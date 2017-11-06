@@ -84,7 +84,7 @@ contract('DividendToken', (accounts) => {
         assert.isFalse(treasurer4, 'Treasurer 4 is not inactive');
     });
 
-    it('Should start a new dividend round', async () => {
+    it('Should start a new dividend round with a balance of 10 eth', async () => {
         const dividendTokenInstance = await DividendToken.deployed();
 
         // Initialize first dividend round with a volume of 10 eth
@@ -105,22 +105,40 @@ contract('DividendToken', (accounts) => {
         assert.isTrue(endTime > 0, 'EndTime not properly setted');
     });
 
-    it('Should fail, because increase dividend cycle is not over', async () => {
+    it('Should increase dividend balance to 20 eth', async () => {
         const dividendTokenInstance = await DividendToken.deployed();
-        // @TODO: @see DividendToken:166
-        try {
-            const tx = await web3.eth.sendTransaction({
-                from: owner,
-                to: dividendTokenInstance.address,
-                value: web3.toWei(1, 'ether'),
-                gas: 200000
-            });
 
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        // Initialize first dividend round with a volume of 10 eth
+        const tx = await web3.eth.sendTransaction({
+            from: owner,
+            to: dividendTokenInstance.address,
+            value: web3.toWei(10, 'ether'),
+            gas: 200000
+        });
+
+        // Get ICO balance
+        const icoBalance = await dividendTokenInstance.currentDividend();
+
+        assert.equal(web3.fromWei(icoBalance.toNumber()), 20, 'dividend balance is not equal to 20 eth');
     });
+
+
+    // it('Should fail, because increase dividend cycle is not over', async () => {
+    //     const dividendTokenInstance = await DividendToken.deployed();
+
+    //     try {
+    //         const tx = await web3.eth.sendTransaction({
+    //             from: owner,
+    //             to: dividendTokenInstance.address,
+    //             value: web3.toWei(1, 'ether'),
+    //             gas: 200000
+    //         });
+
+    //         assert.fail('should have thrown before');
+    //     } catch (e) {
+    //         assertJump(e);
+    //     }
+    // });
 
     // it('', async () => {
 

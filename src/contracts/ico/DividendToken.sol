@@ -163,7 +163,7 @@ contract DividendToken is StandardToken, Ownable {
     function() public payable {
         require(isTreasurer[msg.sender]);
 
-        require(endTime == 0 || endTime < now); // @FIXME: Switch to endTime < now. Is it right? (old: endTime > now)
+        require(endTime == 0 || endTime > now);
 
         currentDividend = this.balance;
         // @TODO: check if msg.value is already added to this.balance before this function is over (I think so)
