@@ -55,6 +55,10 @@ contract('DividendToken', (accounts) => {
     const tokenHolder1          = accounts[3];
     const tokenHolder2          = accounts[4];
 
+    /**
+     * [ Dividend cycle has just begun ]
+     */
+
     it('Should instantiate the dividend token correctly', async () => {
         const dividendTokenInstance = await DividendToken.deployed();
 
@@ -164,28 +168,34 @@ contract('DividendToken', (accounts) => {
         }
     });
 
+    it('Should fail, because requestUnclaimed() is called, but the reclaim period has not begun.', async () => {
+        const dividendTokenInstance = await DividendToken.deployed();
+
+        try {
+            await dividendTokenInstance.requestUnclaimed({from: owner});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
     // it('', async () => {
 
     // });
 
+    /**
+     * [ Claim period is over ]
+     */
+    it('Should reach the end of claim period successfully', async () => {
+        await waitNDays(330);
+    });
 
-    // it('Should fail, because increase dividend cycle is not over', async () => {
-    //     const dividendTokenInstance = await DividendToken.deployed();
+    /**
+     * [ Reclaim period is over ]
+     */
+    it('Should reach the end of reclaim period successfully', async () => {
+        await waitNDays(20);
+    });
 
-    //     try {
-    //         const tx = await web3.eth.sendTransaction({
-    //             from: owner,
-    //             to: dividendTokenInstance.address,
-    //             value: web3.toWei(1, 'ether'),
-    //             gas: 200000
-    //         });
-
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
-    //     }
-    // });
-
-    //     let tx                    = await insuranceInstance.payIn({ value: 1e17 });
-    //     insured                   = await insuranceInstance.isInsured(accounts[0]);
 });
