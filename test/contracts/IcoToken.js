@@ -101,7 +101,7 @@ contract('IcoToken', (accounts) => {
         assert.isTrue(endTime > 0, 'EndTime not properly setted');
     });
 
-    it('should increase dividend balance to 30 eth with different authorized accounts', async () => {
+    it.skip('should increase dividend balance to 20 eth with different authorized accounts', async () => {
         // Increase dividend as owner
         await web3.eth.sendTransaction({
             from: owner,
@@ -110,8 +110,7 @@ contract('IcoToken', (accounts) => {
             gas: 200000
         });
 
-        // @FIXME:
-        // Increase dividend as treasurer
+        // @FIXME: Increase dividend as treasurer
         // await web3.eth.sendTransaction({
         //     from: activeTreasurer1,
         //     to: icoTokenInstance.address,
@@ -120,9 +119,11 @@ contract('IcoToken', (accounts) => {
         // });
 
         // Get ICO balance
-        // const icoBalance = await icoTokenInstance.currentDividend();
+        const icoBalance = await icoTokenInstance.currentDividend();
+        const eth = await web3.fromWei(icoBalance.toNumber());
+        console.log(eth);
 
-        // assert.equal(web3.fromWei(icoBalance.toNumber()), 30, 'dividend balance is not equal to 30 eth');
+        assert.equal(web3.fromWei(icoBalance.toNumber()), 20, 'dividend balance is not equal to 30 eth');
     });
 
     it('should fail, because we try to increase dividend balance with a non treasurer account', async () => {
@@ -231,14 +232,14 @@ contract('IcoToken', (accounts) => {
     /**
      * [ Claim period is over ]
      */
-    it.skip('should reach the end of claim period successfully', async () => {
+    it('should reach the end of claim period successfully', async () => {
         await waitNDays(330);
     });
 
     /**
      * [ Reclaim period is over ]
      */
-    it.skip('should reach the end of reclaim period successfully', async () => {
+    it('should reach the end of reclaim period successfully', async () => {
         await waitNDays(20);
     });
 });
