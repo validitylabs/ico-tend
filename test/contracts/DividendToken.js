@@ -52,8 +52,8 @@ contract('DividendToken', (accounts) => {
     const activeTreasurer2      = accounts[2];
     const inactiveTreasurer1    = accounts[3];
     const inactiveTreasurer2    = accounts[4];
-    // const tokenHolder1  = accounts[3];
-    // const tokenHolder2  = accounts[4];
+    const tokenHolder1          = accounts[3];
+    const tokenHolder2          = accounts[4];
 
     it('Should instantiate the dividend token correctly', async () => {
         const dividendTokenInstance = await DividendToken.deployed();
@@ -105,12 +105,20 @@ contract('DividendToken', (accounts) => {
         assert.isTrue(endTime > 0, 'EndTime not properly setted');
     });
 
-    it('Should increase dividend balance to 20 eth', async () => {
+    it('Should increase dividend balance to 30 eth with different authorized accounts', async () => {
         const dividendTokenInstance = await DividendToken.deployed();
 
-        // Initialize first dividend round with a volume of 10 eth
-        const tx = await web3.eth.sendTransaction({
+        // Increase dividend as owner
+        await web3.eth.sendTransaction({
             from: owner,
+            to: dividendTokenInstance.address,
+            value: web3.toWei(10, 'ether'),
+            gas: 200000
+        });
+
+        // Increase dividend as treasurer
+        await web3.eth.sendTransaction({
+            from: activeTreasurer1,
             to: dividendTokenInstance.address,
             value: web3.toWei(10, 'ether'),
             gas: 200000
@@ -119,8 +127,46 @@ contract('DividendToken', (accounts) => {
         // Get ICO balance
         const icoBalance = await dividendTokenInstance.currentDividend();
 
-        assert.equal(web3.fromWei(icoBalance.toNumber()), 20, 'dividend balance is not equal to 20 eth');
+        assert.equal(web3.fromWei(icoBalance.toNumber()), 30, 'dividend balance is not equal to 30 eth');
     });
+
+    it('Should fail, because we try to increase dividend balance with a non treasurer account', async () => {
+        const dividendTokenInstance = await DividendToken.deployed();
+
+        try {
+            const tx = await web3.eth.sendTransaction({
+                from: tokenHolder1,
+                to: dividendTokenInstance.address,
+                value: web3.toWei(1, 'ether'),
+                gas: 200000
+            });
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('Should fail, because we try to increase dividend balance with a deactivated treasurer account', async () => {
+        const dividendTokenInstance = await DividendToken.deployed();
+
+        try {
+            const tx = await web3.eth.sendTransaction({
+                from: inactiveTreasurer1,
+                to: dividendTokenInstance.address,
+                value: web3.toWei(1, 'ether'),
+                gas: 200000
+            });
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    // it('', async () => {
+
+    // });
 
 
     // it('Should fail, because increase dividend cycle is not over', async () => {
@@ -138,10 +184,6 @@ contract('DividendToken', (accounts) => {
     //     } catch (e) {
     //         assertJump(e);
     //     }
-    // });
-
-    // it('', async () => {
-
     // });
 
     //     let tx                    = await insuranceInstance.payIn({ value: 1e17 });
