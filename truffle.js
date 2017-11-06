@@ -34,7 +34,7 @@ module.exports = {
         },
         coverage: {
             host: 'localhost',
-            network_id: '*',
+            network_id: 4447,
             port: 8555
             // ,
             // gas: 0xfffffffffff,

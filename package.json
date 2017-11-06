@@ -24,6 +24,7 @@
     "upgrade": "yarn run reset; yarn upgrade"
   },
   "dependencies": {
+    "moment": "^2.19.1",
     "truffle-contract": "^3.0.1",
     "web3": "^1.0.0-beta.24",
     "zeppelin-solidity": "^1.3.0"
