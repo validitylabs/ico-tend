@@ -4,6 +4,7 @@
 let moment = require('moment'); // eslint-disable-line
 
 const IcoToken = artifacts.require('./IcoToken');
+
 const dividendCycle = 350;
 const claimPeriod   = 330;
 const reclaimPeriod = 20;
@@ -56,15 +57,15 @@ contract('IcoToken', (accounts) => {
      * [ Dividend cycle has just begun ]
      */
 
-    it('should instantiate the dividend token correctly', async () => {
-        const isOwnerTreasurer = await icoTokenInstance.isTreasurer(owner);
-        const isOwnerAccountZero  = await icoTokenInstance.owner() === owner;
+    it('should instantiate the ICO token correctly', async () => {
+        const isOwnerTreasurer      = await icoTokenInstance.isTreasurer(owner);
+        const isOwnerAccountZero    = await icoTokenInstance.owner() === owner;
 
         assert.isTrue(isOwnerAccountZero, 'Owner is not the first account');
         assert.isTrue(isOwnerTreasurer, 'Owner is not a treasurer');
     });
 
-    it('Should add treasurer accounts', async () => {
+    it('should add treasurer accounts', async () => {
         await icoTokenInstance.setTreasurer(activeTreasurer1, true);
         await icoTokenInstance.setTreasurer(activeTreasurer2, true);
         await icoTokenInstance.setTreasurer(inactiveTreasurer1, false);
@@ -81,7 +82,7 @@ contract('IcoToken', (accounts) => {
         assert.isFalse(treasurer4, 'Treasurer 4 is not inactive');
     });
 
-    it('Should start a new dividend round with a balance of 10 eth', async () => {
+    it('should start a new dividend round with a balance of 10 eth', async () => {
         // Initialize first dividend round with a volume of 10 eth
         await web3.eth.sendTransaction({
             from: owner,
@@ -100,7 +101,7 @@ contract('IcoToken', (accounts) => {
         assert.isTrue(endTime > 0, 'EndTime not properly setted');
     });
 
-    it('Should increase dividend balance to 30 eth with different authorized accounts', async () => {
+    it('should increase dividend balance to 30 eth with different authorized accounts', async () => {
         // Increase dividend as owner
         await web3.eth.sendTransaction({
             from: owner,
@@ -124,7 +125,7 @@ contract('IcoToken', (accounts) => {
         // assert.equal(web3.fromWei(icoBalance.toNumber()), 30, 'dividend balance is not equal to 30 eth');
     });
 
-    it('Should fail, because we try to increase dividend balance with a non treasurer account', async () => {
+    it('should fail, because we try to increase dividend balance with a non treasurer account', async () => {
         try {
             await web3.eth.sendTransaction({
                 from: tokenHolder1,
@@ -139,7 +140,7 @@ contract('IcoToken', (accounts) => {
         }
     });
 
-    it('Should fail, because we try to increase dividend balance with a deactivated treasurer account', async () => {
+    it('should fail, because we try to increase dividend balance with a deactivated treasurer account', async () => {
         try {
             await web3.eth.sendTransaction({
                 from: inactiveTreasurer1,
@@ -154,7 +155,7 @@ contract('IcoToken', (accounts) => {
         }
     });
 
-    it('Should fail, because requestUnclaimed() is called, but the reclaim period has not begun.', async () => {
+    it('should fail, because requestUnclaimed() is called, but the reclaim period has not begun.', async () => {
         try {
             await icoTokenInstance.requestUnclaimed({from: owner});
 
@@ -164,7 +165,28 @@ contract('IcoToken', (accounts) => {
         }
     });
 
-    it.skip('Should transfer 5 dividend tokens to each token holder', async () => {
+    it('should mint tokens for the token holders', async () => {
+        let balanceTokenHolder1 = await icoTokenInstance.balanceOf(tokenHolder1);
+        let balanceTokenHolder2 = await icoTokenInstance.balanceOf(tokenHolder2);
+        let totalSupply         = await icoTokenInstance.totalSupply();
+
+        assert.equal(balanceTokenHolder1, 0, 'Token balance of tokenHolder1 is not 0');
+        assert.equal(balanceTokenHolder2, 0, 'Token balance of tokenHolder2 is not 0');
+        assert.equal(totalSupply, 0, 'Total supply is not 0');
+
+        await icoTokenInstance.mint(tokenHolder1, 5);
+        await icoTokenInstance.mint(tokenHolder2, 5);
+
+        balanceTokenHolder1 = await icoTokenInstance.balanceOf(tokenHolder1);
+        balanceTokenHolder2 = await icoTokenInstance.balanceOf(tokenHolder2);
+        totalSupply         = await icoTokenInstance.totalSupply();
+
+        assert.equal(balanceTokenHolder1, 5, 'Token balance of tokenHolder1 is not 5');
+        assert.equal(balanceTokenHolder2, 5, 'Token balance of tokenHolder2 is not 5');
+        assert.equal(totalSupply, 10, 'Total supply is not 10');
+    });
+
+    it.skip('should transfer 5 dividend tokens to each token holder', async () => {
         // let unclaimedDividend = await icoTokenInstance.unclaimedDividend(tokenHolder1);
         // console.log(unclaimedDividend.toNumber());
 
@@ -209,15 +231,14 @@ contract('IcoToken', (accounts) => {
     /**
      * [ Claim period is over ]
      */
-    it.skip('Should reach the end of claim period successfully', async () => {
+    it.skip('should reach the end of claim period successfully', async () => {
         await waitNDays(330);
     });
 
     /**
      * [ Reclaim period is over ]
      */
-    it.skip('Should reach the end of reclaim period successfully', async () => {
+    it.skip('should reach the end of reclaim period successfully', async () => {
         await waitNDays(20);
     });
-
 });
