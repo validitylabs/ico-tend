@@ -169,7 +169,7 @@ contract('IcoToken', (accounts) => {
         }
     });
 
-    it('should mint tokens for the token holders', async () => {
+    it('should mint 5 tokens for each token holder', async () => {
         const icoTokenInstance  = await IcoToken.deployed();
         let balanceTokenHolder1 = await icoTokenInstance.balanceOf(tokenHolder1);
         let balanceTokenHolder2 = await icoTokenInstance.balanceOf(tokenHolder2);
@@ -191,35 +191,26 @@ contract('IcoToken', (accounts) => {
         assert.equal(totalSupply, 10, 'Total supply is not 10');
     });
 
-    it('should transfer 5 dividend tokens to each token holder', async () => {
-        const icoTokenInstance = await IcoToken.deployed();
+    it('should claim tokens', async () => {
+        await waitNDays(330); // @TODO: should be in claimPeriod
 
-        // minten token for tokenHolder1
-        // tokens da?
-        // einzahlung dividend
+        const icoTokenInstance      = await IcoToken.deployed();
 
-        // let tx = await icoTokenInstance.transferFrom(icoTokenInstance.address, tokenHolder1, 5);
-        // console.log(tx);
+        let totalSupply1            = await icoTokenInstance.totalSupply();
+        let tokenHolder1Balance1    = await icoTokenInstance.balanceOf(tokenHolder1);
+        // let unclaimedDividend       = await icoTokenInstance.unclaimedDividend(tokenHolder1);
 
-        const totalSupply1          = await icoTokenInstance.totalSupply();
-        const tokenHolder1Balance1  = await icoTokenInstance.balanceOf(tokenHolder1);
-
-        // await icoTokenInstance.approve(address _spender, uint256 _value)
-        // await icoTokenInstance.transfer(tokenHolder1, 5);
-
-        // const tokenHolder1Balance2  = await icoTokenInstance.balanceOf(tokenHolder1);
-        // const totalSupply2          = await icoTokenInstance.totalSupply();
-
-        // console.log(totalSupply2.toNumber());
-        // console.log(tokenHolder1Balance2.toNumber());
-
-        // const claimed = await icoTokenInstance.claimDividend({from: tokenHolder1});
-        // // assert.isTrue(claimed, 'claimDividend did not succeeded');
-
-        // let unclaimedDividend = await icoTokenInstance.unclaimedDividend(tokenHolder1);
         // console.log(unclaimedDividend.toNumber());
+        console.log(totalSupply1.toNumber());
+        console.log(tokenHolder1Balance1.toNumber());
 
-        // await icoTokenInstance.claimDividend({from: tokenHolder1});
+        await icoTokenInstance.claimDividend({from: tokenHolder1});
+
+        totalSupply1            = await icoTokenInstance.totalSupply();
+        tokenHolder1Balance1    = await icoTokenInstance.balanceOf(tokenHolder1);
+
+        console.log(totalSupply1.toNumber());
+        console.log(tokenHolder1Balance1.toNumber());
 
         // unclaimedDividend = await icoTokenInstance.unclaimedDividend(tokenHolder1);
         // console.log(unclaimedDividend.toNumber());
@@ -232,9 +223,9 @@ contract('IcoToken', (accounts) => {
     /**
      * [ Claim period is over ]
      */
-    it('should reach the end of claim period successfully', async () => {
-        await waitNDays(330);
-    });
+    // it('should reach the end of claim period successfully', async () => {
+    //     await waitNDays(330);
+    // });
 
     /**
      * [ Reclaim period is over ]
