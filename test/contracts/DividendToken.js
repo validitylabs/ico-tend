@@ -52,8 +52,8 @@ contract('DividendToken', (accounts) => {
     const activeTreasurer2      = accounts[2];
     const inactiveTreasurer1    = accounts[3];
     const inactiveTreasurer2    = accounts[4];
-    const tokenHolder1          = accounts[3];
-    const tokenHolder2          = accounts[4];
+    const tokenHolder1          = accounts[5];
+    const tokenHolder2          = accounts[6];
 
     /**
      * [ Dividend cycle has just begun ]
@@ -178,6 +178,30 @@ contract('DividendToken', (accounts) => {
         } catch (e) {
             assertJump(e);
         }
+    });
+
+    it('Should transfer 5 dividend tokens to each token holder', async () => {
+        const dividendTokenInstance = await DividendToken.deployed();
+
+        // let unclaimedDividend = await dividendTokenInstance.unclaimedDividend(tokenHolder1);
+        // console.log(unclaimedDividend.toNumber());
+
+        // let tx = await dividendTokenInstance.transferFrom(dividendTokenInstance.address, tokenHolder1, 5);
+        // console.log(tx);
+
+        const totalSupply = await dividendTokenInstance.totalSupply();
+        console.log(totalSupply.toNumber());
+
+        // const claimed = await dividendTokenInstance.claimDividend({from: tokenHolder1});
+        // // assert.isTrue(claimed, 'claimDividend did not succeeded');
+
+        // let unclaimedDividend = await dividendTokenInstance.unclaimedDividend(tokenHolder1);
+        // console.log(unclaimedDividend.toNumber());
+
+        // await dividendTokenInstance.claimDividend({from: tokenHolder1});
+
+        // unclaimedDividend = await dividendTokenInstance.unclaimedDividend(tokenHolder1);
+        // console.log(unclaimedDividend.toNumber());
     });
 
     // it('', async () => {
