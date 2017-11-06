@@ -1,0 +1,45 @@
+{
+  "name": "ico-tend",
+  "version": "1.0.0",
+  "description": "The TEND ICO.",
+  "author": "Patrice Juergens <pj@validitylabs.org> (https://validitylabs.org)",
+  "homepage": "https://github.com/validitylabs/ico-tend",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": "^8.0.x"
+  },
+  "scripts": {
+    "start": "yarn run develop",
+    "compile": "truffle compile --all",
+    "migrate": "truffle migrate --reset --compile-all --network _development",
+    "migrate-verbose": "truffle migrate --reset --compile-all --verbose-rpc --network _development",
+    "test": "truffle test --network _development",
+    "coverage": "solidity-coverage",
+    "develop": "truffle develop",
+    "testrpc": "truffle develop --log",
+    "debug": "truffle debug",
+    "clean": "rimraf dist build bin",
+    "reset": "rimraf node_modules; npm run clean",
+    "upgrade": "yarn run reset; yarn upgrade"
+  },
+  "dependencies": {
+    "truffle-contract": "^3.0.1",
+    "web3": "^1.0.0-beta.24",
+    "zeppelin-solidity": "^1.3.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.0.1",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.10.0",
+    "eslint-config-xo": "^0.19.0",
+    "eslint-plugin-babel": "^4.1.2",
+    "rimraf": "^2.6.2",
+    "solc": "0.4.18",
+    "solidity-coverage": "git://github.com/validitylabs/solidity-coverage.git",
+    "truffle": "^4.0.1"
+  },
+  "optionalDevDependencies": {
+    "fsevents": "*"
+  }
+}
