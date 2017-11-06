@@ -37,14 +37,6 @@ async function waitNDays(days) {
 }
 
 contract('IcoToken', (accounts) => {
-    // Provide a fresh instance for each test run
-    let icoTokenInstance;
-    beforeEach(() => {
-        return IcoToken.new().then((instance) => {
-            icoTokenInstance = instance;
-        });
-    });
-
     const owner                 = accounts[0];
     const activeTreasurer1      = accounts[1];
     const activeTreasurer2      = accounts[2];
@@ -58,6 +50,7 @@ contract('IcoToken', (accounts) => {
      */
 
     it('should instantiate the ICO token correctly', async () => {
+        const icoTokenInstance      = await IcoToken.deployed();
         const isOwnerTreasurer      = await icoTokenInstance.isTreasurer(owner);
         const isOwnerAccountZero    = await icoTokenInstance.owner() === owner;
 
@@ -66,6 +59,8 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should add treasurer accounts', async () => {
+        const icoTokenInstance = await IcoToken.deployed();
+
         await icoTokenInstance.setTreasurer(activeTreasurer1, true);
         await icoTokenInstance.setTreasurer(activeTreasurer2, true);
         await icoTokenInstance.setTreasurer(inactiveTreasurer1, false);
@@ -83,6 +78,8 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should start a new dividend round with a balance of 10 eth', async () => {
+        const icoTokenInstance = await IcoToken.deployed();
+
         // Initialize first dividend round with a volume of 10 eth
         await web3.eth.sendTransaction({
             from: owner,
@@ -101,7 +98,9 @@ contract('IcoToken', (accounts) => {
         assert.isTrue(endTime > 0, 'EndTime not properly setted');
     });
 
-    it.skip('should increase dividend balance to 20 eth with different authorized accounts', async () => {
+    it('should increase dividend balance to 30 eth with different authorized accounts', async () => {
+        const icoTokenInstance = await IcoToken.deployed();
+
         // Increase dividend as owner
         await web3.eth.sendTransaction({
             from: owner,
@@ -110,23 +109,23 @@ contract('IcoToken', (accounts) => {
             gas: 200000
         });
 
-        // @FIXME: Increase dividend as treasurer
-        // await web3.eth.sendTransaction({
-        //     from: activeTreasurer1,
-        //     to: icoTokenInstance.address,
-        //     value: web3.toWei(10, 'ether'),
-        //     gas: 200000
-        // });
+        // Increase dividend as treasurer
+        await web3.eth.sendTransaction({
+            from: activeTreasurer1,
+            to: icoTokenInstance.address,
+            value: web3.toWei(10, 'ether'),
+            gas: 200000
+        });
 
         // Get ICO balance
         const icoBalance = await icoTokenInstance.currentDividend();
-        const eth = await web3.fromWei(icoBalance.toNumber());
-        console.log(eth);
 
-        assert.equal(web3.fromWei(icoBalance.toNumber()), 20, 'dividend balance is not equal to 30 eth');
+        assert.equal(web3.fromWei(icoBalance.toNumber()), 30, 'dividend balance is not equal to 30 eth');
     });
 
     it('should fail, because we try to increase dividend balance with a non treasurer account', async () => {
+        const icoTokenInstance = await IcoToken.deployed();
+
         try {
             await web3.eth.sendTransaction({
                 from: tokenHolder1,
@@ -142,6 +141,8 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should fail, because we try to increase dividend balance with a deactivated treasurer account', async () => {
+        const icoTokenInstance = await IcoToken.deployed();
+
         try {
             await web3.eth.sendTransaction({
                 from: inactiveTreasurer1,
@@ -157,6 +158,8 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should fail, because requestUnclaimed() is called, but the reclaim period has not begun.', async () => {
+        const icoTokenInstance = await IcoToken.deployed();
+
         try {
             await icoTokenInstance.requestUnclaimed({from: owner});
 
@@ -167,6 +170,7 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should mint tokens for the token holders', async () => {
+        const icoTokenInstance  = await IcoToken.deployed();
         let balanceTokenHolder1 = await icoTokenInstance.balanceOf(tokenHolder1);
         let balanceTokenHolder2 = await icoTokenInstance.balanceOf(tokenHolder2);
         let totalSupply         = await icoTokenInstance.totalSupply();
@@ -187,9 +191,8 @@ contract('IcoToken', (accounts) => {
         assert.equal(totalSupply, 10, 'Total supply is not 10');
     });
 
-    it.skip('should transfer 5 dividend tokens to each token holder', async () => {
-        // let unclaimedDividend = await icoTokenInstance.unclaimedDividend(tokenHolder1);
-        // console.log(unclaimedDividend.toNumber());
+    it('should transfer 5 dividend tokens to each token holder', async () => {
+        const icoTokenInstance = await IcoToken.deployed();
 
         // minten token for tokenHolder1
         // tokens da?
@@ -198,11 +201,8 @@ contract('IcoToken', (accounts) => {
         // let tx = await icoTokenInstance.transferFrom(icoTokenInstance.address, tokenHolder1, 5);
         // console.log(tx);
 
-        // const tokenHolder1Balance1  = await icoTokenInstance.balanceOf(tokenHolder1);
-        // const totalSupply1          = await icoTokenInstance.totalSupply();
-
-        // console.log(totalSupply1.toNumber());
-        // console.log(tokenHolder1Balance1.toNumber());
+        const totalSupply1          = await icoTokenInstance.totalSupply();
+        const tokenHolder1Balance1  = await icoTokenInstance.balanceOf(tokenHolder1);
 
         // await icoTokenInstance.approve(address _spender, uint256 _value)
         // await icoTokenInstance.transfer(tokenHolder1, 5);
