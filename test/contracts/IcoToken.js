@@ -57,9 +57,9 @@ contract('IcoToken', (accounts) => {
 
         console.log('==========================================');
 
-        console.log('getBalance icoTokenInstance: ' + Math.ceil(web3.fromWei(web3.eth.getBalance(icoTokenInstance.address)).toNumber()));
-        console.log('getBalance tokenHolder1: ' + Math.ceil(web3.fromWei(web3.eth.getBalance(tokenHolder1)).toNumber()));
-        console.log('getBalance tokenHolder2: ' + Math.ceil(web3.fromWei(web3.eth.getBalance(tokenHolder2)).toNumber()));
+        console.log('ETH getBalance icoTokenInstance: ' + Math.ceil(web3.fromWei(web3.eth.getBalance(icoTokenInstance.address)).toNumber()));
+        console.log('ETH getBalance tokenHolder1: ' + Math.ceil(web3.fromWei(web3.eth.getBalance(tokenHolder1)).toNumber()));
+        console.log('ETH getBalance tokenHolder2: ' + Math.ceil(web3.fromWei(web3.eth.getBalance(tokenHolder2)).toNumber()));
 
         const icoTokenInstanceBalance   = await icoTokenInstance.balanceOf(icoTokenInstance.address);
         const tokenHolder1Balance       = await icoTokenInstance.balanceOf(tokenHolder1);
