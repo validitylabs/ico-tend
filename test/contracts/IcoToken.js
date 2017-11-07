@@ -325,9 +325,14 @@ contract('IcoToken', (accounts) => {
         // @TODO: test the timestamps
     });
 
-    // it('', async () => {
-
-    // });
+    it('should fail, because we try to call claimDividend() after the claim period is over', async () => {
+        try {
+            await icoTokenInstance.claimDividend({from: tokenHolder1});
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
 
     /**
      * [ Reclaim period is over ]
@@ -338,4 +343,8 @@ contract('IcoToken', (accounts) => {
         await waitNDays(20);
         // @TODO: test the timestamps
     });
+
+    // it('', async () => {
+
+    // });
 });
