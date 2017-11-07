@@ -274,6 +274,41 @@ contract('IcoToken', (accounts) => {
         );
     });
 
+    it.skip('should transfer dividend of tokenHolder2 to tokenHolder1 using the transferFrom method', async () => {
+        await getInstance();
+
+        await debug();
+
+        // const tokenHolder1Balance1  = await icoTokenInstance.balanceOf(tokenHolder1);
+        // const tokenHolder2Balance1  = await icoTokenInstance.balanceOf(tokenHolder2);
+
+        // function allowance(address _owner, address _spender) public constant returns (uint256 remaining) {
+        const allow1 = await icoTokenInstance.allowance(tokenHolder1, tokenHolder2);
+        console.log(allow1.toNumber());
+
+        // function approve(address _spender, uint256 _value) public returns (bool) {
+        const approval = await icoTokenInstance.approve(tokenHolder2, 5, {from: tokenHolder1});
+        console.log(approval.args);
+
+        const allow2 = await icoTokenInstance.allowance(tokenHolder1, tokenHolder2);
+        console.log(allow2.toNumber());
+
+        // function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+        // @FIXME:
+        const transfer = await icoTokenInstance.transferFrom(tokenHolder2, tokenHolder1, 5, {from: tokenHolder2});
+        console.log(transfer);
+
+        // const tokenHolder2Balance2  = await icoTokenInstance.balanceOf(tokenHolder2);
+
+        await debug();
+
+        // assert.equal(
+        //     tokenHolder2Balance1.toNumber() + tokenHolder1Balance1.toNumber(),
+        //     tokenHolder2Balance2.toNumber(),
+        //     'Excpected value should be 5, but is: ' + (tokenHolder2Balance1.toNumber() + tokenHolder1Balance1.toNumber())
+        // );
+    });
+
     // it('', async () => {
 
     // });
