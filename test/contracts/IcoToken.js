@@ -1,9 +1,8 @@
 /**
  * Contract artifacts
  */
-let moment = require('moment'); // eslint-disable-line
-
-const IcoToken = artifacts.require('./IcoToken');
+let moment      = require('moment'); // eslint-disable-line
+const IcoToken  = artifacts.require('./IcoToken');
 
 /**
  * Expect exception throw above call of assertJump()
@@ -19,17 +18,19 @@ function assertJump(error) {
  * Increase N days in testrpc
  *
  * @param {integer} days Number of days
- * @return {undefined}
+ * @return {integer} Time
  */
 async function waitNDays(days) {
     const daysInSeconds = days * 24 * 60 * 60;
 
-    await web3.currentProvider.send({
+    const time = await web3.currentProvider.send({
         jsonrpc: '2.0',
         method: 'evm_increaseTime',
         params: [daysInSeconds],
         id: 4447
     });
+
+    return time.result;
 }
 
 /**
@@ -52,6 +53,10 @@ contract('IcoToken', (accounts) => {
     const tokenHolder1          = accounts[5];
     const tokenHolder2          = accounts[6];
 
+    /**
+     * Debug function
+     * @return {undefined}
+     */
     debug = async () => {
         await getInstance();
 
@@ -79,6 +84,7 @@ contract('IcoToken', (accounts) => {
      */
 
     it('should instantiate the ICO token correctly', async () => {
+        console.log('[ Dividend cycle has just begun ]');
         await getInstance();
 
         const isOwnerTreasurer      = await icoTokenInstance.isTreasurer(owner);
@@ -309,21 +315,27 @@ contract('IcoToken', (accounts) => {
         // );
     });
 
+    /**
+     * [ Claim period is over ]
+     */
+
+    it('should turn the time 330 days forward', async () => {
+        console.log('[ Claim period is over ]');
+        await waitNDays(330);
+        // @TODO: test the timestamps
+    });
+
     // it('', async () => {
 
     // });
 
     /**
-     * [ Claim period is over ]
-     */
-    // it('should reach the end of claim period successfully', async () => {
-    //     await waitNDays(330);
-    // });
-
-    /**
      * [ Reclaim period is over ]
      */
-    // it('should reach the end of reclaim period successfully', async () => {
-    //     await waitNDays(20);
-    // });
+
+    it('should turn the time 20 days forward', async () => {
+        console.log('[ Reclaim period is over ]');
+        await waitNDays(20);
+        // @TODO: test the timestamps
+    });
 });
