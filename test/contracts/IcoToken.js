@@ -39,7 +39,6 @@ async function waitNDays(days) {
 let icoTokenInstance = null;
 getInstance = async () => {
     if (!icoTokenInstance) {
-        console.log('[ Provide new ico token instance ]');
         icoTokenInstance = await IcoToken.new();
     }
 };
@@ -80,11 +79,11 @@ contract('IcoToken', (accounts) => {
     };
 
     /**
-     * [ Dividend cycle has just begun ]
+     * [ Claim period ]
      */
 
     it('should instantiate the ICO token correctly', async () => {
-        console.log('[ Dividend cycle has just begun ]');
+        console.log('[ Claim period ]');
         await getInstance();
 
         const isOwnerTreasurer      = await icoTokenInstance.isTreasurer(owner);
@@ -294,7 +293,7 @@ contract('IcoToken', (accounts) => {
 
         // function approve(address _spender, uint256 _value) public returns (bool) {
         const approval = await icoTokenInstance.approve(tokenHolder2, 5, {from: tokenHolder1});
-        console.log(approval.args);
+        console.log(approval.logs.args);
 
         const allow2 = await icoTokenInstance.allowance(tokenHolder1, tokenHolder2);
         console.log(allow2.toNumber());
@@ -316,16 +315,19 @@ contract('IcoToken', (accounts) => {
     });
 
     /**
-     * [ Claim period is over ]
+     * [ Reclaim period ]
      */
 
-    it('should turn the time 330 days forward', async () => {
-        console.log('[ Claim period is over ]');
+    it('should turn the time 330 days forward to reclaim period', async () => {
+        console.log('[ Reclaim period ]');
+        await getInstance();
         await waitNDays(330);
         // @TODO: test the timestamps
     });
 
     it('should fail, because we try to call claimDividend() after the claim period is over', async () => {
+        await getInstance();
+
         try {
             await icoTokenInstance.claimDividend({from: tokenHolder1});
             assert.fail('should have thrown before');
@@ -334,12 +336,40 @@ contract('IcoToken', (accounts) => {
         }
     });
 
+    it.skip('should payout the unclaimed token to owner account.', async () => {
+        await getInstance();
+
+        // @FIXME:
+
+        // console.log(await web3.eth.getBalance(owner).toNumber());
+
+        let contractBalance = Math.ceil(web3.fromWei(web3.eth.getBalance(icoTokenInstance.address)).toNumber());
+        console.log(contractBalance);
+
+        // const balanceTokenInstance1   = await icoTokenInstance.balanceOf(icoTokenInstance.address);
+        // const balanceBeneficiary1     = await icoTokenInstance.balanceOf(owner);
+        // console.log(balanceTokenInstance1.toNumber(), balanceBeneficiary1.toNumber());
+
+        await icoTokenInstance.requestUnclaimed({from: owner});
+
+        contractBalance = Math.ceil(web3.fromWei(web3.eth.getBalance(icoTokenInstance.address)).toNumber());
+        console.log(contractBalance);
+
+        // console.log(await web3.eth.getBalance(owner).toNumber());
+        // console.log(await web3.eth.getBalance(contract).toNumber());
+
+        // const balanceTokenInstance2   = await icoTokenInstance.balanceOf(icoTokenInstance.address);
+        // const balanceBeneficiary2     = await icoTokenInstance.balanceOf(owner);
+        // console.log(balanceTokenInstance2.toNumber(), balanceBeneficiary2.toNumber());
+    });
+
     /**
-     * [ Reclaim period is over ]
+     * [ Dividend cycle is over ]
      */
 
     it('should turn the time 20 days forward', async () => {
-        console.log('[ Reclaim period is over ]');
+        console.log('[ Dividend cycle is over ]');
+        await getInstance();
         await waitNDays(20);
         // @TODO: test the timestamps
     });
