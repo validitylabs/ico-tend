@@ -52,6 +52,28 @@ contract('IcoToken', (accounts) => {
     const tokenHolder1          = accounts[5];
     const tokenHolder2          = accounts[6];
 
+    debug = async () => {
+        await getInstance();
+
+        console.log('==========================================');
+
+        console.log('getBalance icoTokenInstance: ' + Math.ceil(web3.fromWei(web3.eth.getBalance(icoTokenInstance.address)).toNumber()));
+        console.log('getBalance tokenHolder1: ' + Math.ceil(web3.fromWei(web3.eth.getBalance(tokenHolder1)).toNumber()));
+        console.log('getBalance tokenHolder2: ' + Math.ceil(web3.fromWei(web3.eth.getBalance(tokenHolder2)).toNumber()));
+
+        const icoTokenInstanceBalance   = await icoTokenInstance.balanceOf(icoTokenInstance.address);
+        const tokenHolder1Balance       = await icoTokenInstance.balanceOf(tokenHolder1);
+        const tokenHolder2Balance       = await icoTokenInstance.balanceOf(tokenHolder2);
+
+        console.log('------------------------------------------');
+
+        console.log('balanceOf icoTokenInstance: ' + icoTokenInstanceBalance.toNumber());
+        console.log('balanceOf tokenHolder1: ' + tokenHolder1Balance.toNumber());
+        console.log('balanceOf tokenHolder2: ' + tokenHolder2Balance.toNumber());
+
+        console.log('==========================================');
+    };
+
     /**
      * [ Dividend cycle has just begun ]
      */
