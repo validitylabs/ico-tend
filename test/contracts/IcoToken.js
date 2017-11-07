@@ -257,6 +257,23 @@ contract('IcoToken', (accounts) => {
         assert.equal(fundsHolder2After, fundsHolder2Before + 15, 'Wrog funds of tokenHolder2: ' + fundsHolder2After);
     });
 
+    it('should transfer dividend of tokenHolder1 to tokenHolder2 using the transfer method', async () => {
+        await getInstance();
+
+        const tokenHolder1Balance1  = await icoTokenInstance.balanceOf(tokenHolder1);
+        const tokenHolder2Balance1  = await icoTokenInstance.balanceOf(tokenHolder2);
+
+        await icoTokenInstance.transfer(tokenHolder2, 5, {from: tokenHolder1});
+
+        const tokenHolder2Balance2  = await icoTokenInstance.balanceOf(tokenHolder2);
+
+        assert.equal(
+            tokenHolder2Balance1.toNumber() + tokenHolder1Balance1.toNumber(),
+            tokenHolder2Balance2.toNumber(),
+            'Excpected value should be 5, but is: ' + (tokenHolder2Balance1.toNumber() + tokenHolder1Balance1.toNumber())
+        );
+    });
+
     // it('', async () => {
 
     // });
