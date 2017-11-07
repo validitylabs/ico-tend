@@ -58,9 +58,9 @@ contract DividendToken is StandardToken, Ownable {
      * @dev Request payout dividend (claim) (requested by tokenHolder -> pull)
      * dividends that have not been claimed within 330 days expire and cannot be claimed anymore by the token holder.
      */
-    function claimDividend() public returns(bool) {
+    function claimDividend() public returns (bool) {
         // unclaimed dividend fractions should expire after 320 days and the owner can reclaim that fraction
-        require(endTime > 0 && endTime.sub(claimTimeout) <= now);
+        require(endTime > 0 && endTime.sub(claimTimeout) > now);
 
         updateDividend(msg.sender);
 
