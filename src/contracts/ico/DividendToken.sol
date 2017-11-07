@@ -43,7 +43,7 @@ contract DividendToken is StandardToken, Ownable {
 
     event Payout(address _tokenHolder, uint256 _value);
 
-    event Finished(uint256 remainingBalance, uint256 _endTime);
+    event Reclaimed(uint256 remainingBalance, uint256 _endTime, uint256 _now);
 
     /**
      * @dev Deploy the DividendToken contract and set the owner of the contract
@@ -84,6 +84,7 @@ contract DividendToken is StandardToken, Ownable {
     function transferDividend(address from, address to, uint256 value) internal {
         updateDividend(from);
         updateDividend(to);
+
         // @TODO: check if this is ok if dividend gets claimed in same block as payment
         // (should allow new dividend to be claimed in same block but not before dividend money came in)
 
@@ -124,7 +125,6 @@ contract DividendToken is StandardToken, Ownable {
      * @param _value uint256 the amount of tokens to be transferred
      */
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-
         // Prevent dividend to be claimed twice
         transferDividend(_from, _to, _value);
 
@@ -152,7 +152,7 @@ contract DividendToken is StandardToken, Ownable {
 
         msg.sender.transfer(this.balance);
 
-        Finished(this.balance, endTime);
+        Reclaimed(this.balance, endTime, now);
     }
 
     /**
@@ -162,7 +162,6 @@ contract DividendToken is StandardToken, Ownable {
      */
     function() public payable {
         require(isTreasurer[msg.sender]);
-
         require(endTime == 0 || endTime > now);
 
         currentDividend = this.balance;
