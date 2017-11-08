@@ -55,36 +55,36 @@ contract('IcoToken', (accounts) => {
         icoTokenInstance = await IcoToken.deployed();
     });
 
-    /**
-     * Debug function
-     * @return {undefined}
-     */
-    debug = async () => {
-        console.log('==========================================');
+    // /**
+    //  * Debug function
+    //  * @return {undefined}
+    //  */
+    // debug = async () => {
+    //     console.log('==========================================');
 
-        console.log('ETH getBalance icoTokenInstance: ' + web3.eth.getBalance(icoTokenInstance.address));
-        console.log('ETH getBalance tokenHolder1: '     + web3.eth.getBalance(tokenHolder1));
-        console.log('ETH getBalance tokenHolder2: '     + web3.eth.getBalance(tokenHolder2));
+    //     console.log('ETH getBalance icoTokenInstance: ' + web3.eth.getBalance(icoTokenInstance.address));
+    //     console.log('ETH getBalance tokenHolder1: '     + web3.eth.getBalance(tokenHolder1));
+    //     console.log('ETH getBalance tokenHolder2: '     + web3.eth.getBalance(tokenHolder2));
 
-        const icoTokenInstanceBalance   = await icoTokenInstance.balanceOf(icoTokenInstance.address);
-        const tokenHolder1Balance       = await icoTokenInstance.balanceOf(tokenHolder1);
-        const tokenHolder2Balance       = await icoTokenInstance.balanceOf(tokenHolder2);
+    //     const icoTokenInstanceBalance   = await icoTokenInstance.balanceOf(icoTokenInstance.address);
+    //     const tokenHolder1Balance       = await icoTokenInstance.balanceOf(tokenHolder1);
+    //     const tokenHolder2Balance       = await icoTokenInstance.balanceOf(tokenHolder2);
 
-        console.log('------------------------------------------');
+    //     console.log('------------------------------------------');
 
-        console.log('balanceOf icoTokenInstance: '  + icoTokenInstanceBalance);
-        console.log('balanceOf tokenHolder1: '      + tokenHolder1Balance);
-        console.log('balanceOf tokenHolder2: '      + tokenHolder2Balance);
+    //     console.log('balanceOf icoTokenInstance: '  + icoTokenInstanceBalance);
+    //     console.log('balanceOf tokenHolder1: '      + tokenHolder1Balance);
+    //     console.log('balanceOf tokenHolder2: '      + tokenHolder2Balance);
 
-        console.log('==========================================');
-    };
+    //     console.log('==========================================');
+    // };
 
     /**
      * [ Claim period ]
      */
 
     it('should instantiate the ICO token correctly', async () => {
-        console.log('[ Claim period ]');
+        console.log('[ Claim period ]'.yellow);
 
         const isOwnerTreasurer      = await icoTokenInstance.isTreasurer(owner);
         const isOwnerAccountZero    = await icoTokenInstance.owner() === owner;
@@ -258,7 +258,7 @@ contract('IcoToken', (accounts) => {
     });
 
     it.skip('should transfer dividend of tokenHolder2 to tokenHolder1 using the transferFrom method', async () => {
-        await debug();
+        // await debug();
 
         // const tokenHolder1Balance1  = await icoTokenInstance.balanceOf(tokenHolder1);
         // const tokenHolder2Balance1  = await icoTokenInstance.balanceOf(tokenHolder2);
@@ -281,7 +281,7 @@ contract('IcoToken', (accounts) => {
 
         // const tokenHolder2Balance2  = await icoTokenInstance.balanceOf(tokenHolder2);
 
-        await debug();
+        // await debug();
 
         // assert.equal(
         //     tokenHolder2Balance1.toNumber() + tokenHolder1Balance1.toNumber(),
@@ -295,7 +295,7 @@ contract('IcoToken', (accounts) => {
      */
 
     it('should turn the time 330 days forward to reclaim period', async () => {
-        console.log('[ Reclaim period ]');
+        console.log('[ Reclaim period ]'.yellow);
         await waitNDays(330);
         // @TODO: test the timestamps
     });
@@ -343,7 +343,7 @@ contract('IcoToken', (accounts) => {
      */
 
     it('should turn the time 20 days forward', async () => {
-        console.log('[ Dividend cycle is over ]');
+        console.log('[ Dividend cycle is over ]'.yellow);
         await waitNDays(20);
         // @TODO: test the timestamps
     });

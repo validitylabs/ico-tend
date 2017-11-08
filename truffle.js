@@ -4,6 +4,10 @@
  * @see https://github.com/trufflesuite/truffle-config/blob/master/index.js
  * @see https://github.com/trufflesuite/truffle/releases
  */
+
+require('babel-register');
+require('babel-polyfill');
+
 const path      = require('path');
 const basePath  = process.cwd();
 

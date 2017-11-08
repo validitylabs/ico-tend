@@ -1,3 +1,6 @@
+require('babel-register');
+require('babel-polyfill');
+
 module.exports = {
     // // testCommand: 'truffle test --compile-all --network coverage',
     // // testCommand: './node_modules/.bin/truffle test',
