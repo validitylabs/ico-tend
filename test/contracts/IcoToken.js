@@ -103,9 +103,8 @@ contract('IcoToken', (accounts) => {
         web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(web3.toWei(0, 'ether'));
 
         // Initialize first dividend round with a volume of 10 eth
-        await web3.eth.sendTransaction({
-            from:   owner,
-            to:     icoTokenInstance.address,
+        await icoTokenInstance.sendTransaction({
+            from: owner,
             value:  web3.toWei(10, 'ether'),
             gas:    200000
         });
@@ -126,17 +125,15 @@ contract('IcoToken', (accounts) => {
         web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(web3.toWei(10, 'ether'));
 
         // Increase dividend as owner
-        await web3.eth.sendTransaction({
+        await icoTokenInstance.sendTransaction({
             from:   owner,
-            to:     icoTokenInstance.address,
             value:  web3.toWei(10, 'ether'),
             gas:    200000
         });
 
         // Increase dividend as treasurer
-        await web3.eth.sendTransaction({
+        await icoTokenInstance.sendTransaction({
             from:   activeTreasurer1,
-            to:     icoTokenInstance.address,
             value:  web3.toWei(10, 'ether'),
             gas:    200000
         });
@@ -150,9 +147,8 @@ contract('IcoToken', (accounts) => {
 
     it('should fail, because we try to increase dividend balance with a non treasurer account', async () => {
         try {
-            await web3.eth.sendTransaction({
+            await icoTokenInstance.sendTransaction({
                 from:   tokenHolder1,
-                to:     icoTokenInstance.address,
                 value:  web3.toWei(1, 'ether'),
                 gas:    200000
             });
@@ -165,9 +161,8 @@ contract('IcoToken', (accounts) => {
 
     it('should fail, because we try to increase dividend balance with a deactivated treasurer account', async () => {
         try {
-            await web3.eth.sendTransaction({
+            await icoTokenInstance.sendTransaction({
                 from:   inactiveTreasurer1,
-                to:     icoTokenInstance.address,
                 value:  web3.toWei(1, 'ether'),
                 gas:    200000
             });
