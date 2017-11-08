@@ -110,6 +110,7 @@ contract('IcoToken', (accounts) => {
 /*
 USER ETH TOKEN
 C    0
+T    100
 O    100
 1    100  5
 2    100  5
@@ -117,6 +118,8 @@ O    100
 */
 
     it('should start a new dividend round with a balance of 30 eth', async () => {
+
+        await displayAll(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
         // At this point, the contract should not have any ETH
         web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(web3.toWei(0, 'ether'));
 
@@ -140,13 +143,15 @@ O    100
 /*
 USER ETH TOKEN
 C    30
-O    70
+T    70
+O    100
 1    100  5
 2    100  5
 3    100  5
 */
 
     it('should fail, because we try to increase the dividend again', async () => {
+        await displayAll(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
         // At this point, the contract should have 30 ETH
         web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(web3.toWei(30, 'ether'));
 
@@ -204,14 +209,17 @@ O    70
 /*
 USER ETH TOKEN
 C    30
-O    70
+T    70
+O    100
 1    100  5
 2    100  5
 3    100  5
 */
 
     it('should claim dividend (ETH)', async () => {
-        const fundsTokenBefore      = web3.eth.getBalance(icoTokenInst0ance.address);
+        await displayAll(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
+
+        const fundsTokenBefore      = web3.eth.getBalance(icoTokenInstance.address);
         const fundsHolder1Before    = web3.eth.getBalance(tokenHolder1);
         const fundsHolder2Before    = web3.eth.getBalance(tokenHolder2);
 
@@ -244,13 +252,16 @@ O    70
 /*
 USER ETH TOKEN
 C    10
-O    70
-1    105  5
-2    105  5
+T    70
+O    100
+1    110  5
+2    110  5
 3    100  5
 */
 
-    it('should transfer dividend of tokenHolder1 to tokenHolder2 using the transfer method', async () => {
+    it('should transfer token of tokenHolder1 to tokenHolder2 using the transfer method', async () => {
+        await displayAll(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
+
         const tokenHolder1Balance1                  = await icoTokenInstance.balanceOf(tokenHolder1);
         const tokenHolder2Balance1                  = await icoTokenInstance.balanceOf(tokenHolder2);
         const tokenHolder1UnclaimedDividendBefore   = await icoTokenInstance.unclaimedDividend(tokenHolder1);
@@ -266,9 +277,20 @@ O    70
         tokenHolder2UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder2UnclaimedDividendAfter);
         tokenHolder2Balance1.plus(tokenHolder1Balance1).should.be.bignumber.equal(tokenHolder2Balance2);
     });
+/*
+USER ETH TOKEN
+C    10
+T    70
+O    100
+1    110  0
+2    110  10
+3    100  5
+*/
 
-    it('should transfer dividend of tokenHolder2 back to tokenHolder1 using the transferFrom method', async () => {
-        const tokenHolder1Balance1  = await icoTokenInstance.balanceOf(tokenHolder1);
+    it('should transfer token of tokenHolder2 back to tokenHolder1 using the transferFrom method', async () => {
+        await displayAll(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
+
+        // const tokenHolder1Balance1  = await icoTokenInstance.balanceOf(tokenHolder1);
         const tokenHolder2Balance1  = await icoTokenInstance.balanceOf(tokenHolder2);
         const tokenHolder3Balance1  = await icoTokenInstance.balanceOf(tokenHolder3);
 
@@ -280,7 +302,7 @@ O    70
         const allow2 = await icoTokenInstance.allowance(tokenHolder2, tokenHolder1);
         allow2.should.be.bignumber.equal(5);
 
-        await icoTokenInstance.transferFrom(tokenHolder2, tokenHolder2, 5, {from: tokenHolder1});
+        await icoTokenInstance.transferFrom(tokenHolder2, tokenHolder1, 5, {from: tokenHolder1});
 
         const tokenHolder1Balance2  = await icoTokenInstance.balanceOf(tokenHolder1);
         const tokenHolder2Balance2  = await icoTokenInstance.balanceOf(tokenHolder2);
@@ -296,16 +318,23 @@ O    70
         // console.log(tokenHolder3Balance2);
 
         tokenHolder3Balance1.should.be.bignumber.equal(tokenHolder3Balance2);
-
-        // @FIXME:
         tokenHolder1Balance2.should.be.bignumber.equal(allow2);
-        tokenHolder2Balance2.should.be.bignumber.equal(tokenHolder2Balance2.minus(allow2));
+        tokenHolder2Balance2.should.be.bignumber.equal(tokenHolder2Balance1.minus(allow2));
     });
+
+/*
+USER ETH TOKEN
+C    10
+T    70
+O    100
+1    110  5
+2    110  5
+3    100  5
+*/
 
     /**
      * [ Reclaim period ]
      */
-
     it('should turn the time 330 days forward to reclaim period', async () => {
         console.log('[ Reclaim period ]'.yellow);
         await waitNDays(330);
@@ -322,19 +351,13 @@ O    70
     });
 
     it('should payout the unclaimed ETH to owner account.', async () => {
+        await displayAll(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
+
         const balance1Contract      = web3.eth.getBalance(icoTokenInstance.address);
         const balance1Owner         = web3.eth.getBalance(owner);
         const balance1TokenHolder1  = web3.eth.getBalance(tokenHolder1);
         const balance1TokenHolder2  = web3.eth.getBalance(tokenHolder2);
         const balance1TokenHolder3  = web3.eth.getBalance(tokenHolder3);
-
-        console.log(
-            balance1Contract.toNumber()/1e18,
-            balance1Owner.toNumber()/1e18,
-            balance1TokenHolder1.toNumber()/1e18,
-            balance1TokenHolder2.toNumber()/1e18,
-            balance1TokenHolder3.toNumber()/1e18
-        );
 
         await icoTokenInstance.requestUnclaimed({from: owner});
 
@@ -344,18 +367,11 @@ O    70
         const balance2TokenHolder2  = web3.eth.getBalance(tokenHolder2);
         const balance2TokenHolder3  = web3.eth.getBalance(tokenHolder3);
 
-        console.log(
-            balance2Contract.toNumber()/1e18,
-            balance2Owner.toNumber()/1e18,
-            balance2TokenHolder1.toNumber(), balance2TokenHolder2.toNumber()/1e18,
-            balance2TokenHolder3.toNumber()/1e18
-        );
-
-        // @TODO: Doublecheck test result
         balance2Contract.should.be.bignumber.equal(0);
         balance2TokenHolder1.should.be.bignumber.equal(balance1TokenHolder1);
         balance2TokenHolder2.should.be.bignumber.equal(balance1TokenHolder2);
         balance2TokenHolder3.should.be.bignumber.equal(balance1TokenHolder3);
+        await displayAll(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
     });
 
     // @TODO: implement requestUnclaimed test, after tokenHolder payout
@@ -363,6 +379,15 @@ O    70
     /**
      * [ Dividend cycle is over ]
      */
+/*
+USER ETH TOKEN
+C    00
+T    70
+O    110
+1    110  5
+2    110  5
+3    100  5
+*/
 
     it('should turn the time 20 days forward', async () => {
         console.log('[ Dividend cycle is over ]'.yellow);
@@ -372,3 +397,27 @@ O    70
 
     // @TODO: Test new dividend round payin
 });
+
+
+async function displayAll(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1) {
+    const tokenHolder1Token  = await icoTokenInstance.balanceOf(tokenHolder1);
+    const tokenHolder2Token  = await icoTokenInstance.balanceOf(tokenHolder2);
+    const tokenHolder3Token  = await icoTokenInstance.balanceOf(tokenHolder3);
+    const ownerToken  = await icoTokenInstance.balanceOf(owner);
+    const activeTreasurer1Token  = await icoTokenInstance.balanceOf(activeTreasurer1);
+    
+    const fundsHolder1Eth = web3.eth.getBalance(tokenHolder1);
+    const fundsHolder2Eth = web3.eth.getBalance(tokenHolder2);
+    const fundsHolder3Eth = web3.eth.getBalance(tokenHolder3);
+    const ownerEth = web3.eth.getBalance(owner);
+    const activeTreasurer1Eth = web3.eth.getBalance(activeTreasurer1);
+    const contractEth = web3.eth.getBalance(icoTokenInstance.address);
+
+    console.log('ACCOUNT | ETH | TOKEN');
+    console.log('CONTRCT | ' + Math.ceil(contractEth/1e18) + ' | ');
+    console.log('TREASUR | ' + Math.ceil(activeTreasurer1Eth/1e18) + ' | ' + activeTreasurer1Token.toNumber());
+    console.log('OWNER   | ' + Math.ceil(ownerEth/1e18) + ' | ' + ownerToken.toNumber());
+    console.log('USER 1  | ' + Math.ceil(fundsHolder1Eth/1e18) + ' | ' + tokenHolder1Token.toNumber());
+    console.log('USER 2  | ' + Math.ceil(fundsHolder2Eth/1e18) + ' | ' + tokenHolder2Token.toNumber());
+    console.log('USER 3  | ' + Math.ceil(fundsHolder3Eth/1e18) + ' | ' + tokenHolder3Token.toNumber());
+}
