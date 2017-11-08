@@ -233,7 +233,7 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should transfer dividend of tokenHolder2 back to tokenHolder1 using the transferFrom method', async () => {
-        const tokenHolder1Balance1  = await icoTokenInstance.balanceOf(tokenHolder1);
+        // const tokenHolder1Balance1  = await icoTokenInstance.balanceOf(tokenHolder1);
         const tokenHolder2Balance1  = await icoTokenInstance.balanceOf(tokenHolder2);
         const tokenHolder3Balance1  = await icoTokenInstance.balanceOf(tokenHolder3);
 
@@ -245,7 +245,7 @@ contract('IcoToken', (accounts) => {
         const allow2 = await icoTokenInstance.allowance(tokenHolder2, tokenHolder1);
         allow2.should.be.bignumber.equal(5);
 
-        await icoTokenInstance.transferFrom(tokenHolder2, tokenHolder2, 5, {from: tokenHolder1});
+        await icoTokenInstance.transferFrom(tokenHolder2, tokenHolder1, 5, {from: tokenHolder1});
 
         const tokenHolder1Balance2  = await icoTokenInstance.balanceOf(tokenHolder1);
         const tokenHolder2Balance2  = await icoTokenInstance.balanceOf(tokenHolder2);
@@ -261,10 +261,8 @@ contract('IcoToken', (accounts) => {
         // console.log(tokenHolder3Balance2);
 
         tokenHolder3Balance1.should.be.bignumber.equal(tokenHolder3Balance2);
-
-        // @FIXME:
-        // tokenHolder1Balance2.should.be.bignumber.equal(allow2);
-        // tokenHolder2Balance2.should.be.bignumber.equal(tokenHolder2Balance2.minus(allow2));
+        tokenHolder1Balance2.should.be.bignumber.equal(allow2);
+        tokenHolder2Balance2.should.be.bignumber.equal(tokenHolder2Balance1.minus(allow2));
     });
 
     /**
@@ -287,36 +285,35 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should payout the unclaimed ETH to owner account.', async () => {
-        // const balance1Contract      = web3.eth.getBalance(icoTokenInstance.address);
-        // const balance1Owner         = web3.eth.getBalance(owner);
+        const balance1Contract      = web3.eth.getBalance(icoTokenInstance.address);
+        const balance1Owner         = web3.eth.getBalance(owner);
         const balance1TokenHolder1  = web3.eth.getBalance(tokenHolder1);
         const balance1TokenHolder2  = web3.eth.getBalance(tokenHolder2);
         const balance1TokenHolder3  = web3.eth.getBalance(tokenHolder3);
 
-        // console.log(
-        //     balance1Contract.toNumber(),
-        //     balance1Owner.toNumber(),
-        //     balance1TokenHolder1.toNumber(),
-        //     balance1TokenHolder2.toNumber(),
-        //     balance1TokenHolder3.toNumber()
-        // );
+        console.log(
+            balance1Contract.toNumber(),
+            balance1Owner.toNumber(),
+            balance1TokenHolder1.toNumber(),
+            balance1TokenHolder2.toNumber(),
+            balance1TokenHolder3.toNumber()
+        );
 
         await icoTokenInstance.requestUnclaimed({from: owner});
 
         const balance2Contract      = web3.eth.getBalance(icoTokenInstance.address);
-        // const balance2Owner         = web3.eth.getBalance(owner);
+        const balance2Owner         = web3.eth.getBalance(owner);
         const balance2TokenHolder1  = web3.eth.getBalance(tokenHolder1);
         const balance2TokenHolder2  = web3.eth.getBalance(tokenHolder2);
         const balance2TokenHolder3  = web3.eth.getBalance(tokenHolder3);
 
-        // console.log(
-        //     balance2Contract.toNumber(),
-        //     balance2Owner.toNumber(),
-        //     balance2TokenHolder1.toNumber(), balance2TokenHolder2.toNumber(),
-        //     balance2TokenHolder3.toNumber()
-        // );
+        console.log(
+            balance2Contract.toNumber(),
+            balance2Owner.toNumber(),
+            balance2TokenHolder1.toNumber(), balance2TokenHolder2.toNumber(),
+            balance2TokenHolder3.toNumber()
+        );
 
-        // @TODO: Doublecheck test result
         balance2Contract.should.be.bignumber.equal(0);
         balance2TokenHolder1.should.be.bignumber.equal(balance1TokenHolder1);
         balance2TokenHolder2.should.be.bignumber.equal(balance1TokenHolder2);
