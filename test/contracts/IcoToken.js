@@ -204,19 +204,15 @@ contract('IcoToken', (accounts) => {
 
         assert.equal(unclaimedDividend, 0, 'Unclaimed dividend should be 0, but is: ' + unclaimedDividend);
 
-        // console.log(tx1.receipt.gasUsed);
-        // console.log(tx1.receipt.gasPrice); //missing
+        const gasUsed1         = await web3.eth.getTransactionReceipt(tx1.tx).gasUsed;
+        const gasPrice1        = await web3.eth.getTransaction(tx1.tx).gasPrice;
+        const transactionFee1  = gasPrice1.times(gasUsed1);
 
-        // const gasUsed1         = await web3.eth.getTransactionReceipt(tx1).gasUsed;
-        // const gasPrice1        = await web3.eth.getTransaction(tx1).gasPrice;
-        // const transactionFee1  = gasPrice1.times(gasUsed1);
+        const gasUsed2         = await web3.eth.getTransactionReceipt(tx2.tx).gasUsed;
+        const gasPrice2        = await web3.eth.getTransaction(tx2.tx).gasPrice;
+        const transactionFee2  = gasPrice2.times(gasUsed2);
 
-        // const gasUsed2         = await web3.eth.getTransactionReceipt(tx2).gasUsed;
-        // const gasPrice2        = await web3.eth.getTransaction(tx2).gasPrice;
-        // const transactionFee2  = gasPrice2.times(gasUsed2);
-
-        const gas = 30000000000000000000 - 29987230200000000000;
-        // const gas = transactionFee1.plus(transactionFee2);
+        const gas = transactionFee1.plus(transactionFee2);
 
         (fundsHolder1After.plus(fundsHolder2After))
             .minus((fundsHolder1Before.plus(fundsHolder2Before)))
