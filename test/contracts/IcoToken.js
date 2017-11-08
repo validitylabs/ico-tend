@@ -111,6 +111,27 @@ contract('IcoToken', (accounts) => {
         assert.isFalse(treasurer4, 'Treasurer 4 is not inactive');
     });
 
+    it('should mint 5 tokens for each token holder', async () => {
+        let balanceTokenHolder1 = await icoTokenInstance.balanceOf(tokenHolder1);
+        let balanceTokenHolder2 = await icoTokenInstance.balanceOf(tokenHolder2);
+        let totalSupply         = await icoTokenInstance.totalSupply();
+
+        assert.equal(balanceTokenHolder1, 0, 'Wrong token balance of tokenHolder1 (is not 0): ' + balanceTokenHolder1);
+        assert.equal(balanceTokenHolder2, 0, 'Wrong token balance of tokenHolder2 (is not 0): ' + balanceTokenHolder2);
+        assert.equal(totalSupply, 0, 'Wrong total supply (is not 0): ' + totalSupply);
+
+        await icoTokenInstance.mint(tokenHolder1, 5);
+        await icoTokenInstance.mint(tokenHolder2, 5);
+
+        balanceTokenHolder1 = await icoTokenInstance.balanceOf(tokenHolder1);
+        balanceTokenHolder2 = await icoTokenInstance.balanceOf(tokenHolder2);
+        totalSupply         = await icoTokenInstance.totalSupply();
+
+        assert.equal(balanceTokenHolder1, 5, 'Wrong token balance of tokenHolder1 (is not 5): ' + balanceTokenHolder1);
+        assert.equal(balanceTokenHolder2, 5, 'Wrong token balance of tokenHolder2 (is not 5): ' + balanceTokenHolder2);
+        assert.equal(totalSupply, 10, 'Wrong total supply (is not 10): ' + totalSupply);
+    });
+
     it('should start a new dividend round with a balance of 10 eth', async () => {
         // Initialize first dividend round with a volume of 10 eth
         await web3.eth.sendTransaction({
@@ -199,27 +220,6 @@ contract('IcoToken', (accounts) => {
         } catch (e) {
             assertJump(e);
         }
-    });
-
-    it('should mint 5 tokens for each token holder', async () => {
-        let balanceTokenHolder1 = await icoTokenInstance.balanceOf(tokenHolder1);
-        let balanceTokenHolder2 = await icoTokenInstance.balanceOf(tokenHolder2);
-        let totalSupply         = await icoTokenInstance.totalSupply();
-
-        assert.equal(balanceTokenHolder1, 0, 'Wrong token balance of tokenHolder1 (is not 0): ' + balanceTokenHolder1);
-        assert.equal(balanceTokenHolder2, 0, 'Wrong token balance of tokenHolder2 (is not 0): ' + balanceTokenHolder2);
-        assert.equal(totalSupply, 0, 'Wrong total supply (is not 0): ' + totalSupply);
-
-        await icoTokenInstance.mint(tokenHolder1, 5);
-        await icoTokenInstance.mint(tokenHolder2, 5);
-
-        balanceTokenHolder1 = await icoTokenInstance.balanceOf(tokenHolder1);
-        balanceTokenHolder2 = await icoTokenInstance.balanceOf(tokenHolder2);
-        totalSupply         = await icoTokenInstance.totalSupply();
-
-        assert.equal(balanceTokenHolder1, 5, 'Wrong token balance of tokenHolder1 (is not 5): ' + balanceTokenHolder1);
-        assert.equal(balanceTokenHolder2, 5, 'Wrong token balance of tokenHolder2 (is not 5): ' + balanceTokenHolder2);
-        assert.equal(totalSupply, 10, 'Wrong total supply (is not 10): ' + totalSupply);
     });
 
     it('should claim tokens', async () => {
