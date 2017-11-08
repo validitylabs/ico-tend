@@ -132,6 +132,9 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should start a new dividend round with a balance of 10 eth', async () => {
+        // At this point, the contract should not have any ETH
+        web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(web3.toWei(0));
+
         // Initialize first dividend round with a volume of 10 eth
         await web3.eth.sendTransaction({
             from:   owner,
@@ -140,16 +143,21 @@ contract('IcoToken', (accounts) => {
             gas:    200000
         });
 
-        const icoBalance    = await icoTokenInstance.currentDividend();
-        const endTime       = await icoTokenInstance.endTime();
+        const icoBalance        = await icoTokenInstance.currentDividend();
+        const endTime           = await icoTokenInstance.endTime();
+        const expectedBalance   = web3.toWei(10);
 
-        icoBalance.should.be.bignumber.equal(web3.toWei(10));
+        icoBalance.should.be.bignumber.equal(expectedBalance);
+        web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(expectedBalance);
 
         // @TODO: Test dividend end time more exclicit with MomentJS
         assert.isTrue(endTime > 0, 'EndTime not properly setted: ' + endTime);
     });
 
     it('should increase dividend balance to 30 eth with different authorized accounts', async () => {
+        // At this point, the contract should have 10 ETH
+        web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(web3.toWei(10));
+
         // Increase dividend as owner
         await web3.eth.sendTransaction({
             from:   owner,
@@ -166,9 +174,11 @@ contract('IcoToken', (accounts) => {
             gas:    200000
         });
 
-        const icoBalance = await icoTokenInstance.currentDividend();
+        const icoBalance        = await icoTokenInstance.currentDividend();
+        const expectedBalance   = web3.toWei(30);
 
-        icoBalance.should.be.bignumber.equal(web3.toWei(30));
+        icoBalance.should.be.bignumber.equal(expectedBalance);
+        web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(expectedBalance);
     });
 
     it('should fail, because we try to increase dividend balance with a non treasurer account', async () => {
@@ -228,6 +238,7 @@ contract('IcoToken', (accounts) => {
         assert.equal(unclaimedDividend, 0, 'Unclaimed dividend should be 0, but is: ' + unclaimedDividend);
 
         const gas = 30000000000000000000 - 29987230200000000000;
+
         (fundsHolder1After.plus(fundsHolder2After))
             .minus((fundsHolder1Before.plus(fundsHolder2Before)))
             .plus(gas).should.be.bignumber.equal(fundsTokenBefore);
