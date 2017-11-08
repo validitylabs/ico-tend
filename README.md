@@ -30,20 +30,34 @@ yarn install
 ```
 This will install all required dependecies in the directory _node_modules_.
 
-### Deploy smart contract
-To deploy the ICO smart contracts, go into the projects root directory, and run the migration script.
+## Compile, migrate and run unit tests
+To deploy the ICO smart contracts, go into the projects root directory, and change into the truffle development console.
 ```
 cd <project base directory>
 source ./initShell.sh
-yarn run compile
-yarn run migrate
+yarn run develop
 ```
 
-### Run the tests
-To run the unit and coverage tests, go into the projects root directory and run these test scripts.
+Now you can compile, migrate and run tests.
+```
+# Compile contract
+compile
+
+# Migrate contract
+migrate
+
+# Test the contract
+test
+```
+__The development console will automatically start it's own TestRPC server for you!__
+
+__Because the test consumes a lot of ETH, please restart the development console between each test!__
+
+## Run the coverage test
+To run the coverage tests, go into the projects root directory and run the coverage test like that.
 ```
 cd <project base directory>
 source ./initShell.sh
-yarn run test
 yarn run coverage
 ```
+__The coverage test will automatically start it's own TestRPC server for you!__
