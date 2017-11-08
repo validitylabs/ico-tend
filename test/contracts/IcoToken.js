@@ -62,10 +62,9 @@ contract('IcoToken', (accounts) => {
     debug = async () => {
         console.log('==========================================');
 
-        // @TODO: bignumber
-        console.log('ETH getBalance icoTokenInstance: ' + Math.ceil(web3.fromWei(web3.eth.getBalance(icoTokenInstance.address)).toNumber()));
-        console.log('ETH getBalance tokenHolder1: ' + Math.ceil(web3.fromWei(web3.eth.getBalance(tokenHolder1)).toNumber()));
-        console.log('ETH getBalance tokenHolder2: ' + Math.ceil(web3.fromWei(web3.eth.getBalance(tokenHolder2)).toNumber()));
+        console.log('ETH getBalance icoTokenInstance: ' + web3.eth.getBalance(icoTokenInstance.address));
+        console.log('ETH getBalance tokenHolder1: '     + web3.eth.getBalance(tokenHolder1));
+        console.log('ETH getBalance tokenHolder2: '     + web3.eth.getBalance(tokenHolder2));
 
         const icoTokenInstanceBalance   = await icoTokenInstance.balanceOf(icoTokenInstance.address);
         const tokenHolder1Balance       = await icoTokenInstance.balanceOf(tokenHolder1);
@@ -73,9 +72,9 @@ contract('IcoToken', (accounts) => {
 
         console.log('------------------------------------------');
 
-        console.log('balanceOf icoTokenInstance: ' + icoTokenInstanceBalance.toNumber());
-        console.log('balanceOf tokenHolder1: ' + tokenHolder1Balance.toNumber());
-        console.log('balanceOf tokenHolder2: ' + tokenHolder2Balance.toNumber());
+        console.log('balanceOf icoTokenInstance: '  + icoTokenInstanceBalance);
+        console.log('balanceOf tokenHolder1: '      + tokenHolder1Balance);
+        console.log('balanceOf tokenHolder2: '      + tokenHolder2Balance);
 
         console.log('==========================================');
     };
@@ -141,15 +140,10 @@ contract('IcoToken', (accounts) => {
             gas:    200000
         });
 
-        // Get ICO balance
         const icoBalance    = await icoTokenInstance.currentDividend();
         const endTime       = await icoTokenInstance.endTime();
 
-        assert.equal(
-            web3.fromWei(icoBalance.toNumber()),
-            10,
-            'Dividend balance is not equal to 10 eth: ' + web3.fromWei(icoBalance.toNumber())
-        );
+        icoBalance.should.be.bignumber.equal(web3.toWei(10));
 
         // @TODO: Test dividend end time more exclicit with MomentJS
         assert.isTrue(endTime > 0, 'EndTime not properly setted: ' + endTime);
@@ -172,14 +166,9 @@ contract('IcoToken', (accounts) => {
             gas:    200000
         });
 
-        // Get ICO balance
         const icoBalance = await icoTokenInstance.currentDividend();
 
-        assert.equal(
-            web3.fromWei(icoBalance.toNumber()),
-            30,
-            'Dividend balance is not equal to 30 eth: ' + icoBalance.toNumber()
-        );
+        icoBalance.should.be.bignumber.equal(web3.toWei(30));
     });
 
     it('should fail, because we try to increase dividend balance with a non treasurer account', async () => {
@@ -223,8 +212,6 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should claim tokens', async () => {
-        let gas;
-
         const fundsTokenBefore      = web3.eth.getBalance(icoTokenInstance.address);
         const fundsHolder1Before    = web3.eth.getBalance(tokenHolder1);
         const fundsHolder2Before    = web3.eth.getBalance(tokenHolder2);
@@ -240,22 +227,12 @@ contract('IcoToken', (accounts) => {
 
         assert.equal(unclaimedDividend, 0, 'Unclaimed dividend should be 0, but is: ' + unclaimedDividend);
 
-        gas = 30000000000000000000 - 29987230200000000000;
+        const gas = 30000000000000000000 - 29987230200000000000;
         (fundsHolder1After.plus(fundsHolder2After))
             .minus((fundsHolder1Before.plus(fundsHolder2Before)))
             .plus(gas).should.be.bignumber.equal(fundsTokenBefore);
 
         assert.equal(fundsTokenAfter.toNumber(), 0, 'Token funds are not equal to 0: ' + fundsTokenAfter.toNumber());
-
-        // @FIXME:
-        // gas = 172271731199999000000 - 162265346299999000000;
-        // assert.equal(fundsHolder1After, fundsHolder1Before + 15, 'Wrong funds of tokenHolder1: ' + fundsHolder1After);
-
-        // fundsHolder1Before.plus(web3.toWei(15)).plus(gas).should.be.bignumber.equal(fundsHolder1After);
-
-        // console.log(web3.toWei(15)); // 15000000000000000000
-
-        // assert.equal(fundsHolder2After, fundsHolder2Before + 15, 'Wrog funds of tokenHolder2: ' + fundsHolder2After);
     });
 
     it('should transfer dividend of tokenHolder1 to tokenHolder2 using the transfer method', async () => {
@@ -266,11 +243,7 @@ contract('IcoToken', (accounts) => {
 
         const tokenHolder2Balance2  = await icoTokenInstance.balanceOf(tokenHolder2);
 
-        assert.equal(
-            tokenHolder2Balance1.toNumber() + tokenHolder1Balance1.toNumber(),
-            tokenHolder2Balance2.toNumber(),
-            'Excpected value should be 5, but is: ' + (tokenHolder2Balance1.toNumber() + tokenHolder1Balance1.toNumber())
-        );
+        tokenHolder2Balance1.plus(tokenHolder1Balance1).should.be.bignumber.equal(tokenHolder2Balance2);
     });
 
     it.skip('should transfer dividend of tokenHolder2 to tokenHolder1 using the transferFrom method', async () => {
