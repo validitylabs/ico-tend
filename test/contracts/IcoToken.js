@@ -100,7 +100,7 @@ contract('IcoToken', (accounts) => {
 
     it('should start a new dividend round with a balance of 10 eth', async () => {
         // At this point, the contract should not have any ETH
-        web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(web3.toWei(0));
+        web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(web3.toWei(0, 'ether'));
 
         // Initialize first dividend round with a volume of 10 eth
         await web3.eth.sendTransaction({
@@ -112,18 +112,18 @@ contract('IcoToken', (accounts) => {
 
         const icoBalance        = await icoTokenInstance.currentDividend();
         const endTime           = await icoTokenInstance.endTime();
-        const expectedBalance   = web3.toWei(10);
+        const expectedBalance   = web3.toWei(10, 'ether');
 
         icoBalance.should.be.bignumber.equal(expectedBalance);
         web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(expectedBalance);
 
         // @TODO: Test dividend end time more exclicit with MomentJS
-        assert.isTrue(endTime > 0, 'EndTime not properly setted: ' + endTime);
+        assert.isTrue(endTime.gt(0), 'EndTime not properly setted: ' + endTime);
     });
 
     it('should increase dividend balance to 30 eth with different authorized accounts', async () => {
         // At this point, the contract should have 10 ETH
-        web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(web3.toWei(10));
+        web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(web3.toWei(10, 'ether'));
 
         // Increase dividend as owner
         await web3.eth.sendTransaction({
@@ -142,7 +142,7 @@ contract('IcoToken', (accounts) => {
         });
 
         const icoBalance        = await icoTokenInstance.currentDividend();
-        const expectedBalance   = web3.toWei(30);
+        const expectedBalance   = web3.toWei(30, 'ether');
 
         icoBalance.should.be.bignumber.equal(expectedBalance);
         web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(expectedBalance);
@@ -193,8 +193,8 @@ contract('IcoToken', (accounts) => {
         const fundsHolder1Before    = web3.eth.getBalance(tokenHolder1);
         const fundsHolder2Before    = web3.eth.getBalance(tokenHolder2);
 
-        await icoTokenInstance.claimDividend({from: tokenHolder1});
-        await icoTokenInstance.claimDividend({from: tokenHolder2});
+        const tx1 = await icoTokenInstance.claimDividend({from: tokenHolder1});
+        const tx2 = await icoTokenInstance.claimDividend({from: tokenHolder2});
 
         const unclaimedDividend = await icoTokenInstance.unclaimedDividend(tokenHolder1);
 
@@ -204,7 +204,19 @@ contract('IcoToken', (accounts) => {
 
         assert.equal(unclaimedDividend, 0, 'Unclaimed dividend should be 0, but is: ' + unclaimedDividend);
 
+        // console.log(tx1.receipt.gasUsed);
+        // console.log(tx1.receipt.gasPrice); //missing
+
+        // const gasUsed1         = await web3.eth.getTransactionReceipt(tx1).gasUsed;
+        // const gasPrice1        = await web3.eth.getTransaction(tx1).gasPrice;
+        // const transactionFee1  = gasPrice1.times(gasUsed1);
+
+        // const gasUsed2         = await web3.eth.getTransactionReceipt(tx2).gasUsed;
+        // const gasPrice2        = await web3.eth.getTransaction(tx2).gasPrice;
+        // const transactionFee2  = gasPrice2.times(gasUsed2);
+
         const gas = 30000000000000000000 - 29987230200000000000;
+        // const gas = transactionFee1.plus(transactionFee2);
 
         (fundsHolder1After.plus(fundsHolder2After))
             .minus((fundsHolder1Before.plus(fundsHolder2Before)))
@@ -219,7 +231,7 @@ contract('IcoToken', (accounts) => {
 
         await icoTokenInstance.transfer(tokenHolder2, 5, {from: tokenHolder1});
 
-        const tokenHolder2Balance2  = await icoTokenInstance.balanceOf(tokenHolder2);
+        const tokenHolder2Balance2 = await icoTokenInstance.balanceOf(tokenHolder2);
 
         tokenHolder2Balance1.plus(tokenHolder1Balance1).should.be.bignumber.equal(tokenHolder2Balance2);
     });
