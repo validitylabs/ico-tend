@@ -2,24 +2,15 @@
  * Contract artifacts
  * @TODO: Implement event driven tests
  */
-const IcoToken  = artifacts.require('./IcoToken');
-const moment    = require('moment'); // eslint-disable-line
-const BigNumber = web3.BigNumber;
+const IcoToken      = artifacts.require('./IcoToken');
+const moment        = require('moment'); // eslint-disable-line
+const BigNumber     = web3.BigNumber;
+const assertJump    = require('./helpers/assertJump');
 
 const should = require('chai') // eslint-disable-line
     .use(require('chai-as-promised'))
     .use(require('chai-bignumber')(BigNumber))
     .should();
-
-/**
- * Expect exception throw above call of assertJump()
- *
- * @param {string} error Expected error
- * @return {undefined}
- */
-function assertJump(error) {
-    assert.isAbove(error.message.search('invalid opcode'), -1, 'Invalid opcode error must be returned');
-}
 
 /**
  * Increase N days in testrpc
@@ -54,30 +45,6 @@ contract('IcoToken', (accounts) => {
     beforeEach(async () => {
         icoTokenInstance = await IcoToken.deployed();
     });
-
-    // /**
-    //  * Debug function
-    //  * @return {undefined}
-    //  */
-    // debug = async () => {
-    //     console.log('==========================================');
-
-    //     console.log('ETH getBalance icoTokenInstance: ' + web3.eth.getBalance(icoTokenInstance.address));
-    //     console.log('ETH getBalance tokenHolder1: '     + web3.eth.getBalance(tokenHolder1));
-    //     console.log('ETH getBalance tokenHolder2: '     + web3.eth.getBalance(tokenHolder2));
-
-    //     const icoTokenInstanceBalance   = await icoTokenInstance.balanceOf(icoTokenInstance.address);
-    //     const tokenHolder1Balance       = await icoTokenInstance.balanceOf(tokenHolder1);
-    //     const tokenHolder2Balance       = await icoTokenInstance.balanceOf(tokenHolder2);
-
-    //     console.log('------------------------------------------');
-
-    //     console.log('balanceOf icoTokenInstance: '  + icoTokenInstanceBalance);
-    //     console.log('balanceOf tokenHolder1: '      + tokenHolder1Balance);
-    //     console.log('balanceOf tokenHolder2: '      + tokenHolder2Balance);
-
-    //     console.log('==========================================');
-    // };
 
     /**
      * [ Claim period ]
@@ -258,8 +225,6 @@ contract('IcoToken', (accounts) => {
     });
 
     it.skip('should transfer dividend of tokenHolder2 to tokenHolder1 using the transferFrom method', async () => {
-        // await debug();
-
         // const tokenHolder1Balance1  = await icoTokenInstance.balanceOf(tokenHolder1);
         // const tokenHolder2Balance1  = await icoTokenInstance.balanceOf(tokenHolder2);
 
@@ -280,8 +245,6 @@ contract('IcoToken', (accounts) => {
         console.log(transfer);
 
         // const tokenHolder2Balance2  = await icoTokenInstance.balanceOf(tokenHolder2);
-
-        // await debug();
 
         // assert.equal(
         //     tokenHolder2Balance1.toNumber() + tokenHolder1Balance1.toNumber(),
