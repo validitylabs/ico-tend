@@ -1,10 +1,15 @@
 /**
  * Test for IcoCrowdsale
+ *
+ * yarn run dev
+ * > test ./test/contracts/IcoCrowdsale.js
  */
 
 const IcoCrowdsale = artifacts.require('./IcoCrowdsale');
 
+import {startTime, endTime, rateEthPerToken} from '../../ico.cnf.json';
 import {waitNDays, getEvents, debug, BigNumber} from './helpers/tools'; // eslint-disable-line
+
 const moment        = require('moment'); // eslint-disable-line
 const assertJump    = require('./helpers/assertJump');
 
