@@ -398,7 +398,7 @@ contract('IcoToken', (accounts) => {
         const balance1TokenHolder2  = web3.eth.getBalance(tokenHolder2);
         const balance1TokenHolder3  = web3.eth.getBalance(tokenHolder3);
 
-        await icoTokenInstance.requestUnclaimed({from: owner});
+        const tx = await icoTokenInstance.requestUnclaimed({from: owner});
 
         const balance2Contract      = web3.eth.getBalance(icoTokenInstance.address);
         const balance2TokenHolder1  = web3.eth.getBalance(tokenHolder1);
@@ -409,6 +409,12 @@ contract('IcoToken', (accounts) => {
         balance2TokenHolder1.should.be.bignumber.equal(balance1TokenHolder1);
         balance2TokenHolder2.should.be.bignumber.equal(balance1TokenHolder2);
         balance2TokenHolder3.should.be.bignumber.equal(balance1TokenHolder3);
+
+        // Testig events
+        const events = getEvents(tx, 'Reclaimed');
+
+        events[0].remainingBalance.should.be.bignumber.equal(web3.eth.getBalance(icoTokenInstance.address));
+        events[0]._now.should.be.bignumber.gte(events[0]._endTime.sub(60 * 60 * 24 * 30));
     });
 
     /**
