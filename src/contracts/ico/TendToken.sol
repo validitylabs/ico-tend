@@ -8,9 +8,9 @@ pragma solidity ^0.4.18;
 import "../../../node_modules/zeppelin-solidity/contracts/token/MintableToken.sol";
 import "./DividendToken.sol";
 
-contract IcoToken is DividendToken, MintableToken {
-    string public constant name = "ICO Token";
-    string public constant symbol = "ICT";
+contract TendToken is DividendToken, MintableToken {
+    string public constant name = "Tend Token";
+    string public constant symbol = "TND";
     uint8 public constant decimals = 18;
 
     // DividendToken public dividendToken;
