@@ -162,13 +162,9 @@ contract('IcoToken', (accounts) => {
         assert.equal(balanceTokenHolder3, 0, 'Wrong token balance of tokenHolder3 (is not 0): ' + balanceTokenHolder3);
         assert.equal(totalSupply, 0, 'Wrong total supply (is not 0): ' + totalSupply);
 
-        // @TODO: EVENTS the right way
-        // const tx1 = await icoTokenInstance.mint(tokenHolder1, 5);
-        // tx1.tx.logs.args
-
-        await icoTokenInstance.mint(tokenHolder1, 5);
-        await icoTokenInstance.mint(tokenHolder2, 5);
-        await icoTokenInstance.mint(tokenHolder3, 5);
+        const tx1 = await icoTokenInstance.mint(tokenHolder1, 5);
+        const tx2 = await icoTokenInstance.mint(tokenHolder2, 5);
+        const tx3 = await icoTokenInstance.mint(tokenHolder3, 5);
 
         balanceTokenHolder1 = await icoTokenInstance.balanceOf(tokenHolder1);
         balanceTokenHolder2 = await icoTokenInstance.balanceOf(tokenHolder2);
@@ -179,6 +175,23 @@ contract('IcoToken', (accounts) => {
         assert.equal(balanceTokenHolder2, 5, 'Wrong token balance of tokenHolder2 (is not 5): ' + balanceTokenHolder2);
         assert.equal(balanceTokenHolder3, 5, 'Wrong token balance of tokenHolder3 (is not 5): ' + balanceTokenHolder3);
         assert.equal(totalSupply, 15, 'Wrong total supply (is not 15): ' + totalSupply);
+
+        // Testing events
+        const events1 = getEvents(tx1);
+        const events2 = getEvents(tx2);
+        const events3 = getEvents(tx3);
+
+        events1.Mint[0].amount.should.be.bignumber.equal(5);
+        events2.Mint[0].amount.should.be.bignumber.equal(5);
+        events3.Mint[0].amount.should.be.bignumber.equal(5);
+
+        assert.equal(events1.Mint[0].to, tokenHolder1, 'Mint event to address doesn\'t match against tokenHolder1 address');
+        assert.equal(events2.Mint[0].to, tokenHolder2, 'Mint event to address doesn\'t match against tokenHolder2 address');
+        assert.equal(events3.Mint[0].to, tokenHolder3, 'Mint event to address doesn\'t match against tokenHolder3 address');
+
+        events1.Transfer[0].value.should.be.bignumber.equal(5);
+        events2.Transfer[0].value.should.be.bignumber.equal(5);
+        events3.Transfer[0].value.should.be.bignumber.equal(5);
     });
 
     it('should start a new dividend round with a balance of 30 eth', async () => {
