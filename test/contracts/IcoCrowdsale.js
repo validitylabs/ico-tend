@@ -51,15 +51,15 @@ contract('IcoCrowdsale', (accounts) => {
         _wallet.should.be.equal(wallet);
     });
 
-    it('should set manager / whitelister accounts', async () => {
+    it('should set manager accounts', async () => {
         const tx1 = await icoCrowdsaleInstance.setManager(activeManager, true);
         const tx2 = await icoCrowdsaleInstance.setManager(inactiveManager, false);
 
         const manager1 = await icoCrowdsaleInstance.isManager(activeManager);
         const manager2 = await icoCrowdsaleInstance.isManager(inactiveManager);
 
-        assert.isTrue(manager1, 'Treasurer 1 is active');
-        assert.isFalse(manager2, 'Treasurer 2 is not active');
+        assert.isTrue(manager1, 'Manager 1 should be active');
+        assert.isFalse(manager2, 'Manager 2 should be inactive');
 
         // Testing events
         const events1 = getEvents(tx1, 'ChangedManager');
@@ -70,6 +70,40 @@ contract('IcoCrowdsale', (accounts) => {
 
         assert.equal(events2[0].manager, inactiveManager, 'inactiveManager address does not match');
         assert.isFalse(events2[0].active, 'inactiveManager expected to be inactive');
+    });
+
+    it('should alter manager accounts', async () => {
+        const tx1 = await icoCrowdsaleInstance.setManager(activeManager, false);
+        const tx2 = await icoCrowdsaleInstance.setManager(inactiveManager, true);
+
+        const manager1 = await icoCrowdsaleInstance.isManager(activeManager);
+        const manager2 = await icoCrowdsaleInstance.isManager(inactiveManager);
+
+        assert.isFalse(manager1, 'Manager 1 should be inactive');
+        assert.isTrue(manager2, 'Manager 2 should be active');
+
+        // Testing events
+        const events1 = getEvents(tx1, 'ChangedManager');
+        const events2 = getEvents(tx2, 'ChangedManager');
+
+        assert.isFalse(events1[0].active, 'activeManager expected to be inactive');
+        assert.isTrue(events2[0].active, 'inactiveManager expected to be active');
+
+        // Roll back to origin values
+        const tx3 = await icoCrowdsaleInstance.setManager(activeManager, true);
+        const tx4 = await icoCrowdsaleInstance.setManager(inactiveManager, false);
+
+        const manager3 = await icoCrowdsaleInstance.isManager(activeManager);
+        const manager4 = await icoCrowdsaleInstance.isManager(inactiveManager);
+
+        assert.isTrue(manager3, 'Manager 1 should be active');
+        assert.isFalse(manager4, 'Manager 2 should be inactive');
+
+        const events3 = getEvents(tx3, 'ChangedManager');
+        const events4 = getEvents(tx4, 'ChangedManager');
+
+        assert.isTrue(events3[0].active, 'activeManager expected to be active');
+        assert.isFalse(events4[0].active, 'inactiveManager expected to be inactive');
     });
 
     /**
