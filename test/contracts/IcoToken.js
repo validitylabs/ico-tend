@@ -307,6 +307,17 @@ contract('IcoToken', (accounts) => {
         (fundsHolder1After.plus(fundsHolder2After))
             .minus((fundsHolder1Before.plus(fundsHolder2Before)))
             .plus(gas).should.be.bignumber.equal(fundsTokenBefore.minus(fundsTokenAfter));
+
+        // Testing events
+        const events1 = getEvents(tx1);
+        const events2 = getEvents(tx2);
+
+        assert.equal(events1.Payout[0]._tokenHolder, tokenHolder1, 'TokenHolder1 doesn\'t match against Event');
+        assert.equal(events2.Payout[0]._tokenHolder, tokenHolder2, 'TokenHolder2 doesn\'t match against Event');
+
+        (fundsHolder1After.plus(fundsHolder2After))
+            .minus((fundsHolder1Before.plus(fundsHolder2Before)))
+            .plus(gas).should.be.bignumber.equal(events1.Payout[0]._value.plus(events1.Payout[0]._value));
     });
 
     it('should transfer token of tokenHolder1 to tokenHolder2 using the transfer method', async () => {
