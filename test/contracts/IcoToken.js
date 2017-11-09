@@ -7,7 +7,6 @@ const IcoToken      = artifacts.require('./IcoToken');
 const moment        = require('moment'); // eslint-disable-line
 const BigNumber     = web3.BigNumber;
 const assertJump    = require('./helpers/assertJump');
-let timestamp       = Math.floor(Date.now() / 1000);
 
 const should = require('chai') // eslint-disable-line
     .use(require('chai-as-promised'))
@@ -29,11 +28,6 @@ async function waitNDays(days) {
         params: [daysInSeconds],
         id: 4447
     });
-
-    // @TODO: Transform to icoTokenInstance.endTime() format
-    // time:                            60480000
-    // endTime.toNumber() / Date.now(): 1600936260
-    timestamp = time.result;
 
     return time.result;
 }
@@ -150,6 +144,8 @@ contract('IcoToken', (accounts) => {
         assert.isTrue(treasurer2, 'Treasurer 2 is not active');
         assert.isFalse(treasurer3, 'Treasurer 3 is not inactive');
         assert.isFalse(treasurer4, 'Treasurer 4 is not inactive');
+
+        // @TODO: test events
     });
 
     it('should mint 5 tokens for each token holder', async () => {
@@ -214,7 +210,7 @@ contract('IcoToken', (accounts) => {
         icoBalance.should.be.bignumber.equal(expectedBalance);
         web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(expectedBalance);
 
-        assert.isTrue(endTime.gt(timestamp), 'EndTime not properly set: ' + endTime);
+        assert.isTrue(endTime.gt(0), 'EndTime not properly set: ' + endTime);
 
         // Testing events
         const events = getEvents(tx);
@@ -382,7 +378,6 @@ contract('IcoToken', (accounts) => {
     it('should turn the time 330 days forward to reclaim period', async () => {
         console.log('[ Reclaim period ]'.yellow);
         await waitNDays(330);
-        // @TODO: Check value of timestamps
     });
 
     it('should fail, because we try to call claimDividend() after the claim period is over', async () => {
@@ -425,7 +420,6 @@ contract('IcoToken', (accounts) => {
     it('should turn the time 20 days forward', async () => {
         console.log('[ First dividend cycle is over, second is started ]'.yellow);
         await waitNDays(20);
-        // @TODO: Check value of timestamps
     });
 
     it('should start a second dividend round with a balance of 15 eth', async () => {
@@ -446,7 +440,7 @@ contract('IcoToken', (accounts) => {
 
         icoBalance.should.be.bignumber.equal(expectedBalance);
         web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(expectedBalance);
-        assert.isTrue(endTime.gt(timestamp), 'EndTime not properly set: ' + endTime);
+        assert.isTrue(endTime.gt(0), 'EndTime not properly set: ' + endTime);
 
         // Testing events
         const events = getEvents(tx);
