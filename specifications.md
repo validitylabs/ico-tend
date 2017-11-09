@@ -16,6 +16,10 @@
   - unclaimed fraction of interest that remains in contract after 330 days can be reclaimed by Tend
 
 # Crowdsale specifications and features
+- pre contribution (just issue tokens but tokens only transferrable once all tokens allocated after confirmations) ongoing, distribution via owner account
+- public round:
+    - start 27.01. 12:00 (noon CH time)
+    - end 03.02. 12:00 (noon CH time)
 - Ether / CHF rate set during contract deployment (in constructor, e.g. 300 CHF / Ether)
 - token / CHF rate set during contract deployment (in constructor, e.g. 1 CHF / Token)
 - minimum contribution: 500 CHF
