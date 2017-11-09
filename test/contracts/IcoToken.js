@@ -195,24 +195,32 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should start a new dividend round with a balance of 30 eth', async () => {
+        const expectedBalance = web3.toWei(30, 'ether');
+
         // At this point, the contract should not have any ETH
         web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(web3.toWei(0, 'ether'));
 
         // Initialize first dividend round with a volume of 30 eth
-        await icoTokenInstance.sendTransaction({
+        const tx = await icoTokenInstance.sendTransaction({
             from:   activeTreasurer1,
-            value:  web3.toWei(30, 'ether'),
+            value:  expectedBalance,
             gas:    200000
         });
 
-        const icoBalance        = await icoTokenInstance.currentDividend();
-        const endTime           = await icoTokenInstance.endTime();
-        const expectedBalance   = web3.toWei(30, 'ether');
+        const icoBalance    = await icoTokenInstance.currentDividend();
+        const endTime       = await icoTokenInstance.endTime();
 
         icoBalance.should.be.bignumber.equal(expectedBalance);
         web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(expectedBalance);
 
         assert.isTrue(endTime.gt(timestamp), 'EndTime not properly set: ' + endTime);
+
+        // Testing events
+        const events = getEvents(tx);
+
+        events.Payin[0]._value.should.be.bignumber.equal(expectedBalance);
+        events.Payin[0]._endTime.should.be.bignumber.equal(endTime);
+        assert.equal(events.Payin[0]._owner, activeTreasurer1, 'Treasurer doesn\'t match against: ' + activeTreasurer1);
     });
 
     it('should fail, because we try to increase the dividend again', async () => {
