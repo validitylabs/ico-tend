@@ -47,10 +47,10 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should add treasurer accounts', async () => {
-        await icoTokenInstance.setTreasurer(activeTreasurer1, true);
-        await icoTokenInstance.setTreasurer(activeTreasurer2, true);
-        await icoTokenInstance.setTreasurer(inactiveTreasurer1, false);
-        await icoTokenInstance.setTreasurer(inactiveTreasurer2, false);
+        const tx1 = await icoTokenInstance.setTreasurer(activeTreasurer1, true);
+        const tx2 = await icoTokenInstance.setTreasurer(activeTreasurer2, true);
+        const tx3 = await icoTokenInstance.setTreasurer(inactiveTreasurer1, false);
+        const tx4 = await icoTokenInstance.setTreasurer(inactiveTreasurer2, false);
 
         const treasurer1 = await icoTokenInstance.isTreasurer(activeTreasurer1);
         const treasurer2 = await icoTokenInstance.isTreasurer(activeTreasurer2);
@@ -62,7 +62,23 @@ contract('IcoToken', (accounts) => {
         assert.isFalse(treasurer3, 'Treasurer 3 is not inactive');
         assert.isFalse(treasurer4, 'Treasurer 4 is not inactive');
 
-        // @TODO: test events
+        // Testing events
+        const events1 = getEvents(tx1, 'ChangedTreasurer');
+        const events2 = getEvents(tx2, 'ChangedTreasurer');
+        const events3 = getEvents(tx3, 'ChangedTreasurer');
+        const events4 = getEvents(tx4, 'ChangedTreasurer');
+
+        assert.equal(events1[0].treasurer, activeTreasurer1, 'activeTreasurer1 address does not match');
+        assert.isTrue(events1[0].active, 'activeTreasurer1 expected to be active');
+
+        assert.equal(events2[0].treasurer, activeTreasurer2, 'activeTreasurer2 address does not match');
+        assert.isTrue(events2[0].active, 'activeTreasurer2 expected to be active');
+
+        assert.equal(events3[0].treasurer, inactiveTreasurer1, 'inactiveTreasurer1 address does not match');
+        assert.isFalse(events3[0].active, 'inactiveTreasurer1 expected to be inactive');
+
+        assert.equal(events4[0].treasurer, inactiveTreasurer2, 'inactiveTreasurer2 address does not match');
+        assert.isFalse(events4[0].active, 'inactiveTreasurer2 expected to be inactive');
     });
 
     it('should mint 5 tokens for each token holder', async () => {
