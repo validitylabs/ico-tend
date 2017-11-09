@@ -32,7 +32,33 @@ contract('IcoCrowdsale', (accounts) => {
         icoCrowdsaleInstance = await IcoCrowdsale.deployed();
     });
 
-    it.skip('should do something', async () => {
-        console.log('[ CROWDSALE ]');
+    /**
+     * [ Pre contribution period ]
+     */
+
+    it('should instantiate the ICO crowdsale correctly', async () => {
+        console.log('[ Pre contribution period ]'.yellow);
+
+        const _startTime = await icoCrowdsaleInstance.startTime();
+        const _endTime   = await icoCrowdsaleInstance.endTime();
+        const _rate      = await icoCrowdsaleInstance.rate();
+        const _wallet    = await icoCrowdsaleInstance.wallet();
+
+        _startTime.should.be.bignumber.equal(startTime);
+        _endTime.should.be.bignumber.equal(endTime);
+        _rate.should.be.bignumber.equal(rateEthPerToken);
+        _wallet.should.be.equal(wallet);
     });
+
+    /**
+     * [ Contribution period ]
+     */
+
+    /**
+     * [ Confirmation period ]
+     */
+
+    // it('should do something', async () => {
+
+    // });
 });
