@@ -326,7 +326,7 @@ contract('IcoToken', (accounts) => {
         const tokenHolder1UnclaimedDividendBefore   = await icoTokenInstance.unclaimedDividend(tokenHolder1);
         const tokenHolder2UnclaimedDividendBefore   = await icoTokenInstance.unclaimedDividend(tokenHolder2);
 
-        await icoTokenInstance.transfer(tokenHolder2, 5, {from: tokenHolder1});
+        const tx = await icoTokenInstance.transfer(tokenHolder2, 5, {from: tokenHolder1});
 
         const tokenHolder2Balance2                  = await icoTokenInstance.balanceOf(tokenHolder2);
         const tokenHolder1UnclaimedDividendAfter    = await icoTokenInstance.unclaimedDividend(tokenHolder1);
@@ -335,6 +335,13 @@ contract('IcoToken', (accounts) => {
         tokenHolder1UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder1UnclaimedDividendAfter);
         tokenHolder2UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder2UnclaimedDividendAfter);
         tokenHolder2Balance1.plus(tokenHolder1Balance1).should.be.bignumber.equal(tokenHolder2Balance2);
+
+        // Testing events
+        const transferEvents = getEvents(tx, 'Transfer');
+
+        assert.equal(transferEvents[0].from, tokenHolder1, 'Transfer event from address doesn\'t match against tokenHolder1 address');
+        assert.equal(transferEvents[0].to, tokenHolder2, 'Transfer event to address doesn\'t match against tokenHolder2 address');
+        transferEvents[0].value.should.be.bignumber.equal(5);
     });
 
     it('should transfer token of tokenHolder2 back to tokenHolder1 using the transferFrom method', async () => {
