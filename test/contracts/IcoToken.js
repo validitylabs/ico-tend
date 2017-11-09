@@ -47,6 +47,7 @@ async function waitNDays(days) {
  */
 function getEvents(tx, event = null) {
     const stack = [];
+    // @TODO: throw if empty
 
     tx.logs.forEach((item) => {
         if (event) {
@@ -455,32 +456,6 @@ contract('IcoToken', (accounts) => {
         assert.equal(events.Payin[0]._owner, owner, 'Treasurer doesn\'t match against owner: ' + owner);
     });
 
-    it('should mint 3 tokens for tokenHolder1 and 2 tokens for tokenHolder3', async () => {
-        let balanceTokenHolder1 = await icoTokenInstance.balanceOf(tokenHolder1);
-        let balanceTokenHolder2 = await icoTokenInstance.balanceOf(tokenHolder2);
-        let balanceTokenHolder3 = await icoTokenInstance.balanceOf(tokenHolder3);
-        let totalSupply         = await icoTokenInstance.totalSupply();
-
-        assert.equal(balanceTokenHolder1, 5, 'Wrong token balance of tokenHolder1 (is not 5): ' + balanceTokenHolder1);
-        assert.equal(balanceTokenHolder2, 5, 'Wrong token balance of tokenHolder2 (is not 5): ' + balanceTokenHolder2);
-        assert.equal(balanceTokenHolder3, 5, 'Wrong token balance of tokenHolder3 (is not 5): ' + balanceTokenHolder3);
-        assert.equal(totalSupply, 15, 'Wrong total supply (is not 15): ' + totalSupply);
-
-        await icoTokenInstance.mint(tokenHolder1, 3);
-        await icoTokenInstance.mint(tokenHolder3, 2);
-
-        balanceTokenHolder1 = await icoTokenInstance.balanceOf(tokenHolder1);
-        balanceTokenHolder2 = await icoTokenInstance.balanceOf(tokenHolder2);
-        balanceTokenHolder3 = await icoTokenInstance.balanceOf(tokenHolder3);
-        totalSupply         = await icoTokenInstance.totalSupply();
-
-        assert.equal(balanceTokenHolder1, 8, 'Wrong token balance of tokenHolder1 (is not 8): ' + balanceTokenHolder1);
-        // @FIXME: should balanceTokenHolder2 be 0?
-        assert.equal(balanceTokenHolder2, 5, 'Wrong token balance of tokenHolder2 (is not 5): ' + balanceTokenHolder2);
-        assert.equal(balanceTokenHolder3, 7, 'Wrong token balance of tokenHolder3 (is not 7): ' + balanceTokenHolder3);
-        assert.equal(totalSupply, 20, 'Wrong total supply (is not 20): ' + totalSupply);
-    });
-
     it('should claim dividend (ETH) again', async () => {
         const fundsTokenBefore      = web3.eth.getBalance(icoTokenInstance.address);
         const fundsHolder3Before    = web3.eth.getBalance(tokenHolder3);
@@ -511,4 +486,8 @@ contract('IcoToken', (accounts) => {
             .minus((fundsHolder3Before.plus(fundsHolder2Before)))
             .plus(gas).should.be.bignumber.equal(fundsTokenBefore.minus(fundsTokenAfter));
     });
+
+    // @TODO: transfer tokens and check if dividend is transferred as well
+    // from tokenHolder1 (nothing claimed) to wathever
+    // check if dividend is transferred as well
 });
