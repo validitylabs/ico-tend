@@ -21,14 +21,14 @@
 - minimum contribution: 500 CHF
 - cap of 95m CHF
 - whitelisting:
-    - investor addresses need to be whitelisted by whitelister account
-    - whitelister accounts can be set and reset by owner account
+    - investor addresses need to be whitelisted by manager account
+    - manager accounts can be set and reset by owner account
     - owner account transferrable
     - whitelisting of addresses can be undone
     - batch whitelisting of array of addresses
 - escrow and confirmation:
     - Ether will remain in contract in escrow until issueing of tokens happens or payback to non-approved addresses
-    - after contribution period is over, whitelisters have 30 days confirmation period to block contriting transactions (not-confirmed in potential secondary KYC step), by default all transactions are marked as "confirmed" unless explicitely set to "not-confirmed"/"blocked".
+    - after contribution period is over, managers have 30 days confirmation period to block contributing transactions (not-confirmed in potential secondary KYC step), by default all transactions are marked as "confirmed" unless explicitely set to "not-confirmed"/"blocked".
     - confirmation period can be marked as "completed" by owner earlier than 30 days time window
     - if confirmation period is over, tokens can be made available
 - token issueing:

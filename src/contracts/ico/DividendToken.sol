@@ -12,10 +12,6 @@ import "../../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol"
 contract DividendToken is StandardToken, Ownable {
     using SafeMath for uint256;
 
-    string public constant name = "Dividend Token";
-    string public constant symbol = "DIT";
-    uint8 public constant decimals = 18;
-
     // time before endTime during which dividend cannot be claimed by token holders
     // instead the unclaimed dividend can be claimed by treasury in that time span
     uint256 public claimTimeout = 20 days;
@@ -44,6 +40,8 @@ contract DividendToken is StandardToken, Ownable {
     event Payout(address _tokenHolder, uint256 _value);
 
     event Reclaimed(uint256 remainingBalance, uint256 _endTime, uint256 _now);
+
+    event ChangedTreasurer(address treasurer, bool active);
 
     /**
      * @dev Deploy the DividendToken contract and set the owner of the contract
@@ -139,6 +137,7 @@ contract DividendToken is StandardToken, Ownable {
      */
     function setTreasurer(address treasurer, bool active) public onlyOwner {
         isTreasurer[treasurer] = active;
+        ChangedTreasurer(treasurer, active);
     }
 
     /**
