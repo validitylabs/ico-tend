@@ -1,7 +1,6 @@
 /**
  * Contract artifacts
  * @TODO: Write test.md -> describe procedure (it()) -> verboser nested <UL> mit asserts
- * @TODO: Write event test
  */
 
 const IcoToken      = artifacts.require('./IcoToken');
@@ -37,6 +36,32 @@ async function waitNDays(days) {
     timestamp = time.result;
 
     return time.result;
+}
+
+/**
+ * Get event from transaction
+ *
+ * @param {object} tx Transaction object
+ * @param {string} event Event searching for
+ * @returns {object} Event stack
+ */
+function getEvents(tx, event = null) {
+    const stack = [];
+
+    tx.logs.forEach((item) => {
+        if (event) {
+            if (event === item.event) {
+                stack.push(item.args);
+            }
+        } else {
+            if (!stack[item.event]) {
+                stack[item.event] = [];
+            }
+            stack[item.event].push(item.args);
+        }
+    });
+
+    return stack;
 }
 
 /**
