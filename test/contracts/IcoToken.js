@@ -356,7 +356,7 @@ contract('IcoToken', (accounts) => {
         const allow2 = await icoTokenInstance.allowance(tokenHolder2, tokenHolder1);
         allow2.should.be.bignumber.equal(5);
 
-        await icoTokenInstance.transferFrom(tokenHolder2, tokenHolder1, 5, {from: tokenHolder1});
+        const tx = await icoTokenInstance.transferFrom(tokenHolder2, tokenHolder1, 5, {from: tokenHolder1});
 
         const tokenHolder1Balance2  = await icoTokenInstance.balanceOf(tokenHolder1);
         const tokenHolder2Balance2  = await icoTokenInstance.balanceOf(tokenHolder2);
@@ -365,6 +365,13 @@ contract('IcoToken', (accounts) => {
         tokenHolder3Balance1.should.be.bignumber.equal(tokenHolder3Balance2);
         tokenHolder1Balance2.should.be.bignumber.equal(allow2);
         tokenHolder2Balance2.should.be.bignumber.equal(tokenHolder2Balance1.minus(allow2));
+
+        // Testing events
+        const transferEvents = getEvents(tx, 'Transfer');
+
+        assert.equal(transferEvents[0].from, tokenHolder2, 'Transfer event from address doesn\'t match against tokenHolder2 address');
+        assert.equal(transferEvents[0].to, tokenHolder1, 'Transfer event to address doesn\'t match against tokenHolder1 address');
+        transferEvents[0].value.should.be.bignumber.equal(5);
     });
 
     /**
