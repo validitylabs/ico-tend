@@ -417,4 +417,33 @@ contract('IcoToken', (accounts) => {
     // @TODO: transfer tokens and check if dividend is transferred as well
     // from tokenHolder1 (nothing claimed) to wathever
     // check if dividend is transferred as well
+    it.skip('should transfer tokens from tokenHolder1 to tokenHolder2 and check, if dividend is transferred as well', async () => {
+        const tokenHolder1Balance1                  = await icoTokenInstance.balanceOf(tokenHolder1);
+        const tokenHolder2Balance1                  = await icoTokenInstance.balanceOf(tokenHolder2);
+        const tokenHolder1UnclaimedDividendBefore   = await icoTokenInstance.unclaimedDividend(tokenHolder1);
+        const tokenHolder2UnclaimedDividendBefore   = await icoTokenInstance.unclaimedDividend(tokenHolder2);
+
+        debug(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
+
+        const tx = await icoTokenInstance.transfer(tokenHolder2, 5, {from: tokenHolder1});
+
+        const tokenHolder2Balance2                  = await icoTokenInstance.balanceOf(tokenHolder2);
+        const tokenHolder1UnclaimedDividendAfter    = await icoTokenInstance.unclaimedDividend(tokenHolder1);
+        const tokenHolder2UnclaimedDividendAfter    = await icoTokenInstance.unclaimedDividend(tokenHolder2);
+
+        // tokenHolder1UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder1UnclaimedDividendAfter);
+        // tokenHolder2UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder2UnclaimedDividendAfter);
+        // tokenHolder2Balance1.plus(tokenHolder1Balance1).should.be.bignumber.equal(tokenHolder2Balance2);
+
+        debug(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
+
+        // Testing events
+        const transferEvents = getEvents(tx, 'Transfer');
+
+        console.log(transferEvents);
+
+        // assert.equal(transferEvents[0].from, tokenHolder1, 'Transfer event from address doesn\'t match against tokenHolder1 address');
+        // assert.equal(transferEvents[0].to, tokenHolder2, 'Transfer event to address doesn\'t match against tokenHolder2 address');
+        // transferEvents[0].value.should.be.bignumber.equal(5);
+    });
 });
