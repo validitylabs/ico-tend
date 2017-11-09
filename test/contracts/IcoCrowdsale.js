@@ -23,7 +23,8 @@ const should = require('chai') // eslint-disable-line
  */
 contract('IcoCrowdsale', (accounts) => {
     const owner             = accounts[0];
-    const activeManager1    = accounts[1];
+    const activeManager     = accounts[1];
+    const inactiveManager   = accounts[2];
     const wallet            = accounts[6];
 
     // Provide icoTokenInstance for every test case
@@ -48,6 +49,27 @@ contract('IcoCrowdsale', (accounts) => {
         _endTime.should.be.bignumber.equal(endTime);
         _rate.should.be.bignumber.equal(rateEthPerToken);
         _wallet.should.be.equal(wallet);
+    });
+
+    it('should set manager / whitelister accounts', async () => {
+        const tx1 = await icoCrowdsaleInstance.setManager(activeManager, true);
+        const tx2 = await icoCrowdsaleInstance.setManager(inactiveManager, false);
+
+        const manager1 = await icoCrowdsaleInstance.isManager(activeManager);
+        const manager2 = await icoCrowdsaleInstance.isManager(inactiveManager);
+
+        assert.isTrue(manager1, 'Treasurer 1 is active');
+        assert.isFalse(manager2, 'Treasurer 2 is not active');
+
+        // Testing events
+        const events1 = getEvents(tx1, 'ChangedManager');
+        const events2 = getEvents(tx2, 'ChangedManager');
+
+        assert.equal(events1[0].manager, activeManager, 'activeManager address does not match');
+        assert.isTrue(events1[0].active, 'activeManager expected to be active');
+
+        assert.equal(events2[0].manager, inactiveManager, 'inactiveManager address does not match');
+        assert.isFalse(events2[0].active, 'inactiveManager expected to be inactive');
     });
 
     /**
