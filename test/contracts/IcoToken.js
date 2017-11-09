@@ -1,13 +1,12 @@
 /**
- * Contract artifacts
+ * Test for IcoToken
  * @TODO: Write test.md -> describe procedure (it()) -> verboser nested <UL> mit asserts
  */
-
-const IcoToken      = artifacts.require('./IcoToken');
-const moment        = require('moment'); // eslint-disable-line
-const assertJump    = require('./helpers/assertJump');
+const IcoToken = artifacts.require('./IcoToken');
 
 import {waitNDays, getEvents, debug, BigNumber} from './helpers/tools'; // eslint-disable-line
+const moment        = require('moment'); // eslint-disable-line
+const assertJump    = require('./helpers/assertJump');
 
 const should = require('chai') // eslint-disable-line
     .use(require('chai-as-promised'))
