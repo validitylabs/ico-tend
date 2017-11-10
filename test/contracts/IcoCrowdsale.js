@@ -25,6 +25,9 @@ contract('IcoCrowdsale', (accounts) => {
     const owner             = accounts[0];
     const activeManager     = accounts[1];
     const inactiveManager   = accounts[2];
+    const investor1         = accounts[3];
+    const investor2         = accounts[4];
+    const investor3         = accounts[5];
     const wallet            = accounts[6];
 
     // Provide icoTokenInstance for every test case
@@ -52,8 +55,8 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should set manager accounts', async () => {
-        const tx1 = await icoCrowdsaleInstance.setManager(activeManager, true);
-        const tx2 = await icoCrowdsaleInstance.setManager(inactiveManager, false);
+        const tx1 = await icoCrowdsaleInstance.setManager(activeManager, true, {from: owner});
+        const tx2 = await icoCrowdsaleInstance.setManager(inactiveManager, false, {from: owner});
 
         const manager1 = await icoCrowdsaleInstance.isManager(activeManager);
         const manager2 = await icoCrowdsaleInstance.isManager(inactiveManager);
@@ -73,8 +76,8 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should alter manager accounts', async () => {
-        const tx1 = await icoCrowdsaleInstance.setManager(activeManager, false);
-        const tx2 = await icoCrowdsaleInstance.setManager(inactiveManager, true);
+        const tx1 = await icoCrowdsaleInstance.setManager(activeManager, false, {from: owner});
+        const tx2 = await icoCrowdsaleInstance.setManager(inactiveManager, true, {from: owner});
 
         const manager1 = await icoCrowdsaleInstance.isManager(activeManager);
         const manager2 = await icoCrowdsaleInstance.isManager(inactiveManager);
@@ -90,8 +93,8 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isTrue(events2[0].active, 'inactiveManager expected to be active');
 
         // Roll back to origin values
-        const tx3 = await icoCrowdsaleInstance.setManager(activeManager, true);
-        const tx4 = await icoCrowdsaleInstance.setManager(inactiveManager, false);
+        const tx3 = await icoCrowdsaleInstance.setManager(activeManager, true, {from: owner});
+        const tx4 = await icoCrowdsaleInstance.setManager(inactiveManager, false, {from: owner});
 
         const manager3 = await icoCrowdsaleInstance.isManager(activeManager);
         const manager4 = await icoCrowdsaleInstance.isManager(inactiveManager);
@@ -105,6 +108,19 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isTrue(events3[0].active, 'activeManager expected to be active');
         assert.isFalse(events4[0].active, 'inactiveManager expected to be inactive');
     });
+
+    it('should fail, because we try to set manager from unauthorized account', async () => {
+        try {
+            await icoCrowdsaleInstance.setManager(activeManager, false, {from: investor1});
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    // it('should whitelist investor accounts', async () => {
+
+    // });
 
     /**
      * [ Contribution period ]
