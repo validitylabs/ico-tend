@@ -35,7 +35,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         public
         Crowdsale(_startTime, _endTime, _rate, _wallet)
     {
-
+        setManager(msg.sender, true);
     }
 
     /**

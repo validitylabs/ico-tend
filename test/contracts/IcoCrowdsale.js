@@ -54,6 +54,12 @@ contract('IcoCrowdsale', (accounts) => {
         _wallet.should.be.equal(wallet);
     });
 
+    it('should verify, the owner is added properly to manager accounts', async () => {
+        const manager = await icoCrowdsaleInstance.isManager(owner);
+
+        assert.isTrue(manager, 'Owner should be a manager too');
+    });
+
     it('should set manager accounts', async () => {
         const tx1 = await icoCrowdsaleInstance.setManager(activeManager, true, {from: owner});
         const tx2 = await icoCrowdsaleInstance.setManager(inactiveManager, false, {from: owner});
