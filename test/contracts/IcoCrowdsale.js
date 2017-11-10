@@ -25,9 +25,9 @@ contract('IcoCrowdsale', (accounts) => {
     const owner             = accounts[0];
     const activeManager     = accounts[1];
     const inactiveManager   = accounts[2];
-    const investor1         = accounts[3];
-    const investor2         = accounts[4];
-    const investor3         = accounts[5];
+    const activeInvestor1   = accounts[3];
+    const activeInvestor2   = accounts[4];
+    const inactiveInvestor1 = accounts[5];
     const wallet            = accounts[6];
 
     // Provide icoTokenInstance for every test case
@@ -117,16 +117,33 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to set manager from unauthorized account', async () => {
         try {
-            await icoCrowdsaleInstance.setManager(activeManager, false, {from: investor1});
+            await icoCrowdsaleInstance.setManager(activeManager, false, {from: activeInvestor1});
             assert.fail('should have thrown before');
         } catch (e) {
             assertJump(e);
         }
     });
 
-    // it('should whitelist investor accounts', async () => {
+    it('should whitelist investor accounts', async () => {
+        const tx1 = await icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: owner});
+        const tx2 = await icoCrowdsaleInstance.whiteListInvestor(activeInvestor2, {from: activeManager});
 
-    // });
+        const whitelisted1 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
+        const whitelisted2 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor2);
+
+        assert.isTrue(whitelisted1, 'Investor1 should be whitelisted');
+        assert.isTrue(whitelisted2, 'Investor2 should be whitelisted');
+
+        // Testing events
+        const events1 = getEvents(tx1, 'ChangedInvestorWhitelisting');
+        const events2 = getEvents(tx2, 'ChangedInvestorWhitelisting');
+
+        assert.equal(events1[0].investor, activeInvestor1, 'Investor1 address doesn\'t match');
+        assert.isTrue(events1[0].whitelisted, true, 'Investor1 should be whitelisted');
+
+        assert.equal(events2[0].investor, activeInvestor2, 'Investor2 address doesn\'t match');
+        assert.isTrue(events2[0].whitelisted, true, 'Investor2 should be whitelisted');
+    });
 
     /**
      * [ Contribution period ]
