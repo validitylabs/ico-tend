@@ -4,6 +4,9 @@
  * yarn run dev
  * > test ./test/contracts/IcoToken.js
  */
+
+
+ // @ TODO: renamed in Solidity unclaimedDividend to getClaimableDividend (and hope that it works!!!)
 const IcoToken = artifacts.require('./IcoToken');
 
 import {waitNDays, getEvents, debug, BigNumber} from './helpers/tools'; // eslint-disable-line
@@ -419,25 +422,28 @@ contract('IcoToken', (accounts) => {
     // @TODO: transfer tokens and check if dividend is transferred as well
     // from tokenHolder1 (nothing claimed) to wathever
     // check if dividend is transferred as well
-    it.skip('should transfer tokens from tokenHolder1 to tokenHolder2 and check, if dividend is transferred as well', async () => {
+    it('should transfer tokens from tokenHolder1 to tokenHolder2 and check, if dividend is transferred as well', async () => {
         const tokenHolder1Balance1                  = await icoTokenInstance.balanceOf(tokenHolder1);
         const tokenHolder2Balance1                  = await icoTokenInstance.balanceOf(tokenHolder2);
         const tokenHolder1UnclaimedDividendBefore   = await icoTokenInstance.unclaimedDividend(tokenHolder1);
         const tokenHolder2UnclaimedDividendBefore   = await icoTokenInstance.unclaimedDividend(tokenHolder2);
 
-        debug(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
+        await debug(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
 
-        const tx = await icoTokenInstance.transfer(tokenHolder2, 5, {from: tokenHolder1});
+        const tx = await icoTokenInstance.transfer(tokenHolder2, 2, {from: tokenHolder1});
 
         const tokenHolder2Balance2                  = await icoTokenInstance.balanceOf(tokenHolder2);
         const tokenHolder1UnclaimedDividendAfter    = await icoTokenInstance.unclaimedDividend(tokenHolder1);
         const tokenHolder2UnclaimedDividendAfter    = await icoTokenInstance.unclaimedDividend(tokenHolder2);
 
+        console.log(tokenHolder1UnclaimedDividendBefore.toNumber(), tokenHolder2UnclaimedDividendBefore.toNumber());
+        console.log(tokenHolder1UnclaimedDividendAfter.toNumber(), tokenHolder2UnclaimedDividendAfter.toNumber());
+        
         // tokenHolder1UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder1UnclaimedDividendAfter);
         // tokenHolder2UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder2UnclaimedDividendAfter);
         // tokenHolder2Balance1.plus(tokenHolder1Balance1).should.be.bignumber.equal(tokenHolder2Balance2);
 
-        debug(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
+        await debug(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
 
         // Testing events
         const transferEvents = getEvents(tx, 'Transfer');
