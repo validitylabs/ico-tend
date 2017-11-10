@@ -68,7 +68,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         require(isManager[msg.sender]);
         address investor;
 
-        for (uint256 c; c < investors.length; c.add(1)) {
+        for (uint256 c; c < investors.length; c++) { // @FIXME: out of gas + block gas limit
             investor = investors[c]; // gas optimization
             isWhitelisted[investor] = true;
             ChangedInvestorWhitelisting(investor, true);
