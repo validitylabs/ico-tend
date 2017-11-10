@@ -5,8 +5,7 @@
  * > test ./test/contracts/IcoToken.js
  */
 
-
- // @ TODO: renamed in Solidity unclaimedDividend to getClaimableDividend (and hope that it works!!!)
+// @TODO: renamed in Solidity unclaimedDividend to getClaimableDividend(address hodler) (and hope that it works!!!)
 const IcoToken = artifacts.require('./IcoToken');
 
 import {waitNDays, getEvents, debug, BigNumber} from './helpers/tools'; // eslint-disable-line
@@ -438,7 +437,7 @@ contract('IcoToken', (accounts) => {
 
         console.log(tokenHolder1UnclaimedDividendBefore.toNumber(), tokenHolder2UnclaimedDividendBefore.toNumber());
         console.log(tokenHolder1UnclaimedDividendAfter.toNumber(), tokenHolder2UnclaimedDividendAfter.toNumber());
-        
+
         // tokenHolder1UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder1UnclaimedDividendAfter);
         // tokenHolder2UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder2UnclaimedDividendAfter);
         // tokenHolder2Balance1.plus(tokenHolder1Balance1).should.be.bignumber.equal(tokenHolder2Balance2);
