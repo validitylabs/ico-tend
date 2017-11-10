@@ -158,6 +158,34 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(events[0].whitelisted, 'inactiveInvestor1 should be blacklisted');
     });
 
+    it('should fail, because we try to whitelist investor from unauthorized account', async () => {
+        try {
+            await icoCrowdsaleInstance.whiteListInvestor(inactiveInvestor1, {from: activeInvestor2});
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to blacklist investor from unauthorized account', async () => {
+        try {
+            await icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: activeInvestor2});
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should verify the investor account states succesfully', async () => {
+        const whitelisted1  = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
+        const whitelisted2  = await icoCrowdsaleInstance.isWhitelisted(activeInvestor2);
+        const whitelisted3  = await icoCrowdsaleInstance.isWhitelisted(inactiveInvestor1);
+
+        assert.isTrue(whitelisted1, 'activeInvestor1 should be whitelisted');
+        assert.isTrue(whitelisted2, 'activeInvestor2 should be whitelisted');
+        assert.isFalse(whitelisted3, 'inactiveInvestor1 should be blacklisted');
+    });
+
     /**
      * [ Contribution period ]
      */
