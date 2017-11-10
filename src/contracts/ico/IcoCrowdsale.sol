@@ -57,8 +57,16 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     function whiteListInvestor(address investor) public {
         require(isManager[msg.sender]);
+
         isWhitelisted[investor] = true;
         ChangedInvestorWhitelisting(investor, true);
+    }
+
+    function blackListInvestor(address investor) public {
+        require(isManager[msg.sender]);
+
+        isWhitelisted[investor] = false;
+        ChangedInvestorWhitelisting(investor, false);
     }
 
     // override so that funds do not get forwarded to beneficiary wallet
@@ -68,6 +76,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     // extend core functionality by whitelist check
     function buyTokens(address beneficiary) public payable {
         require(isWhitelisted[msg.sender]);
+
         super.buyTokens(beneficiary);
     }
 }

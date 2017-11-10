@@ -139,10 +139,23 @@ contract('IcoCrowdsale', (accounts) => {
         const events2 = getEvents(tx2, 'ChangedInvestorWhitelisting');
 
         assert.equal(events1[0].investor, activeInvestor1, 'Investor1 address doesn\'t match');
-        assert.isTrue(events1[0].whitelisted, true, 'Investor1 should be whitelisted');
+        assert.isTrue(events1[0].whitelisted, 'Investor1 should be whitelisted');
 
         assert.equal(events2[0].investor, activeInvestor2, 'Investor2 address doesn\'t match');
-        assert.isTrue(events2[0].whitelisted, true, 'Investor2 should be whitelisted');
+        assert.isTrue(events2[0].whitelisted, 'Investor2 should be whitelisted');
+    });
+
+    it('should blacklist investor account', async () => {
+        const tx            = await icoCrowdsaleInstance.blackListInvestor(inactiveInvestor1, {from: owner});
+        const whitelisted   = await icoCrowdsaleInstance.isWhitelisted(inactiveInvestor1);
+
+        assert.isFalse(whitelisted, 'inactiveInvestor1 should be blacklisted');
+
+        // Testing events
+        const events = getEvents(tx, 'ChangedInvestorWhitelisting');
+
+        assert.equal(events[0].investor, inactiveInvestor1, 'inactiveInvestor1 address doesn\'t match');
+        assert.isFalse(events[0].whitelisted, 'inactiveInvestor1 should be blacklisted');
     });
 
     /**
