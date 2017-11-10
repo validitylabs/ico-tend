@@ -33,12 +33,14 @@ module.exports = {
             port: 9545,
             network_id: 4447,
             gasPrice: 1,
-            gas: 10000000000000
+            gas: 100000000000000000
         },
         coverage: {
             host: 'localhost',
             network_id: 4447,
-            port: 8555
+            port: 8555,
+            gasPrice: 1,
+            gas: 100000000000000000
             // ,
             // gas: 0xfffffffffff,
             // gasPrice: 0x01
