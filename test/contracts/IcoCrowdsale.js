@@ -29,6 +29,7 @@ contract('IcoCrowdsale', (accounts) => {
     const activeInvestor2   = accounts[4];
     const inactiveInvestor1 = accounts[5];
     const wallet            = accounts[6];
+    const beneficiary       = accounts[7];
 
     // Provide icoTokenInstance for every test case
     let icoCrowdsaleInstance;
@@ -186,9 +187,22 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(whitelisted3, 'inactiveInvestor1 should be blacklisted');
     });
 
+    it.skip('should buy tokens for beneficiary account with activeManager successfully', async () => {
+        const tx = await icoCrowdsaleInstance.buyTokens(
+            beneficiary,
+            {from: activeManager, value: web3.toWei(20, 'ether'), gas: 200000}
+        );
+
+        console.log(tx);
+    });
+
     /**
      * [ Contribution period ]
      */
+    // it('should turn the time 330 days forward to reclaim period', async () => {
+    //     console.log('[ Contribution period ]'.yellow);
+    //     // await waitNDays(330);
+    // });
 
     /**
      * [ Confirmation period ]

@@ -1,6 +1,8 @@
 /**
  * Test for IcoToken
- * @TODO: Write test.md -> describe procedure (it()) -> verboser nested <UL> mit asserts
+ *
+ * yarn run dev
+ * > test ./test/contracts/IcoToken.js
  */
 const IcoToken = artifacts.require('./IcoToken');
 
