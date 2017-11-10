@@ -110,7 +110,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function confirmPayment(uint256 investmentId) public {
         // @TODO: only within 30 days after contribution period is over
         require(isManager[msg.sender]);
-        
+
         investments[investmentId].confirmed = true;
     }
 
@@ -129,7 +129,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function unConfirmPayment(uint256 investmentId) public {
         // @TODO: only within 30 days after contribution period is over
         require(isManager[msg.sender]);
-        
+
         investments[investmentId].confirmed = false;
     }
 }

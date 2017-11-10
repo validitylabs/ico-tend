@@ -5,7 +5,6 @@
  * > test ./test/contracts/IcoToken.js
  */
 
-// @TODO: renamed in Solidity unclaimedDividend to getClaimableDividend(address hodler) (and hope that it works!!!)
 const IcoToken = artifacts.require('./IcoToken');
 
 import {waitNDays, getEvents, debug, BigNumber} from './helpers/tools'; // eslint-disable-line
@@ -220,7 +219,7 @@ contract('IcoToken', (accounts) => {
         const tx1 = await icoTokenInstance.claimDividend({from: tokenHolder1});
         const tx2 = await icoTokenInstance.claimDividend({from: tokenHolder2});
 
-        const unclaimedDividend = await icoTokenInstance.unclaimedDividend(tokenHolder1);
+        const unclaimedDividend = await icoTokenInstance.getClaimableDividend(tokenHolder1);
 
         const fundsTokenAfter   = web3.eth.getBalance(icoTokenInstance.address);
         const fundsHolder1After = web3.eth.getBalance(tokenHolder1);
@@ -257,14 +256,14 @@ contract('IcoToken', (accounts) => {
     it('should transfer token of tokenHolder1 to tokenHolder2 using the transfer method', async () => {
         const tokenHolder1Balance1                  = await icoTokenInstance.balanceOf(tokenHolder1);
         const tokenHolder2Balance1                  = await icoTokenInstance.balanceOf(tokenHolder2);
-        const tokenHolder1UnclaimedDividendBefore   = await icoTokenInstance.unclaimedDividend(tokenHolder1);
-        const tokenHolder2UnclaimedDividendBefore   = await icoTokenInstance.unclaimedDividend(tokenHolder2);
+        const tokenHolder1UnclaimedDividendBefore   = await icoTokenInstance.getClaimableDividend(tokenHolder1);
+        const tokenHolder2UnclaimedDividendBefore   = await icoTokenInstance.getClaimableDividend(tokenHolder2);
 
         const tx = await icoTokenInstance.transfer(tokenHolder2, 5, {from: tokenHolder1});
 
         const tokenHolder2Balance2                  = await icoTokenInstance.balanceOf(tokenHolder2);
-        const tokenHolder1UnclaimedDividendAfter    = await icoTokenInstance.unclaimedDividend(tokenHolder1);
-        const tokenHolder2UnclaimedDividendAfter    = await icoTokenInstance.unclaimedDividend(tokenHolder2);
+        const tokenHolder1UnclaimedDividendAfter    = await icoTokenInstance.getClaimableDividend(tokenHolder1);
+        const tokenHolder2UnclaimedDividendAfter    = await icoTokenInstance.getClaimableDividend(tokenHolder2);
 
         tokenHolder1UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder1UnclaimedDividendAfter);
         tokenHolder2UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder2UnclaimedDividendAfter);
@@ -351,7 +350,7 @@ contract('IcoToken', (accounts) => {
     });
 
     /**
-     * [ First dividend cycle is over, second is started ]
+     * [ First dividend cycle is over, second claim period is running ]
      */
 
     it('should turn the time 20 days forward', async () => {
@@ -395,7 +394,7 @@ contract('IcoToken', (accounts) => {
         const tx1 = await icoTokenInstance.claimDividend({from: tokenHolder3});
         const tx2 = await icoTokenInstance.claimDividend({from: tokenHolder2});
 
-        const unclaimedDividend = await icoTokenInstance.unclaimedDividend(tokenHolder3);
+        const unclaimedDividend = await icoTokenInstance.getClaimableDividend(tokenHolder3);
 
         const fundsTokenAfter   = web3.eth.getBalance(icoTokenInstance.address);
         const fundsHolder3After = web3.eth.getBalance(tokenHolder3);
