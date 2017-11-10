@@ -22,6 +22,17 @@ export async function waitNDays(days) {
 }
 
 /**
+ * Defines a EmptyStackException
+ *
+ * @param {string} message Exception message
+ * @returns {undefined}
+ */
+function EmptyStackException(message) {
+    this.message    = message;
+    this.name       = 'EmptyStackException';
+}
+
+/**
  * Get event from transaction
  *
  * @param {object} tx Transaction object
@@ -30,7 +41,6 @@ export async function waitNDays(days) {
  */
 export function getEvents(tx, event = null) {
     const stack = [];
-    // @TODO: throw if empty
 
     tx.logs.forEach((item) => {
         if (event) {
@@ -44,6 +54,10 @@ export function getEvents(tx, event = null) {
             stack[item.event].push(item.args);
         }
     });
+
+    if (Object.keys(stack).length === 0) {
+        throw new EmptyStackException('No Events fired');
+    }
 
     return stack;
 }
