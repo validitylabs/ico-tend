@@ -418,39 +418,19 @@ contract('IcoToken', (accounts) => {
             .plus(gas).should.be.bignumber.equal(fundsTokenBefore.minus(fundsTokenAfter));
     });
 
-    // @TODO: transfer tokens and check if dividend is transferred as well
-    // from tokenHolder1 (nothing claimed) to wathever
-    // check if dividend is transferred as well
     it('should transfer tokens from tokenHolder1 to tokenHolder2 and check, if dividend is transferred as well', async () => {
         const tokenHolder1Balance1                  = await icoTokenInstance.balanceOf(tokenHolder1);
         const tokenHolder2Balance1                  = await icoTokenInstance.balanceOf(tokenHolder2);
-        const tokenHolder1UnclaimedDividendBefore   = await icoTokenInstance.unclaimedDividend(tokenHolder1);
-        const tokenHolder2UnclaimedDividendBefore   = await icoTokenInstance.unclaimedDividend(tokenHolder2);
+        const tokenHolder1UnclaimedDividendBefore   = await icoTokenInstance.getClaimableDividend(tokenHolder1);
 
-        await debug(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
+        await icoTokenInstance.transfer(tokenHolder2, 2, {from: tokenHolder1});
 
-        const tx = await icoTokenInstance.transfer(tokenHolder2, 2, {from: tokenHolder1});
-
+        const tokenHolder1Balance2                  = await icoTokenInstance.balanceOf(tokenHolder1);
         const tokenHolder2Balance2                  = await icoTokenInstance.balanceOf(tokenHolder2);
-        const tokenHolder1UnclaimedDividendAfter    = await icoTokenInstance.unclaimedDividend(tokenHolder1);
-        const tokenHolder2UnclaimedDividendAfter    = await icoTokenInstance.unclaimedDividend(tokenHolder2);
+        const tokenHolder1UnclaimedDividendAfter    = await icoTokenInstance.getClaimableDividend(tokenHolder1);
+        const tokenHolder2UnclaimedDividendAfter    = await icoTokenInstance.getClaimableDividend(tokenHolder2);
 
-        console.log(tokenHolder1UnclaimedDividendBefore.toNumber(), tokenHolder2UnclaimedDividendBefore.toNumber());
-        console.log(tokenHolder1UnclaimedDividendAfter.toNumber(), tokenHolder2UnclaimedDividendAfter.toNumber());
-
-        // tokenHolder1UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder1UnclaimedDividendAfter);
-        // tokenHolder2UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder2UnclaimedDividendAfter);
-        // tokenHolder2Balance1.plus(tokenHolder1Balance1).should.be.bignumber.equal(tokenHolder2Balance2);
-
-        await debug(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1);
-
-        // Testing events
-        const transferEvents = getEvents(tx, 'Transfer');
-
-        console.log(transferEvents);
-
-        // assert.equal(transferEvents[0].from, tokenHolder1, 'Transfer event from address doesn\'t match against tokenHolder1 address');
-        // assert.equal(transferEvents[0].to, tokenHolder2, 'Transfer event to address doesn\'t match against tokenHolder2 address');
-        // transferEvents[0].value.should.be.bignumber.equal(5);
+        tokenHolder1UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder1UnclaimedDividendAfter.plus(tokenHolder2UnclaimedDividendAfter));
+        tokenHolder1Balance1.plus(tokenHolder2Balance1).should.be.bignumber.equal(tokenHolder1Balance2.plus(tokenHolder2Balance2));
     });
 });
