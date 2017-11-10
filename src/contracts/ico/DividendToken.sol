@@ -20,7 +20,7 @@ contract DividendToken is StandardToken, Ownable {
 
     uint256 public currentDividend;
 
-    mapping(address => uint256) public unclaimedDividend;
+    mapping(address => uint256) unclaimedDividend;
 
     // tracks when the dividend balance has been updated last time
     mapping(address => uint256) public lastUpdate;
@@ -100,6 +100,14 @@ contract DividendToken is StandardToken, Ownable {
         if (lastUpdate[hodler] < lastDividendIncreaseDate) {
             unclaimedDividend[hodler] = (currentDividend.mul(balanceOf(hodler))).div(totalSupply);
             lastUpdate[hodler] = now;
+        }
+    }
+
+    function getClaimableDividend(address hodler) public constant returns (uint256 claimableDividend) {
+        if (lastUpdate[hodler] < lastDividendIncreaseDate) {
+            return (currentDividend.mul(balanceOf(hodler))).div(totalSupply);
+        } else {
+            return (unclaimedDividend[hodler]);
         }
     }
 

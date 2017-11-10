@@ -22,6 +22,8 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     event ChangedInvestorWhitelisting(address investor, bool whitelisted);
 
+
+
     event ChangedManager(address manager, bool active);
 
     /**
@@ -62,7 +64,18 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         ChangedInvestorWhitelisting(investor, true);
     }
 
-    function blackListInvestor(address investor) public {
+    function batchWhiteListInvestors(address[] investors) public {
+        require(isManager[msg.sender]);
+        address investor;
+
+        for (uint256 c; c < investors.length; c.add(1)) {
+            investor = investors[c]; // gas optimization
+            isWhitelisted[investor] = true;
+            ChangedInvestorWhitelisting(investor, true);
+        }
+    }
+
+    function unWhiteListInvestor(address investor) public {
         require(isManager[msg.sender]);
 
         isWhitelisted[investor] = false;
@@ -73,10 +86,50 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     // sending funds happens after crowdsale is over and confirmation period is over
     function forwardFunds() internal {}
 
+    struct payment {
+        address investor;
+        address beneficiary;
+        uint256 amount;
+        bool confirmed;
+    }
+
+    payment[] public investments; // @TODO (Sebastian): or mapping better than array?
+
     // extend core functionality by whitelist check
     function buyTokens(address beneficiary) public payable {
+        // @TODO: (just in case) check we're in contribution period window (maybe use FinalizableCrowdsale???)
         require(isWhitelisted[msg.sender]);
 
+        // register payment so that later on it can be confirmed (and tokens issued and ethere paid out)
+        payment memory newPayment = payment(msg.sender, beneficiary, msg.value, false);
+        investments.push(newPayment);
+
         super.buyTokens(beneficiary);
+    }
+
+    function confirmPayment(uint256 investmentId) public {
+        // @TODO: only within 30 days after contribution period is over
+        require(isManager[msg.sender]);
+        
+        investments[investmentId].confirmed = true;
+    }
+
+    function batchConfirmPayments(uint256[] investmentIds) public {
+        require(isManager[msg.sender]);
+        uint256 investmentId;
+
+        for (uint256 c; c < investmentIds.length; c.add(1)) {
+            investmentId = investmentIds[c]; // gas optimization
+            investments[investmentId].confirmed = true;
+            // @TODO: add event similar to below:
+            //ChangedInvestorWhitelisting(investmentId, true);
+        }
+    }
+
+    function unConfirmPayment(uint256 investmentId) public {
+        // @TODO: only within 30 days after contribution period is over
+        require(isManager[msg.sender]);
+        
+        investments[investmentId].confirmed = false;
     }
 }
