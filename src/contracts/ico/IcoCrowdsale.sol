@@ -22,9 +22,15 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     event ChangedInvestorWhitelisting(address investor, bool whitelisted);
 
-
-
     event ChangedManager(address manager, bool active);
+
+    event ChangedInvestmentConfirmation(uint256 investmentId, address investor, bool confirmed);
+
+    uint256 public confirmationPeriod = 30 days;
+
+    uint256 public cap = 95000000 * 10**18; // @TODO: or pass in constructor?
+
+    uint256 public alreadyMinted = 0;       // already minted tokens (maximally = cap)
 
     /**
      * @dev Deploy capped ico crowdsale contract
@@ -95,12 +101,11 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     payment[] public investments; // @TODO (Sebastian): or mapping better than array?
 
-    // extend core functionality by whitelist check
+    // extend core functionality by whitelist check and registration of payment
     function buyTokens(address beneficiary) public payable {
-        // @TODO: (just in case) check we're in contribution period window (maybe use FinalizableCrowdsale???)
         require(isWhitelisted[msg.sender]);
 
-        // register payment so that later on it can be confirmed (and tokens issued and ethere paid out)
+        // register payment so that later on it can be confirmed (and tokens issued and Ether paid out)
         payment memory newPayment = payment(msg.sender, beneficiary, msg.value, false);
         investments.push(newPayment);
 
@@ -108,28 +113,48 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     }
 
     function confirmPayment(uint256 investmentId) public {
-        // @TODO: only within 30 days after contribution period is over
         require(isManager[msg.sender]);
+        require (now > endTime && now <= endTime.add(confirmationPeriod));
         
         investments[investmentId].confirmed = true;
+        ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, true);
     }
 
     function batchConfirmPayments(uint256[] investmentIds) public {
         require(isManager[msg.sender]);
+        require (now > endTime && now <= endTime.add(confirmationPeriod));
+
         uint256 investmentId;
 
         for (uint256 c; c < investmentIds.length; c.add(1)) {
             investmentId = investmentIds[c]; // gas optimization
             investments[investmentId].confirmed = true;
-            // @TODO: add event similar to below:
-            //ChangedInvestorWhitelisting(investmentId, true);
+            ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, true);
         }
     }
 
     function unConfirmPayment(uint256 investmentId) public {
-        // @TODO: only within 30 days after contribution period is over
         require(isManager[msg.sender]);
+        require (now > endTime && now <= endTime.add(confirmationPeriod));
         
         investments[investmentId].confirmed = false;
+        ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, false);
+    }
+
+    function mintTokenPreSale(address beneficiary, uint256 tokens) public onlyOwner {
+        // during pre-sale we can issue tokens for fiat or other contributions
+        // pre-sale ends with start of public sales round (accepting Ether)
+        require (now < startTime);
+
+        require (alreadyMinted.add(tokens) <= cap);
+
+        alreadyMinted = alreadyMinted.add(tokens);
+
+        token.mint(beneficiary, tokens);
+        TokenPurchase(msg.sender, beneficiary, 0, tokens);
+    }
+
+    function settleInvestment(uint256 investmentId) public {
+        
     }
 }
