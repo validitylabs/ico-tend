@@ -32,6 +32,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     uint256 public alreadyMinted = 0;       // already minted tokens (maximally = cap)
 
+    bool public confirmationPeriodOver = false;    // can be set by owner to finish confirmation in under 30 days
     /**
      * @dev Deploy capped ico crowdsale contract
      * @param _startTime uint256 Start time of the crowdsale
@@ -154,7 +155,11 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         TokenPurchase(msg.sender, beneficiary, 0, tokens);
     }
 
+    function finaliseContributionPeriod() public onlyOwner {
+        confirmationPeriodOver = true;
+    }
+    
     function settleInvestment(uint256 investmentId) public {
-        
+
     }
 }

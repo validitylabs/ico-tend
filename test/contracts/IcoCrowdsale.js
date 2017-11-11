@@ -146,17 +146,17 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isTrue(events2[0].whitelisted, 'Investor2 should be whitelisted');
     });
 
-    it('should blacklist investor account', async () => {
-        const tx            = await icoCrowdsaleInstance.blackListInvestor(inactiveInvestor1, {from: owner});
+    it('should unwhitelist investor account', async () => {
+        const tx            = await icoCrowdsaleInstance.unWhiteListInvestor(inactiveInvestor1, {from: owner});
         const whitelisted   = await icoCrowdsaleInstance.isWhitelisted(inactiveInvestor1);
 
-        assert.isFalse(whitelisted, 'inactiveInvestor1 should be blacklisted');
+        assert.isFalse(whitelisted, 'inactiveInvestor1 should be unwhitelisted');
 
         // Testing events
         const events = getEvents(tx, 'ChangedInvestorWhitelisting');
 
         assert.equal(events[0].investor, inactiveInvestor1, 'inactiveInvestor1 address doesn\'t match');
-        assert.isFalse(events[0].whitelisted, 'inactiveInvestor1 should be blacklisted');
+        assert.isFalse(events[0].whitelisted, 'inactiveInvestor1 should be unwhitelisted');
     });
 
     it('should fail, because we try to whitelist investor from unauthorized account', async () => {
@@ -168,13 +168,35 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    it('should fail, because we try to blacklist investor from unauthorized account', async () => {
+    it('should fail, because we try to unwhitelist investor from unauthorized account', async () => {
         try {
             await icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: activeInvestor2});
             assert.fail('should have thrown before');
         } catch (e) {
             assertJump(e);
         }
+    });
+
+    it('should whitelist 2 investors by batch function', async () => {
+        await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor1, {from: owner});
+        await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor2, {from: owner});
+
+        const tx = await icoCrowdsaleInstance.batchWhiteListInvestors([activeInvestor1, activeInvestor2], {from: owner});
+
+        const whitelisted1  = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
+        const whitelisted2  = await icoCrowdsaleInstance.isWhitelisted(activeInvestor2);
+
+        assert.isTrue(whitelisted1, 'activeInvestor1 should be whitelisted');
+        assert.isTrue(whitelisted2, 'activeInvestor2 should be whitelisted');
+
+        // Testing events
+        const events = getEvents(tx, 'ChangedInvestorWhitelisting');
+
+        assert.equal(events[0].investor, activeInvestor1, 'Investor1 address doesn\'t match');
+        assert.isTrue(events[0].whitelisted, 'Investor1 should be whitelisted');
+
+        assert.equal(events[1].investor, activeInvestor2, 'Investor2 address doesn\'t match');
+        assert.isTrue(events[1].whitelisted, 'Investor2 should be whitelisted');
     });
 
     it('should verify the investor account states succesfully', async () => {
@@ -184,16 +206,7 @@ contract('IcoCrowdsale', (accounts) => {
 
         assert.isTrue(whitelisted1, 'activeInvestor1 should be whitelisted');
         assert.isTrue(whitelisted2, 'activeInvestor2 should be whitelisted');
-        assert.isFalse(whitelisted3, 'inactiveInvestor1 should be blacklisted');
-    });
-
-    it.skip('should buy tokens for beneficiary account with activeManager successfully', async () => {
-        const tx = await icoCrowdsaleInstance.buyTokens(
-            beneficiary,
-            {from: activeManager, value: web3.toWei(20, 'ether'), gas: 200000}
-        );
-
-        console.log(tx);
+        assert.isFalse(whitelisted3, 'inactiveInvestor1 should be unwhitelisted');
     });
 
     /**
