@@ -307,19 +307,20 @@ contract('IcoCrowdsale', (accounts) => {
         await waitNDays(35);
     });
 
-    it.skip('should buyTokens properly', async () => {
-        const ratio = await icoCrowdsaleInstance.weiPerChf();
-        console.log(ratio.toNumber());
-        console.log(await icoCrowdsaleInstance.isOverMinimum(ratio));
-
-        const tx = await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: activeInvestor2, gas: 1000000, value: web3.toWei(2, 'ether')});
-        console.log(tx);
+    // test ./test/contracts/IcoCrowdsale.js
+    it('should buyTokens properly', async () => {
+        const tx = await icoCrowdsaleInstance.buyTokens(
+            activeInvestor1,
+            {from: activeInvestor2, gas: 1000000, value: web3.toWei(2, 'ether')}
+        );
 
         // @TODO: write test
 
         // Testing events
-        // const events = getEvents(tx);
-        // console.log(events);
+        // TokenPurchase(msg.sender, beneficiary, weiAmount, 0);
+
+        const events = getEvents(tx, 'TokenPurchase');
+        console.log(events);
     });
 
     it('should fail, because we try to trigger buyTokens as unwhitelisted investor', async () => {
@@ -409,18 +410,15 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    it('should fail, because we try to trigger confirmPayment in Confirmation period', async () => {
-        try {
-            await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+    it('should trigger confirmPayment successfully', async () => {
+        await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000});
+        // @TODO: write test
     });
 
     it.skip('should run batchConfirmPayments() successfully', async () => {
         const tx = await icoCrowdsaleInstance.batchConfirmPayments([0, 1, 2, 3, 4], {from: activeManager, gas: 1000000});
+
+        // @TODO: write test
 
         console.log(tx);
     });
@@ -428,22 +426,14 @@ contract('IcoCrowdsale', (accounts) => {
     it.skip('should run unConfirmPayment() successfully', async () => {
         const tx = await icoCrowdsaleInstance.unConfirmPayment(2, {from: activeManager, gas: 1000000});
 
+        // @TODO: write test
+
         console.log(tx);
     });
 
     it('should fail, because we try to trigger batchConfirmPayments with non manager account', async () => {
         try {
             await icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: inactiveManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
-    });
-
-    it('should fail, because we try to trigger unConfirmPayment in Confirmation period', async () => {
-        try {
-            await icoCrowdsaleInstance.unConfirmPayment(0, {from: activeManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {

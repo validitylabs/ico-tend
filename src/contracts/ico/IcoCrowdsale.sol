@@ -91,10 +91,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         confirmationPeriod = _confirmationPeriodDays * 1 days;
     }
 
-    function isOverMinimum(uint256 value) public constant returns (bool) {
-        return value.div(weiPerChf) >= 500;
-    }
-
     /**
      * @dev Create new instance of ico token contract
      */
@@ -158,11 +154,10 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     // extend base functionality with min investment amount
     function validPurchase() internal constant returns (bool) {
-
         // minimal investment: 500 CHF
         require (msg.value.div(weiPerChf) >= 500);
 
-        super.validPurchase();
+        return super.validPurchase();
     }
 
     function confirmPayment(uint256 investmentId) public {
