@@ -25,28 +25,69 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     event ChangedInvestmentConfirmation(uint256 investmentId, address investor, bool confirmed);
 
-    uint256 public confirmationPeriod = 0 days;
+    uint256 public confirmationPeriod;
 
     uint256 public cap;
 
-    uint256 public alreadyMinted = 0;           // already minted tokens (maximally = cap)
+    uint256 public alreadyMinted;           // already minted tokens (maximally = cap)
 
-    bool public confirmationPeriodOver = false; // can be set by owner to finish confirmation in under 30 days
+    bool public confirmationPeriodOver; // can be set by owner to finish confirmation in under 30 days
+
+    uint256 public WeiPerChf;
+
+    uint256 public investmentIdLastAttemptedToSettle;
+
+    struct Payment {
+        address investor;
+        address beneficiary;
+        uint256 amount;
+        bool confirmed;
+        bool attemptedSettlement;
+        bool completedSettlement;
+    }
+
+    Payment[] public investments;
+
+     /*
+     tokenUnitsPerWei = 10 ** uint256(decimals) * tokenPerChf / WeiPerChf
+
+     e.g.: 1ETH = 300 CHF -> 1e18 Wei = 300 CHF -> 1CHF = 3.3 e15 Wei
+     --> WeiPerChf = 3.3 e15
+     --> tokenPerChf = 1
+
+     10 ** 18 * 1 / 3.3e15
+     = 303 tokens / wei
+
+     alternative example (200 CHF / ETH):
+     10 ** 18 * 1 / 5e15
+     = 200;
+     */
+
     /**
      * @dev Deploy capped ico crowdsale contract
      * @param _startTime uint256 Start time of the crowdsale
      * @param _endTime uint256 End time of the crowdsale
-     * @param _rate uint256 Rate of crowdsale
+     * @param _rateTokenPerChf uint256 issueing rate tokens per CHF
+     * @param _rateWeiPerChf uint256 exchange rate Wei per CHF
      * @param _wallet address Wallet address of the crowdsale
      * @param _cap uint256 Crowdsale cap
      * @param _confirmationPeriodDays uint256 Confirmation period in days
      */
-    function IcoCrowdsale(uint256 _startTime, uint256 _endTime, uint256 _rate, address _wallet, uint256 _cap, uint256 _confirmationPeriodDays)
+    function IcoCrowdsale(
+        uint256 _startTime,
+        uint256 _endTime,
+        uint256 _rateTokenPerChf,
+        uint256 _rateWeiPerChf,
+        address _wallet,
+        uint256 _cap,
+        uint256 _confirmationPeriodDays
+    )
         public
-        Crowdsale(_startTime, _endTime, _rate, _wallet)
+        Crowdsale(_startTime, _endTime, (10 ** uint256(18)).mul(_rateTokenPerChf).div(_rateWeiPerChf), _wallet)
     {
         setManager(msg.sender, true);
         cap = _cap;
+        WeiPerChf = _rateWeiPerChf;
         confirmationPeriod = _confirmationPeriodDays * 1 days;
     }
 
@@ -93,28 +134,31 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         ChangedInvestorWhitelisting(investor, false);
     }
 
-    // override so that funds do not get forwarded to beneficiary wallet
-    // sending funds happens after crowdsale is over and confirmation period is over
-    function forwardFunds() internal {}
-
-    struct Payment {
-        address investor;
-        address beneficiary;
-        uint256 amount;
-        bool confirmed;
-    }
-
-    Payment[] public investments; // @TODO (Sebastian): or mapping better than array?
-
-    // extend core functionality by whitelist check and registration of payment
+    // override (not extend! because we only issues tokens after final KYC confirm phase)
+    // core functionality by whitelist check and registration of payment
     function buyTokens(address beneficiary) public payable {
+        require(beneficiary != 0x0);
+        require(validPurchase());
         require(isWhitelisted[msg.sender]);
 
-        // register payment so that later on it can be confirmed (and tokens issued and Ether paid out)
-        Payment memory newPayment = Payment(msg.sender, beneficiary, msg.value, false);
-        investments.push(newPayment);
+        uint256 weiAmount = msg.value;
 
-        super.buyTokens(beneficiary);
+        weiRaised = weiRaised.add(weiAmount);
+
+        TokenPurchase(msg.sender, beneficiary, weiAmount, 0);
+
+        // register payment so that later on it can be confirmed (and tokens issued and Ether paid out)
+        Payment memory newPayment = Payment(msg.sender, beneficiary, weiRaised, false, false, false);
+        investments.push(newPayment);
+    }
+
+    // extend base functionality with min investment amount
+    function validPurchase() internal constant returns (bool) {
+        
+        // minimal investment: 500 CHF
+        require (msg.value.div(WeiPerChf) >= 500);
+
+        super.validPurchase();
     }
 
     function confirmPayment(uint256 investmentId) public {
@@ -158,11 +202,54 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         TokenPurchase(msg.sender, beneficiary, 0, tokens);
     }
 
-    function finaliseContributionPeriod() public onlyOwner {
+    function finaliseConfirmationPeriod() public onlyOwner {
         confirmationPeriodOver = true;
     }
 
     function settleInvestment(uint256 investmentId) public {
+        // only possible after confirmationPeriodOver has been manually set OR after time is over
+        require(confirmationPeriodOver || now > startTime.add(confirmationPeriod));
 
+        // investments have to be processed in right order
+        // unless we're at first investment, the previous has needs to have undergone an attempted settlement
+        Payment storage p = investments[investmentId];
+        require(investmentId == 0 || investments[investmentId.sub(1)].attemptedSettlement);
+
+        p.attemptedSettlement = true;
+
+        // just so that we can see which one we attempted last time and can continue with next
+        investmentIdLastAttemptedToSettle = investmentId;
+
+        if (p.confirmed) {
+            // if confirmed -> issue tokens, send ETH to wallet and complete settlement
+
+            // calculate number of tokens to be issued to investor
+            uint256 tokens = p.amount.mul(rate);
+            
+            // mint tokens for investor
+            token.mint(p.beneficiary, tokens);
+
+            // send Ether to project wallet
+            // throws if wallet throws
+            wallet.transfer(p.amount);
+
+            p.completedSettlement = true;
+        } else {
+            // if not confirmed -> reimburse ETH
+
+            // only complete settlement if investor got their money back 
+            // (does not throw (as .transfer would)
+            // otherwise we would block settlement process of all following investments)
+            if (p.investor.send(p.amount)) {
+                p.completedSettlement = true;
+            }
+        }
     }
+
+    function batchSettleInvestments(uint256[] investmentIds) public {
+        for (uint256 c; c < investmentIds.length; c = c.add(1)) {
+            settleInvestment(investmentIds[c]);
+        }
+    }
+
 }
