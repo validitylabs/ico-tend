@@ -4,16 +4,10 @@
  * yarn run dev
  * > test ./test/contracts/IcoCrowdsale.js
  */
-
-// @TODO: Helper Zeppeling test -> setToTime
-// startTime
-// einamlig oben setzen: export function increaseTimeTo(dts from xmas) {
-// @TODO: Test PausedToken -> Zeppelin
-
 const IcoCrowdsale = artifacts.require('./IcoCrowdsale');
 
 import {startTime, endTime, rateEthPerToken} from '../../ico.cnf.json';
-import {waitNDays, getEvents, debug, BigNumber, cnf} from './helpers/tools'; // eslint-disable-line
+import {waitNDays, getEvents, debug, BigNumber, cnf, increaseTimeTo, duration} from './helpers/tools'; // eslint-disable-line
 
 const moment        = require('moment'); // eslint-disable-line
 const assertJump    = require('../../node_modules/zeppelin-solidity/test/helpers/assertJump');
@@ -47,6 +41,9 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should instantiate the ICO crowdsale correctly', async () => {
         console.log('[ Pre contribution period ]'.yellow);
+
+        // Set DTS to 2017-12-24T00:00:00Z CET
+        await increaseTimeTo(1514113200);
 
         const _startTime            = await icoCrowdsaleInstance.startTime();
         const _endTime              = await icoCrowdsaleInstance.endTime();
@@ -262,7 +259,7 @@ contract('IcoCrowdsale', (accounts) => {
      */
     // it('should turn the time 30 days forward to reclaim period', async () => {
     //     console.log('[ Contribution period ]'.yellow);
-    //     // await waitNDays(30);
+    //     // await waitNDays(35);
     // });
 
     // @TODO: buyTokens(investor1, {from: investor2}) // -> investor2 kauft für investor1 tokens
@@ -276,6 +273,11 @@ contract('IcoCrowdsale', (accounts) => {
     /**
      * [ Confirmation period ]
      */
+    // it('should turn the time 30 days forward to reclaim period', async () => {
+    //     console.log('[ Contribution period ]'.yellow);
+    //     // await waitNDays(10);
+    // });
+
     // @TODO: await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3, {from: activeManager});
     // @TODO: confirmPayment(uint256 investmentId)
     // @TODO: batchConfirmPayments(uint256[] investmentIds)
@@ -289,6 +291,10 @@ contract('IcoCrowdsale', (accounts) => {
     /**
      * [ Confirmation period over ]
      */
+    // it('should turn the time 30 days forward to reclaim period', async () => {
+    //     console.log('[ Contribution period ]'.yellow);
+    //     // await waitNDays(30);
+    // });
     // @TODO: failtest: confirmPayment(uint256 investmentId)
     // @TODO: failtest: batchConfirmPayments(uint256[] investmentIds)
     // @TODO: failtest: unConfirmPayment(uint256 investmentId)

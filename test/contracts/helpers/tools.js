@@ -1,9 +1,18 @@
+require('babel-register');
+require('babel-polyfill');
+
+import {increaseTimeTo, duration} from './increaseTime';
+export {increaseTimeTo, duration};
+
 /**
  * @const BigNumber Pointer to web3.BigNumber
  */
 const BigNumber = web3.BigNumber;
 export {BigNumber};
 
+/**
+ * @const cnf Static config from JSON file
+ */
 const cnf = require('../../../ico.cnf.json');
 export {cnf};
 
