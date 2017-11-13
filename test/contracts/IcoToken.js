@@ -49,6 +49,16 @@ contract('IcoToken', (accounts) => {
         assert.isTrue(isOwnerTreasurer, 'Owner is not a treasurer');
     });
 
+    it('should unpause ICO token correctly', async () => {
+        const tx = await icoTokenInstance.unpause({from: owner});
+
+        // Testing event
+        const events = getEvents(tx, 'Unpause');
+
+        assert.isArray(events, 'Events expected to be an array');
+        assert.equal(events.length, 1, 'Events length expected to have a length of 1');
+    });
+
     it('should add treasurer accounts', async () => {
         const tx1 = await icoTokenInstance.setTreasurer(activeTreasurer1, true);
         const tx2 = await icoTokenInstance.setTreasurer(activeTreasurer2, true);
