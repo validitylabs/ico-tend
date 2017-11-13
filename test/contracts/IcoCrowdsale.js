@@ -5,6 +5,12 @@
  * > test ./test/contracts/IcoCrowdsale.js
  */
 
+// @TODO: use zeppelin helper directly
+// @TODO: Helper Zeppeling test -> setToTime
+// startTime
+// einamlig oben setzen: export function increaseTimeTo(dts from xmas) {
+// @TODO: Test PausedToken -> Zeppelin
+
 const IcoCrowdsale = artifacts.require('./IcoCrowdsale');
 
 import {startTime, endTime, rateEthPerToken} from '../../ico.cnf.json';
@@ -29,7 +35,6 @@ contract('IcoCrowdsale', (accounts) => {
     const activeInvestor2   = accounts[4];
     const inactiveInvestor1 = accounts[5];
     const wallet            = accounts[6];
-    const beneficiary       = accounts[7];
 
     // Provide icoTokenInstance for every test case
     let icoCrowdsaleInstance;
@@ -214,19 +219,74 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(whitelisted3, 'inactiveInvestor1 should be unwhitelisted');
     });
 
+    it('should fail, because we try to mint tokens for presale with a non owner account', async () => {
+        try {
+            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1, {from: activeManager});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to mint tokens more as cap limit allows', async () => {
+        try {
+            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, (cnf.cap + 1), {from: activeManager});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    // @TODO: negativ test: buyTokens(investor1, {from: investor2}) // -> investor2 kauft für investor1 tokens
+    // @TODO: negativ test: test fallback function
+
+    // it('should mint tokens for presale as owner', async () => {
+    //     const tx1 = await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 10, {from: owner});
+    //     const tx2 = await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor2, 5, {from: owner});
+
+    //     // TokenPurchase(msg.sender, beneficiary, 0, tokens);
+    //     // Testing events
+    //     const events1 = getEvents(tx1, 'TokenPurchase');
+    //     const events2 = getEvents(tx2, 'TokenPurchase');
+
+    //     console.log(events1);
+    // });
+
     /**
      * [ Contribution period ]
      */
-    // it('should turn the time 330 days forward to reclaim period', async () => {
+    // it('should turn the time 30 days forward to reclaim period', async () => {
     //     console.log('[ Contribution period ]'.yellow);
-    //     // await waitNDays(330);
+    //     // await waitNDays(30);
     // });
+
+    // @TODO: buyTokens(investor1, {from: investor2}) // -> investor2 kauft für investor1 tokens
+    // @TODO: test fallback function
+    // @TODO: failtest: await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3, {from: activeManager});
+    // @TODO: failtest: confirmPayment(uint256 investmentId)
+    // @TODO: failtest: batchConfirmPayments(uint256[] investmentIds)
+    // @TODO: failtest: unConfirmPayment(uint256 investmentId)
+    // @TODO: whitelist / unwhitelist investor
 
     /**
      * [ Confirmation period ]
      */
+    // @TODO: await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3, {from: activeManager});
+    // @TODO: confirmPayment(uint256 investmentId)
+    // @TODO: batchConfirmPayments(uint256[] investmentIds)
+    // @TODO: unConfirmPayment(uint256 investmentId)
+    // @TODO: whitelist / unwhitelist investor
 
     // it('should do something', async () => {
 
     // });
+
+    /**
+     * [ Confirmation period over ]
+     */
+    // @TODO: failtest: confirmPayment(uint256 investmentId)
+    // @TODO: failtest: batchConfirmPayments(uint256[] investmentIds)
+    // @TODO: failtest: unConfirmPayment(uint256 investmentId)
 });
