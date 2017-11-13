@@ -49,6 +49,16 @@ contract('IcoToken', (accounts) => {
         assert.isTrue(isOwnerTreasurer, 'Owner is not a treasurer');
     });
 
+    it('should fail, because we try to transfer on a paused contract', async () => {
+        try {
+            await icoTokenInstance.transfer(tokenHolder2, 1, {from: tokenHolder1});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
     it('should unpause ICO token correctly', async () => {
         const tx = await icoTokenInstance.unpause({from: owner});
 
