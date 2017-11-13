@@ -381,7 +381,7 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    it('should fail, because we try to trigger unConfirmPayment with non manager accoutn', async () => {
+    it('should fail, because we try to trigger unConfirmPayment with non manager account', async () => {
         try {
             await icoCrowdsaleInstance.unConfirmPayment(0, {from: inactiveManager, gas: 1000000});
 
@@ -419,10 +419,17 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    // @TODO: confirmBatchPayment success
-    // mit den IDs 0 1 2 3 4 für später
+    it.skip('should run batchConfirmPayments() successfully', async () => {
+        const tx = await icoCrowdsaleInstance.batchConfirmPayments([0, 1, 2, 3, 4], {from: activeManager, gas: 1000000});
 
-    //@TODO: unconfirm 2 success
+        console.log(tx);
+    });
+
+    it.skip('should run unConfirmPayment() successfully', async () => {
+        const tx = await icoCrowdsaleInstance.unConfirmPayment(2, {from: activeManager, gas: 1000000});
+
+        console.log(tx);
+    });
 
     it('should fail, because we try to trigger batchConfirmPayments with non manager account', async () => {
         try {
