@@ -579,5 +579,12 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     // @TODO: settleInvestment(uint256 investmentId) -> check investments from fallback test
+    it.skip('should run settleInvestment successfully', async () => {
+
+    });
+
     // @TODO: settleBatchInvestment(uint256 investmentId)
+    it.skip('should run settleBatchInvestment successfully', async () => {
+
+    });
 });
