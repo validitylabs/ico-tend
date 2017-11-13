@@ -38,14 +38,16 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      * @param _endTime uint256 End time of the crowdsale
      * @param _rate uint256 Rate of crowdsale
      * @param _wallet address Wallet address of the crowdsale
+     * @param _cap uint256 Crowdsale cap
+     * @param _confirmationPeriodDays uint256 Confirmation period in days
      */
-    function IcoCrowdsale(uint256 _startTime, uint256 _endTime, uint256 _rate, address _wallet, uint256 _cap, uint256 _confirmationPeriod)
+    function IcoCrowdsale(uint256 _startTime, uint256 _endTime, uint256 _rate, address _wallet, uint256 _cap, uint256 _confirmationPeriodDays)
         public
         Crowdsale(_startTime, _endTime, _rate, _wallet)
     {
         setManager(msg.sender, true);
         cap = _cap;
-        confirmationPeriod = _confirmationPeriod; // @TODO: ok?
+        confirmationPeriod = _confirmationPeriodDays * 1 days;
     }
 
     /**
