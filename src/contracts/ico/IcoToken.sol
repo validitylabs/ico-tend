@@ -14,12 +14,11 @@ contract IcoToken is DividendToken, MintableToken, PausableToken {
     string public constant symbol = "TND";
     uint8 public constant decimals = 18;
 
-    // DividendToken public dividendToken;
-
     /**
      * @dev Constructor of IcoToken that instantiate a new DividendToken
      */
     function IcoToken() public DividendToken(msg.sender) {
-        paused = true; // token should not be transferrable until after all tokens have been issued
+        // token should not be transferrable until after all tokens have been issued
+        paused = true;
     }
 }
