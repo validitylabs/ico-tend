@@ -74,6 +74,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     function batchWhiteListInvestors(address[] investors) public {
         require(isManager[msg.sender]);
+
         address investor;
 
         for (uint256 c; c < investors.length; c = c.add(1)) {
@@ -116,7 +117,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     function confirmPayment(uint256 investmentId) public {
         require(isManager[msg.sender]);
-        require (now > endTime && now <= endTime.add(confirmationPeriod));
+        require(now > endTime && now <= endTime.add(confirmationPeriod));
 
         investments[investmentId].confirmed = true;
         ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, true);
@@ -124,7 +125,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     function batchConfirmPayments(uint256[] investmentIds) public {
         require(isManager[msg.sender]);
-        require (now > endTime && now <= endTime.add(confirmationPeriod));
+        require(now > endTime && now <= endTime.add(confirmationPeriod));
 
         uint256 investmentId;
 
@@ -137,7 +138,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     function unConfirmPayment(uint256 investmentId) public {
         require(isManager[msg.sender]);
-        require (now > endTime && now <= endTime.add(confirmationPeriod));
+        require(now > endTime && now <= endTime.add(confirmationPeriod));
 
         investments[investmentId].confirmed = false;
         ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, false);
@@ -146,9 +147,8 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function mintTokenPreSale(address beneficiary, uint256 tokens) public onlyOwner {
         // during pre-sale we can issue tokens for fiat or other contributions
         // pre-sale ends with start of public sales round (accepting Ether)
-        require (now < startTime);
-
-        require (alreadyMinted.add(tokens) <= cap);
+        require(now < startTime);
+        require(alreadyMinted.add(tokens) <= cap);
 
         alreadyMinted = alreadyMinted.add(tokens);
 
