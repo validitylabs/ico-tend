@@ -456,26 +456,78 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    // test ./test/contracts/IcoCrowdsale.js
     it('should trigger confirmPayment successfully', async () => {
-        await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000});
-        // @TODO: write test
+        const tx        = await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000});
+        const events    = getEvents(tx, 'ChangedInvestmentConfirmation');
+
+        assert.equal(events[0].investmentId, 0);
+        assert.equal(events[0].investor, activeInvestor2); // @TODO: ok?
+        assert.isTrue(events[0].confirmed);
     });
 
-    it.skip('should run batchConfirmPayments() successfully', async () => {
-        const tx = await icoCrowdsaleInstance.batchConfirmPayments([0, 1, 2, 3, 4], {from: activeManager, gas: 1000000});
+    it('should run batchConfirmPayments() successfully', async () => {
+        const tx = await icoCrowdsaleInstance.batchConfirmPayments(
+            [0, 1, 2, 3, 4],
+            {from: activeManager, gas: 1000000}
+        );
 
-        // @TODO: write test
+        const events = getEvents(tx, 'ChangedInvestmentConfirmation');
 
-        console.log(tx);
+        assert.equal(events[0].investmentId, 0);
+        assert.equal(events[0].investor, activeInvestor2);
+        assert.isTrue(events[0].confirmed);
+
+        assert.equal(events[1].investmentId, 1);
+        assert.equal(events[1].investor, activeInvestor1);
+        assert.isTrue(events[1].confirmed);
+
+        assert.equal(events[2].investmentId, 2);
+        assert.equal(events[2].investor, activeInvestor1);
+        assert.isTrue(events[2].confirmed);
+
+        assert.equal(events[3].investmentId, 3);
+        assert.equal(events[3].investor, activeInvestor2);
+        assert.isTrue(events[3].confirmed);
+
+        assert.equal(events[4].investmentId, 4);
+        assert.equal(events[4].investor, activeInvestor1);
+        assert.isTrue(events[4].confirmed);
+
+        // console.log(events);
+        // @TODO: check correctness of investor addresses
+        // activeInvestor2
+        //     [ { investmentId: BigNumber { s: 1, e: 0, c: [Array] },
+        //     investor: '0x0d1d4e623d10f9fba5db95830f7d3839406c6af2',
+        //     confirmed: true },
+
+        // activeInvestor1
+        //   { investmentId: BigNumber { s: 1, e: 0, c: [Array] },
+        //     investor: '0x821aea9a577a9b44299b9c15c88cf3087f3b5544',
+        //     confirmed: true },
+
+        // activeInvestor1
+        //   { investmentId: BigNumber { s: 1, e: 0, c: [Array] },
+        //     investor: '0x821aea9a577a9b44299b9c15c88cf3087f3b5544',
+        //     confirmed: true },
+
+        // activeInvestor2
+        //   { investmentId: BigNumber { s: 1, e: 0, c: [Array] },
+        //     investor: '0x0d1d4e623d10f9fba5db95830f7d3839406c6af2',
+        //     confirmed: true },
+
+        // activeInvestor1
+        //   { investmentId: BigNumber { s: 1, e: 0, c: [Array] },
+        //     investor: '0x821aea9a577a9b44299b9c15c88cf3087f3b5544',
+        //     confirmed: true } ]
     });
 
-    it.skip('should run unConfirmPayment() successfully', async () => {
-        const tx = await icoCrowdsaleInstance.unConfirmPayment(2, {from: activeManager, gas: 1000000});
+    it('should run unConfirmPayment() successfully', async () => {
+        const tx        = await icoCrowdsaleInstance.unConfirmPayment(2, {from: activeManager, gas: 1000000});
+        const events    = getEvents(tx, 'ChangedInvestmentConfirmation');
 
-        // @TODO: write test
-
-        console.log(tx);
+        assert.equal(events[0].investmentId, 2);
+        assert.equal(events[0].investor, activeInvestor1);
+        assert.isFalse(events[0].confirmed);
     });
 
     it('should fail, because we try to trigger batchConfirmPayments with non manager account', async () => {
