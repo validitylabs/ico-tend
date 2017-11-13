@@ -36,9 +36,8 @@ contract('IcoCrowdsale', (accounts) => {
 
     beforeEach(async () => {
         icoCrowdsaleInstance    = await IcoCrowdsale.deployed();
-        icoTokenInstance        = await IcoToken.deployed();
-        // icoTokenAddress         = await icoCrowdsaleInstance.icoToken();
-        // icoTokenInstance        = await IcoToken.at(icoTokenAddress);
+        const icoTokenAddress   = await icoCrowdsaleInstance.token();
+        icoTokenInstance        = await IcoToken.at(icoTokenAddress);
     });
 
     /**
@@ -269,9 +268,15 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    it.skip('should mint tokens for presale as owner', async () => {
-        const activeInvestor1Balance1 = await icoTokenInstance.balanceOf(activeInvestor1);
-        const activeInvestor2Balance1 = await icoTokenInstance.balanceOf(activeInvestor2);
+    it('should mint tokens for presale as owner', async () => {
+        const activeInvestor1Balance1   = await icoTokenInstance.balanceOf(activeInvestor1);
+        const activeInvestor2Balance1   = await icoTokenInstance.balanceOf(activeInvestor2);
+        const zero                      = new BigNumber(0);
+        const ten                       = new BigNumber(10);
+        const five                      = new BigNumber(5);
+
+        activeInvestor1Balance1.should.be.bignumber.equal(zero);
+        activeInvestor2Balance1.should.be.bignumber.equal(zero);
 
         const tx1 = await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 10);
         const tx2 = await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor2, 5);
@@ -279,34 +284,137 @@ contract('IcoCrowdsale', (accounts) => {
         const activeInvestor1Balance2 = await icoTokenInstance.balanceOf(activeInvestor1);
         const activeInvestor2Balance2 = await icoTokenInstance.balanceOf(activeInvestor2);
 
-        console.log(activeInvestor1Balance1.toNumber(), activeInvestor1Balance2.toNumber()); // 0 0
-        console.log(activeInvestor2Balance1.toNumber(), activeInvestor2Balance2.toNumber()); // 0 0
+        activeInvestor1Balance2.should.be.bignumber.equal(ten);
+        activeInvestor2Balance2.should.be.bignumber.equal(five);
 
-        // TokenPurchase(msg.sender, beneficiary, 0, tokens);
         // Testing events
         const events1 = getEvents(tx1, 'TokenPurchase');
         const events2 = getEvents(tx2, 'TokenPurchase');
 
-        console.log(events1);
-    });
+        assert.equal(events1[0].purchaser, owner, '');
+        assert.equal(events2[0].purchaser, owner, '');
 
-    // test ./test/contracts/IcoCrowdsale.js
+        assert.equal(events1[0].beneficiary, activeInvestor1, '');
+        assert.equal(events2[0].beneficiary, activeInvestor2, '');
+
+        events1[0].value.should.be.bignumber.equal(zero);
+        events1[0].amount.should.be.bignumber.equal(ten);
+
+        events2[0].value.should.be.bignumber.equal(zero);
+        events2[0].amount.should.be.bignumber.equal(five);
+    });
 
     /**
      * [ Contribution period ]
      */
-    // it('should turn the time 30 days forward to reclaim period', async () => {
-    //     console.log('[ Contribution period ]'.yellow);
-    //     // await waitNDays(35);
-    // });
+    it('should turn the time 35 days forward to contribution period', async () => {
+        console.log('[ Contribution period ]'.yellow);
+        await waitNDays(35);
+    });
 
-    // @TODO: buyTokens(investor1, {from: investor2}) // -> investor2 kauft für investor1 tokens
-    // @TODO: test fallback function
-    // @TODO: failtest: await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3, {from: activeManager});
-    // @TODO: failtest: confirmPayment(uint256 investmentId)
-    // @TODO: failtest: batchConfirmPayments(uint256[] investmentIds)
-    // @TODO: failtest: unConfirmPayment(uint256 investmentId)
-    // @TODO: whitelist / unwhitelist investor
+    // @FIXME: Error: VM Exception while processing transaction: invalid opcode
+    // test ./test/contracts/IcoCrowdsale.js
+    it.skip('should buyTokens properly', async () => {
+        const tx = await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: activeInvestor2});
+
+        console.log(tx);
+
+        // Testing events
+        // const events = getEvents(tx);
+        // console.log(events);
+    });
+
+    it('should fail, because we try to trigger buyTokens as unwhitelisted investor', async () => {
+        try {
+            await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: inactiveInvestor1});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    // @FIXME: Error: VM Exception while processing transaction: invalid opcode
+    // test ./test/contracts/IcoCrowdsale.js
+    it.skip('should call the fallback function successfully', async () => {
+        const tx = await icoCrowdsaleInstance.sendTransaction({
+            from:   activeInvestor1,
+            value:  web3.toWei(1, 'ether'),
+            gas:    700000
+        });
+
+        // buyTokens(msg.sender);
+
+        console.log(tx);
+        // console.log(await icoCrowdsaleInstance.investments());
+    });
+
+    it('should fail, because we try to trigger mintTokenPreSale in contribution period', async () => {
+        try {
+            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3, {from: activeInvestor2});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to trigger confirmPayment in contribution period', async () => {
+        try {
+            await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to trigger batchConfirmPayments in contribution period', async () => {
+        try {
+            await icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: activeManager});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to trigger unConfirmPayment in contribution period', async () => {
+        try {
+            await icoCrowdsaleInstance.unConfirmPayment(0, {from: activeManager});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should unwhitelist investor account', async () => {
+        const tx            = await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor1, {from: activeManager});
+        const whitelisted   = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
+
+        assert.isFalse(whitelisted, 'activeInvestor1 should be unwhitelisted');
+
+        // Testing events
+        const events = getEvents(tx, 'ChangedInvestorWhitelisting');
+
+        assert.equal(events[0].investor, activeInvestor1, 'activeInvestor1 address doesn\'t match');
+        assert.isFalse(events[0].whitelisted, 'activeInvestor1 should be unwhitelisted');
+    });
+
+    it('should whitelist investor accounts', async () => {
+        const tx1 = await icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: owner});
+
+        const whitelisted1 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
+
+        assert.isTrue(whitelisted1, 'Investor1 should be whitelisted');
+
+        // Testing events
+        const events1 = getEvents(tx1, 'ChangedInvestorWhitelisting');
+
+        assert.equal(events1[0].investor, activeInvestor1, 'Investor1 address doesn\'t match');
+        assert.isTrue(events1[0].whitelisted, 'Investor1 should be whitelisted');
+    });
 
     /**
      * [ Confirmation period ]
