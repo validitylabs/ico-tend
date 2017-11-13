@@ -307,20 +307,21 @@ contract('IcoCrowdsale', (accounts) => {
         await waitNDays(35);
     });
 
-    // test ./test/contracts/IcoCrowdsale.js
     it('should buyTokens properly', async () => {
-        const tx = await icoCrowdsaleInstance.buyTokens(
+        const zero  = new BigNumber(0);
+        const tx    = await icoCrowdsaleInstance.buyTokens(
             activeInvestor1,
             {from: activeInvestor2, gas: 1000000, value: web3.toWei(2, 'ether')}
         );
 
-        // @TODO: write test
-
         // Testing events
-        // TokenPurchase(msg.sender, beneficiary, weiAmount, 0);
-
         const events = getEvents(tx, 'TokenPurchase');
-        console.log(events);
+
+        assert.equal(events[0].purchaser, activeInvestor2, 'activeInvestor2 does not match purchaser');
+        assert.equal(events[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
+
+        events[0].value.should.be.bignumber.equal(web3.toWei(2, 'ether'));
+        events[0].amount.should.be.bignumber.equal(zero);
     });
 
     it('should fail, because we try to trigger buyTokens as unwhitelisted investor', async () => {
@@ -333,23 +334,68 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    it.skip('should call the fallback function successfully', async () => {
-        const tx = await icoCrowdsaleInstance.sendTransaction({
+    // @TODO: Check investments (via fallback call)
+    it('should call the fallback function successfully', async () => {
+        const zero  = new BigNumber(0);
+        const tx1   = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor1,
-            value:  web3.toWei(1, 'ether'),
+            value:  web3.toWei(2, 'ether'),
             gas:    1000000
         });
 
-        // für settleInvestment() test -> fallback mehrfahc aufrufe
-        // @TODO: investment tätigen investor1 -> 2eth
-        // @TODO: investment tätigen investor1 -> 3eth
-        // @TODO: investment tätigen investor2 -> 3eth
-        // @TODO: investment tätigen investor1 -> 2eth
+        // Testing events
+        const events1 = getEvents(tx1, 'TokenPurchase');
 
-        // buyTokens(msg.sender);
+        assert.equal(events1[0].purchaser, activeInvestor1, 'activeInvestor1 does not match purchaser');
+        assert.equal(events1[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
 
-        console.log(tx);
-        // console.log(await icoCrowdsaleInstance.investments());
+        events1[0].value.should.be.bignumber.equal(web3.toWei(2, 'ether'));
+        events1[0].amount.should.be.bignumber.equal(zero);
+
+        const tx2   = await icoCrowdsaleInstance.sendTransaction({
+            from:   activeInvestor1,
+            value:  web3.toWei(3, 'ether'),
+            gas:    1000000
+        });
+
+        // Testing events
+        const events2 = getEvents(tx2, 'TokenPurchase');
+
+        assert.equal(events2[0].purchaser, activeInvestor1, 'activeInvestor1 does not match purchaser');
+        assert.equal(events2[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
+
+        events2[0].value.should.be.bignumber.equal(web3.toWei(3, 'ether'));
+        events2[0].amount.should.be.bignumber.equal(zero);
+
+        const tx3   = await icoCrowdsaleInstance.sendTransaction({
+            from:   activeInvestor2,
+            value:  web3.toWei(3, 'ether'),
+            gas:    1000000
+        });
+
+        // Testing events
+        const events3 = getEvents(tx3, 'TokenPurchase');
+
+        assert.equal(events3[0].purchaser, activeInvestor2, 'activeInvestor2 does not match purchaser');
+        assert.equal(events3[0].beneficiary, activeInvestor2, 'activeInvestor2 does not match beneficiary');
+
+        events3[0].value.should.be.bignumber.equal(web3.toWei(3, 'ether'));
+        events3[0].amount.should.be.bignumber.equal(zero);
+
+        const tx4   = await icoCrowdsaleInstance.sendTransaction({
+            from:   activeInvestor1,
+            value:  web3.toWei(2, 'ether'),
+            gas:    1000000
+        });
+
+        // Testing events
+        const events4 = getEvents(tx4, 'TokenPurchase');
+
+        assert.equal(events4[0].purchaser, activeInvestor1, 'activeInvestor1 does not match purchaser');
+        assert.equal(events4[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
+
+        events4[0].value.should.be.bignumber.equal(web3.toWei(2, 'ether'));
+        events4[0].amount.should.be.bignumber.equal(zero);
     });
 
     it('should fail, because we try to trigger mintTokenPreSale in contribution period', async () => {
@@ -410,6 +456,7 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
+    // test ./test/contracts/IcoCrowdsale.js
     it('should trigger confirmPayment successfully', async () => {
         await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000});
         // @TODO: write test
@@ -479,6 +526,6 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    // @TODO: settleInvestment(uint256 investmentId)
+    // @TODO: settleInvestment(uint256 investmentId) -> check investments from fallback test
     // @TODO: settleBatchInvestment(uint256 investmentId)
 });
