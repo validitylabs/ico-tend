@@ -12,7 +12,6 @@ import "../../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol"
 import "./IcoToken.sol";
 
 contract IcoCrowdsale is Crowdsale, Ownable {
-
     // allow managers to whitelist and confirm contributions by manager accounts
     // (managers can be set and altered by owner, multiple manager accounts are possible
     mapping(address => bool) public isManager;
@@ -26,13 +25,13 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     event ChangedInvestmentConfirmation(uint256 investmentId, address investor, bool confirmed);
 
-    uint256 public confirmationPeriod = 30 days;
+    uint256 public confirmationPeriod = 0 days;
 
-    uint256 public cap = 95000000 * 10**18; // @TODO: or pass in constructor?
+    uint256 public cap;
 
-    uint256 public alreadyMinted = 0;       // already minted tokens (maximally = cap)
+    uint256 public alreadyMinted = 0;           // already minted tokens (maximally = cap)
 
-    bool public confirmationPeriodOver = false;    // can be set by owner to finish confirmation in under 30 days
+    bool public confirmationPeriodOver = false; // can be set by owner to finish confirmation in under 30 days
     /**
      * @dev Deploy capped ico crowdsale contract
      * @param _startTime uint256 Start time of the crowdsale
@@ -40,11 +39,13 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      * @param _rate uint256 Rate of crowdsale
      * @param _wallet address Wallet address of the crowdsale
      */
-    function IcoCrowdsale(uint256 _startTime, uint256 _endTime, uint256 _rate, address _wallet)
+    function IcoCrowdsale(uint256 _startTime, uint256 _endTime, uint256 _rate, address _wallet, uint256 _cap, uint256 _confirmationPeriod)
         public
         Crowdsale(_startTime, _endTime, _rate, _wallet)
     {
         setManager(msg.sender, true);
+        cap = _cap;
+        confirmationPeriod = _confirmationPeriod; // @TODO: ok?
     }
 
     /**
@@ -75,7 +76,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         require(isManager[msg.sender]);
         address investor;
 
-        for (uint256 c; c < investors.length; c++) {
+        for (uint256 c; c < investors.length; c = c.add(1)) {
             investor = investors[c]; // gas optimization
             isWhitelisted[investor] = true;
             ChangedInvestorWhitelisting(investor, true);
@@ -127,7 +128,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
         uint256 investmentId;
 
-        for (uint256 c; c < investmentIds.length; c++) {
+        for (uint256 c; c < investmentIds.length; c = c.add(1)) {
             investmentId = investmentIds[c]; // gas optimization
             investments[investmentId].confirmed = true;
             ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, true);

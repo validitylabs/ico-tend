@@ -8,7 +8,7 @@
 const IcoCrowdsale = artifacts.require('./IcoCrowdsale');
 
 import {startTime, endTime, rateEthPerToken} from '../../ico.cnf.json';
-import {waitNDays, getEvents, debug, BigNumber} from './helpers/tools'; // eslint-disable-line
+import {waitNDays, getEvents, debug, BigNumber, cnf} from './helpers/tools'; // eslint-disable-line
 
 const moment        = require('moment'); // eslint-disable-line
 const assertJump    = require('./helpers/assertJump');
@@ -44,15 +44,20 @@ contract('IcoCrowdsale', (accounts) => {
     it('should instantiate the ICO crowdsale correctly', async () => {
         console.log('[ Pre contribution period ]'.yellow);
 
-        const _startTime = await icoCrowdsaleInstance.startTime();
-        const _endTime   = await icoCrowdsaleInstance.endTime();
-        const _rate      = await icoCrowdsaleInstance.rate();
-        const _wallet    = await icoCrowdsaleInstance.wallet();
+        const _startTime            = await icoCrowdsaleInstance.startTime();
+        const _endTime              = await icoCrowdsaleInstance.endTime();
+        const _rate                 = await icoCrowdsaleInstance.rate();
+        const _wallet               = await icoCrowdsaleInstance.wallet();
+        const _cap                  = await icoCrowdsaleInstance.cap();
+        const _confirmationPeriod   = await icoCrowdsaleInstance.confirmationPeriod();
+        const bigCap                = new BigNumber(cnf.cap);
 
         _startTime.should.be.bignumber.equal(startTime);
         _endTime.should.be.bignumber.equal(endTime);
         _rate.should.be.bignumber.equal(rateEthPerToken);
         _wallet.should.be.equal(wallet);
+        _cap.should.be.bignumber.equal(bigCap.mul(10e18));
+        _confirmationPeriod.should.be.bignumber.equal(cnf.confirmationPeriod);
     });
 
     it('should verify, the owner is added properly to manager accounts', async () => {

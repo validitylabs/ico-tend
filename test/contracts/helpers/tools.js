@@ -4,6 +4,9 @@
 const BigNumber = web3.BigNumber;
 export {BigNumber};
 
+const cnf = require('../../../ico.cnf.json');
+export {cnf};
+
 /**
  * Increase N days in testrpc
  *
