@@ -419,20 +419,79 @@ contract('IcoCrowdsale', (accounts) => {
     /**
      * [ Confirmation period ]
      */
-    // it('should turn the time 30 days forward to reclaim period', async () => {
-    //     console.log('[ Contribution period ]'.yellow);
-    //     // await waitNDays(10);
-    // });
+    it('should turn the time 10 days forward to Confirmation period', async () => {
+        console.log('[ Confirmation period ]'.yellow);
+        await waitNDays(10);
+    });
 
-    // @TODO: await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3, {from: activeManager});
-    // @TODO: confirmPayment(uint256 investmentId)
-    // @TODO: batchConfirmPayments(uint256[] investmentIds)
-    // @TODO: unConfirmPayment(uint256 investmentId)
-    // @TODO: whitelist / unwhitelist investor
+    it('should fail, because we try to trigger mintTokenPreSale in Confirmation period', async () => {
+        try {
+            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3, {from: activeInvestor2});
 
-    // it('should do something', async () => {
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
 
-    // });
+    it('should fail, because we try to trigger confirmPayment in Confirmation period', async () => {
+        try {
+            await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to trigger batchConfirmPayments in Confirmation period', async () => {
+        try {
+            await icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: activeManager});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to trigger unConfirmPayment in Confirmation period', async () => {
+        try {
+            await icoCrowdsaleInstance.unConfirmPayment(0, {from: activeManager});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should unwhitelist investor account', async () => {
+        const tx            = await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor1, {from: activeManager});
+        const whitelisted   = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
+
+        assert.isFalse(whitelisted, 'activeInvestor1 should be unwhitelisted');
+
+        // Testing events
+        const events = getEvents(tx, 'ChangedInvestorWhitelisting');
+
+        assert.equal(events[0].investor, activeInvestor1, 'activeInvestor1 address doesn\'t match');
+        assert.isFalse(events[0].whitelisted, 'activeInvestor1 should be unwhitelisted');
+    });
+
+    it('should whitelist investor accounts', async () => {
+        const tx1 = await icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: owner});
+
+        const whitelisted1 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
+
+        assert.isTrue(whitelisted1, 'Investor1 should be whitelisted');
+
+        // Testing events
+        const events1 = getEvents(tx1, 'ChangedInvestorWhitelisting');
+
+        assert.equal(events1[0].investor, activeInvestor1, 'Investor1 address doesn\'t match');
+        assert.isTrue(events1[0].whitelisted, 'Investor1 should be whitelisted');
+    });
+
+    // test ./test/contracts/IcoCrowdsale.js
 
     /**
      * [ Confirmation period over ]
