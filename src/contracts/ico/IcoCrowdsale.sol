@@ -94,21 +94,21 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     // sending funds happens after crowdsale is over and confirmation period is over
     function forwardFunds() internal {}
 
-    struct payment {
+    struct Payment {
         address investor;
         address beneficiary;
         uint256 amount;
         bool confirmed;
     }
 
-    payment[] public investments; // @TODO (Sebastian): or mapping better than array?
+    Payment[] public investments; // @TODO (Sebastian): or mapping better than array?
 
     // extend core functionality by whitelist check and registration of payment
     function buyTokens(address beneficiary) public payable {
         require(isWhitelisted[msg.sender]);
 
         // register payment so that later on it can be confirmed (and tokens issued and Ether paid out)
-        payment memory newPayment = payment(msg.sender, beneficiary, msg.value, false);
+        Payment memory newPayment = Payment(msg.sender, beneficiary, msg.value, false);
         investments.push(newPayment);
 
         super.buyTokens(beneficiary);
