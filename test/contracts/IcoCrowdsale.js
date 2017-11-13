@@ -4,7 +4,8 @@
  * yarn run dev
  * > test ./test/contracts/IcoCrowdsale.js
  */
-const IcoCrowdsale = artifacts.require('./IcoCrowdsale');
+const IcoCrowdsale  = artifacts.require('./IcoCrowdsale');
+const IcoToken      = artifacts.require('./IcoToken');
 
 import {startTime, endTime, rateEthPerToken} from '../../ico.cnf.json';
 import {waitNDays, getEvents, debug, BigNumber, cnf, increaseTimeTo, duration} from './helpers/tools'; // eslint-disable-line
@@ -31,8 +32,13 @@ contract('IcoCrowdsale', (accounts) => {
 
     // Provide icoTokenInstance for every test case
     let icoCrowdsaleInstance;
+    let icoTokenInstance;
+
     beforeEach(async () => {
-        icoCrowdsaleInstance = await IcoCrowdsale.deployed();
+        icoCrowdsaleInstance    = await IcoCrowdsale.deployed();
+        icoTokenInstance        = await IcoToken.deployed();
+        // icoTokenAddress         = await icoCrowdsaleInstance.icoToken();
+        // icoTokenInstance        = await IcoToken.at(icoTokenAddress);
     });
 
     /**
@@ -239,20 +245,52 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    // @TODO: negativ test: buyTokens(investor1, {from: investor2}) // -> investor2 kauft für investor1 tokens
-    // @TODO: negativ test: test fallback function
+    it('should fail, because we try to trigger buyTokens in before contribution time is started', async () => {
+        try {
+            await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: activeInvestor2});
 
-    // it('should mint tokens for presale as owner', async () => {
-    //     const tx1 = await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 10, {from: owner});
-    //     const tx2 = await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor2, 5, {from: owner});
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
 
-    //     // TokenPurchase(msg.sender, beneficiary, 0, tokens);
-    //     // Testing events
-    //     const events1 = getEvents(tx1, 'TokenPurchase');
-    //     const events2 = getEvents(tx2, 'TokenPurchase');
+    it('should fail, because we try to trigger the fallback function before contribution time is started', async () => {
+        try {
+            await icoCrowdsaleInstance.sendTransaction({
+                from:   owner,
+                value:  web3.toWei(1, 'ether'),
+                gas:    700000
+            });
 
-    //     console.log(events1);
-    // });
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it.skip('should mint tokens for presale as owner', async () => {
+        const activeInvestor1Balance1 = await icoTokenInstance.balanceOf(activeInvestor1);
+        const activeInvestor2Balance1 = await icoTokenInstance.balanceOf(activeInvestor2);
+
+        const tx1 = await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 10);
+        const tx2 = await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor2, 5);
+
+        const activeInvestor1Balance2 = await icoTokenInstance.balanceOf(activeInvestor1);
+        const activeInvestor2Balance2 = await icoTokenInstance.balanceOf(activeInvestor2);
+
+        console.log(activeInvestor1Balance1.toNumber(), activeInvestor1Balance2.toNumber()); // 0 0
+        console.log(activeInvestor2Balance1.toNumber(), activeInvestor2Balance2.toNumber()); // 0 0
+
+        // TokenPurchase(msg.sender, beneficiary, 0, tokens);
+        // Testing events
+        const events1 = getEvents(tx1, 'TokenPurchase');
+        const events2 = getEvents(tx2, 'TokenPurchase');
+
+        console.log(events1);
+    });
+
+    // test ./test/contracts/IcoCrowdsale.js
 
     /**
      * [ Contribution period ]
