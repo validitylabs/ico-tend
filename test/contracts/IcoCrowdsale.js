@@ -72,8 +72,8 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should set manager accounts', async () => {
-        const tx1 = await icoCrowdsaleInstance.setManager(activeManager, true, {from: owner});
-        const tx2 = await icoCrowdsaleInstance.setManager(inactiveManager, false, {from: owner});
+        const tx1 = await icoCrowdsaleInstance.setManager(activeManager, true, {from: owner, gas: 1000000});
+        const tx2 = await icoCrowdsaleInstance.setManager(inactiveManager, false, {from: owner, gas: 1000000});
 
         const manager1 = await icoCrowdsaleInstance.isManager(activeManager);
         const manager2 = await icoCrowdsaleInstance.isManager(inactiveManager);
@@ -93,8 +93,8 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should alter manager accounts', async () => {
-        const tx1 = await icoCrowdsaleInstance.setManager(activeManager, false, {from: owner});
-        const tx2 = await icoCrowdsaleInstance.setManager(inactiveManager, true, {from: owner});
+        const tx1 = await icoCrowdsaleInstance.setManager(activeManager, false, {from: owner, gas: 1000000});
+        const tx2 = await icoCrowdsaleInstance.setManager(inactiveManager, true, {from: owner, gas: 1000000});
 
         const manager1 = await icoCrowdsaleInstance.isManager(activeManager);
         const manager2 = await icoCrowdsaleInstance.isManager(inactiveManager);
@@ -110,8 +110,8 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isTrue(events2[0].active, 'inactiveManager expected to be active');
 
         // Roll back to origin values
-        const tx3 = await icoCrowdsaleInstance.setManager(activeManager, true, {from: owner});
-        const tx4 = await icoCrowdsaleInstance.setManager(inactiveManager, false, {from: owner});
+        const tx3 = await icoCrowdsaleInstance.setManager(activeManager, true, {from: owner, gas: 1000000});
+        const tx4 = await icoCrowdsaleInstance.setManager(inactiveManager, false, {from: owner, gas: 1000000});
 
         const manager3 = await icoCrowdsaleInstance.isManager(activeManager);
         const manager4 = await icoCrowdsaleInstance.isManager(inactiveManager);
@@ -128,7 +128,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to set manager from unauthorized account', async () => {
         try {
-            await icoCrowdsaleInstance.setManager(activeManager, false, {from: activeInvestor1});
+            await icoCrowdsaleInstance.setManager(activeManager, false, {from: activeInvestor1, gas: 1000000});
             assert.fail('should have thrown before');
         } catch (e) {
             assertJump(e);
@@ -136,8 +136,8 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should whitelist investor accounts', async () => {
-        const tx1 = await icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: owner});
-        const tx2 = await icoCrowdsaleInstance.whiteListInvestor(activeInvestor2, {from: activeManager});
+        const tx1 = await icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: owner, gas: 1000000});
+        const tx2 = await icoCrowdsaleInstance.whiteListInvestor(activeInvestor2, {from: activeManager, gas: 1000000});
 
         const whitelisted1 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
         const whitelisted2 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor2);
@@ -157,7 +157,7 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should unwhitelist investor account', async () => {
-        const tx            = await icoCrowdsaleInstance.unWhiteListInvestor(inactiveInvestor1, {from: owner});
+        const tx            = await icoCrowdsaleInstance.unWhiteListInvestor(inactiveInvestor1, {from: owner, gas: 1000000});
         const whitelisted   = await icoCrowdsaleInstance.isWhitelisted(inactiveInvestor1);
 
         assert.isFalse(whitelisted, 'inactiveInvestor1 should be unwhitelisted');
@@ -171,7 +171,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to whitelist investor from unauthorized account', async () => {
         try {
-            await icoCrowdsaleInstance.whiteListInvestor(inactiveInvestor1, {from: activeInvestor2});
+            await icoCrowdsaleInstance.whiteListInvestor(inactiveInvestor1, {from: activeInvestor2, gas: 1000000});
             assert.fail('should have thrown before');
         } catch (e) {
             assertJump(e);
@@ -180,7 +180,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to unwhitelist investor from unauthorized account', async () => {
         try {
-            await icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: activeInvestor2});
+            await icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: activeInvestor2, gas: 1000000});
             assert.fail('should have thrown before');
         } catch (e) {
             assertJump(e);
@@ -188,10 +188,10 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should whitelist 2 investors by batch function', async () => {
-        await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor1, {from: owner});
-        await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor2, {from: owner});
+        await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor1, {from: owner, gas: 1000000});
+        await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor2, {from: owner, gas: 1000000});
 
-        const tx = await icoCrowdsaleInstance.batchWhiteListInvestors([activeInvestor1, activeInvestor2], {from: owner});
+        const tx = await icoCrowdsaleInstance.batchWhiteListInvestors([activeInvestor1, activeInvestor2], {from: owner, gas: 1000000});
 
         const whitelisted1  = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
         const whitelisted2  = await icoCrowdsaleInstance.isWhitelisted(activeInvestor2);
@@ -221,7 +221,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to mint tokens for presale with a non owner account', async () => {
         try {
-            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1, {from: activeManager});
+            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1, {from: activeManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -231,7 +231,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to mint tokens more as cap limit allows', async () => {
         try {
-            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, (cnf.cap + 1), {from: activeManager});
+            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, (cnf.cap + 1), {from: activeManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -241,7 +241,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to trigger buyTokens in before contribution time is started', async () => {
         try {
-            await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: activeInvestor2});
+            await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: activeInvestor2, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -401,7 +401,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to trigger mintTokenPreSale in Confirmation period', async () => {
         try {
-            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3, {from: activeInvestor2});
+            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3, {from: activeInvestor2, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -411,7 +411,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to trigger confirmPayment in Confirmation period', async () => {
         try {
-            await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager});
+            await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -451,19 +451,43 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    // test ./test/contracts/IcoCrowdsale.js
-
     /**
      * [ Confirmation period over ]
      */
-    // it('should turn the time 30 days forward to reclaim period', async () => {
-    //     console.log('[ Contribution period ]'.yellow);
-    //     // await waitNDays(30);
-    // });
+    it('should turn the time 30 days forward, after the Confirmation period is over', async () => {
+        console.log('[ Confirmation period over ]'.yellow);
+        await waitNDays(30);
+    });
 
-    // @TODO: failtest: confirmPayment(uint256 investmentId)
-    // @TODO: failtest: batchConfirmPayments(uint256[] investmentIds)
-    // @TODO: failtest: unConfirmPayment(uint256 investmentId)
+    it('should fail, because we try to trigger confirmPayment after Confirmation period is over', async () => {
+        try {
+            await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to trigger batchConfirmPayments after Confirmation period is over', async () => {
+        try {
+            await icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: activeManager, gas: 1000000});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to trigger unConfirmPayment after Confirmation period is over', async () => {
+        try {
+            await icoCrowdsaleInstance.unConfirmPayment(0, {from: inactiveManager, gas: 1000000});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
 
     // @TODO: settleInvestment(uint256 investmentId)
     // @TODO: settleBatchInvestment(uint256 investmentId)
