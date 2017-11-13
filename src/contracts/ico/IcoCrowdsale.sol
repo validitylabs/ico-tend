@@ -75,7 +75,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         require(isManager[msg.sender]);
         address investor;
 
-        for (uint256 c; c < investors.length; c.add(1)) {
+        for (uint256 c; c < investors.length; c++) {
             investor = investors[c]; // gas optimization
             isWhitelisted[investor] = true;
             ChangedInvestorWhitelisting(investor, true);
@@ -116,7 +116,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function confirmPayment(uint256 investmentId) public {
         require(isManager[msg.sender]);
         require (now > endTime && now <= endTime.add(confirmationPeriod));
-        
+
         investments[investmentId].confirmed = true;
         ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, true);
     }
@@ -127,7 +127,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
         uint256 investmentId;
 
-        for (uint256 c; c < investmentIds.length; c.add(1)) {
+        for (uint256 c; c < investmentIds.length; c++) {
             investmentId = investmentIds[c]; // gas optimization
             investments[investmentId].confirmed = true;
             ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, true);
@@ -137,7 +137,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function unConfirmPayment(uint256 investmentId) public {
         require(isManager[msg.sender]);
         require (now > endTime && now <= endTime.add(confirmationPeriod));
-        
+
         investments[investmentId].confirmed = false;
         ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, false);
     }
@@ -158,7 +158,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function finaliseContributionPeriod() public onlyOwner {
         confirmationPeriodOver = true;
     }
-    
+
     function settleInvestment(uint256 investmentId) public {
 
     }
