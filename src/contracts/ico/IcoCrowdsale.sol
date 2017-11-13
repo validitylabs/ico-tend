@@ -70,6 +70,8 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      * @param _rateTokenPerChf uint256 issueing rate tokens per CHF
      * @param _rateWeiPerChf uint256 exchange rate Wei per CHF
      * @param _wallet address Wallet address of the crowdsale
+     * @param _cap uint256 Crowdsale cap
+     * @param _confirmationPeriodDays uint256 Confirmation period in days
      */
     function IcoCrowdsale(
         uint256 _startTime,
@@ -78,7 +80,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         uint256 _rateWeiPerChf,
         address _wallet,
         uint256 _cap,
-        uint256 _confirmationPeriod
+        uint256 _confirmationPeriodDays
     )
         public
         Crowdsale(_startTime, _endTime, (10 ** uint256(18)).mul(_rateTokenPerChf).div(_rateWeiPerChf), _wallet)
@@ -86,7 +88,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         setManager(msg.sender, true);
         cap = _cap;
         WeiPerChf = _rateWeiPerChf;
-        confirmationPeriod = _confirmationPeriod; // @TODO: ok?
+        confirmationPeriod = _confirmationPeriodDays * 1 days;
     }
 
     /**
