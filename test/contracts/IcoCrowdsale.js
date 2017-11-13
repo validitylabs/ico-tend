@@ -4,12 +4,10 @@
  * yarn run dev
  * > test ./test/contracts/IcoCrowdsale.js
  */
-const IcoCrowdsale  = artifacts.require('./IcoCrowdsale');
-const IcoToken      = artifacts.require('./IcoToken');
-
-import {startTime, endTime, rateEthPerToken} from '../../ico.cnf.json';
 import {waitNDays, getEvents, debug, BigNumber, cnf, increaseTimeTo, duration} from './helpers/tools'; // eslint-disable-line
 
+const IcoCrowdsale  = artifacts.require('./IcoCrowdsale');
+const IcoToken      = artifacts.require('./IcoToken');
 const moment        = require('moment'); // eslint-disable-line
 const assertJump    = require('../../node_modules/zeppelin-solidity/test/helpers/assertJump');
 
@@ -59,8 +57,8 @@ contract('IcoCrowdsale', (accounts) => {
         const bigCap                = new BigNumber(cnf.cap);
         const confirmationPeriod    = new BigNumber(cnf.confirmationPeriod);
 
-        _startTime.should.be.bignumber.equal(startTime);
-        _endTime.should.be.bignumber.equal(endTime);
+        _startTime.should.be.bignumber.equal(cnf.startTime);
+        _endTime.should.be.bignumber.equal(cnf.endTime);
         _weiPerChf.should.be.bignumber.equal(cnf.rateWeiPerChf);
         _wallet.should.be.equal(wallet);
         _cap.should.be.bignumber.equal(bigCap.mul(10e18));
@@ -314,8 +312,8 @@ contract('IcoCrowdsale', (accounts) => {
         console.log(ratio.toNumber());
         console.log(await icoCrowdsaleInstance.isOverMinimum(ratio));
 
-        // const tx = await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: activeInvestor2, gas: 1000000, value: web3.toWei(2, 'ether')});
-        // console.log(tx);
+        const tx = await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: activeInvestor2, gas: 1000000, value: web3.toWei(2, 'ether')});
+        console.log(tx);
 
         // @TODO: write test
 
