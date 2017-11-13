@@ -157,7 +157,7 @@ contract('IcoToken', (accounts) => {
         const tx = await icoTokenInstance.sendTransaction({
             from:   activeTreasurer1,
             value:  expectedBalance,
-            gas:    200000
+            gas:    700000
         });
 
         const icoBalance    = await icoTokenInstance.currentDividend();
@@ -184,7 +184,7 @@ contract('IcoToken', (accounts) => {
             await icoTokenInstance.sendTransaction({
                 from:   owner,
                 value:  web3.toWei(1, 'ether'),
-                gas:    200000
+                gas:    700000
             });
 
             assert.fail('should have thrown before');
@@ -198,7 +198,7 @@ contract('IcoToken', (accounts) => {
             await icoTokenInstance.sendTransaction({
                 from:   tokenHolder1,
                 value:  web3.toWei(1, 'ether'),
-                gas:    200000
+                gas:    700000
             });
 
             assert.fail('should have thrown before');
@@ -212,7 +212,7 @@ contract('IcoToken', (accounts) => {
             await icoTokenInstance.sendTransaction({
                 from:   inactiveTreasurer1,
                 value:  web3.toWei(1, 'ether'),
-                gas:    200000
+                gas:    700000
             });
 
             assert.fail('should have thrown before');
@@ -388,7 +388,7 @@ contract('IcoToken', (accounts) => {
         const tx = await icoTokenInstance.sendTransaction({
             from:   owner,
             value:  expectedBalance,
-            gas:    200000
+            gas:    700000
         });
 
         const icoBalance        = await icoTokenInstance.currentDividend();
