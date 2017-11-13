@@ -3,10 +3,12 @@
     "startTime":                    1517050800,
     "comment endTime":              "03/02/2018 @ 12:00am (CET)",
     "endTime":                      1517655600,
-    "comment rateEthPerToken":      "Ratio ETH to token",
-    "rateEthPerToken":              1,
     "comment cap":                  "Will be calculated to 95000000 * 10**18 in migration script",
     "cap":                          95000000,
     "comment confirmationPeriod":   "confirmation period in days",
-    "confirmationPeriod":           30
+    "confirmationPeriod":           30,
+    "comment rateTokenPerChf":      "ratio tokens per CHF",
+    "rateTokenPerChf":              1,
+    "comment rateWeiPerChf":        "ratio wei per CHF",
+    "rateWeiPerChf":                3e15
 }

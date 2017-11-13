@@ -33,7 +33,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     bool public confirmationPeriodOver; // can be set by owner to finish confirmation in under 30 days
 
-    uint256 public WeiPerChf;
+    uint256 public weiPerChf;
 
     uint256 public investmentIdLastAttemptedToSettle;
 
@@ -49,10 +49,10 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     Payment[] public investments;
 
      /*
-     tokenUnitsPerWei = 10 ** uint256(decimals) * tokenPerChf / WeiPerChf
+     tokenUnitsPerWei = 10 ** uint256(decimals) * tokenPerChf / weiPerChf
 
      e.g.: 1ETH = 300 CHF -> 1e18 Wei = 300 CHF -> 1CHF = 3.3 e15 Wei
-     --> WeiPerChf = 3.3 e15
+     --> weiPerChf = 3.3 e15
      --> tokenPerChf = 1
 
      10 ** 18 * 1 / 3.3e15
@@ -87,8 +87,12 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     {
         setManager(msg.sender, true);
         cap = _cap;
-        WeiPerChf = _rateWeiPerChf;
+        weiPerChf = _rateWeiPerChf;
         confirmationPeriod = _confirmationPeriodDays * 1 days;
+    }
+
+    function isOverMinimum(uint256 value) public constant returns (bool) {
+        return value.div(weiPerChf) >= 500;
     }
 
     /**
@@ -154,9 +158,9 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     // extend base functionality with min investment amount
     function validPurchase() internal constant returns (bool) {
-        
+
         // minimal investment: 500 CHF
-        require (msg.value.div(WeiPerChf) >= 500);
+        require (msg.value.div(weiPerChf) >= 500);
 
         super.validPurchase();
     }
@@ -225,7 +229,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
             // calculate number of tokens to be issued to investor
             uint256 tokens = p.amount.mul(rate);
-            
+
             // mint tokens for investor
             token.mint(p.beneficiary, tokens);
 
@@ -237,7 +241,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         } else {
             // if not confirmed -> reimburse ETH
 
-            // only complete settlement if investor got their money back 
+            // only complete settlement if investor got their money back
             // (does not throw (as .transfer would)
             // otherwise we would block settlement process of all following investments)
             if (p.investor.send(p.amount)) {

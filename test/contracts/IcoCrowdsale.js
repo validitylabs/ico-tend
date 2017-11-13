@@ -52,22 +52,19 @@ contract('IcoCrowdsale', (accounts) => {
 
         const _startTime            = await icoCrowdsaleInstance.startTime();
         const _endTime              = await icoCrowdsaleInstance.endTime();
-        const _rate                 = await icoCrowdsaleInstance.rate();
+        const _weiPerChf            = await icoCrowdsaleInstance.weiPerChf();
         const _wallet               = await icoCrowdsaleInstance.wallet();
         const _cap                  = await icoCrowdsaleInstance.cap();
-        // const _confirmationPeriod   = await icoCrowdsaleInstance.confirmationPeriod();
+        const _confirmationPeriod   = await icoCrowdsaleInstance.confirmationPeriod();
         const bigCap                = new BigNumber(cnf.cap);
+        const confirmationPeriod    = new BigNumber(cnf.confirmationPeriod);
 
         _startTime.should.be.bignumber.equal(startTime);
         _endTime.should.be.bignumber.equal(endTime);
-        _rate.should.be.bignumber.equal(rateEthPerToken);
+        _weiPerChf.should.be.bignumber.equal(cnf.rateWeiPerChf);
         _wallet.should.be.equal(wallet);
         _cap.should.be.bignumber.equal(bigCap.mul(10e18));
-
-        // @FIXME:
-        // const confirmationPeriod = new BigNumber(cnf.confirmationPeriod);
-        // console.log(confirmationPeriod, _confirmationPeriod);
-        // _confirmationPeriod.should.be.bignumber.equal(confirmationPeriod);
+        _confirmationPeriod.div(60 * 60 * 24).should.be.bignumber.equal(confirmationPeriod);
     });
 
     it('should verify, the owner is added properly to manager accounts', async () => {
@@ -312,12 +309,15 @@ contract('IcoCrowdsale', (accounts) => {
         await waitNDays(35);
     });
 
-    // @FIXME: Error: VM Exception while processing transaction: invalid opcode
-    // test ./test/contracts/IcoCrowdsale.js
     it.skip('should buyTokens properly', async () => {
-        const tx = await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: activeInvestor2});
+        const ratio = await icoCrowdsaleInstance.weiPerChf();
+        console.log(ratio.toNumber());
+        console.log(await icoCrowdsaleInstance.isOverMinimum(ratio));
 
-        console.log(tx);
+        // const tx = await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: activeInvestor2, gas: 1000000, value: web3.toWei(2, 'ether')});
+        // console.log(tx);
+
+        // @TODO: write test
 
         // Testing events
         // const events = getEvents(tx);
@@ -326,7 +326,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to trigger buyTokens as unwhitelisted investor', async () => {
         try {
-            await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: inactiveInvestor1});
+            await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: inactiveInvestor1, gas: 1000000, value: web3.toWei(2, 'ether')});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -334,14 +334,18 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    // @FIXME: Error: VM Exception while processing transaction: invalid opcode
-    // test ./test/contracts/IcoCrowdsale.js
     it.skip('should call the fallback function successfully', async () => {
         const tx = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor1,
             value:  web3.toWei(1, 'ether'),
-            gas:    700000
+            gas:    1000000
         });
+
+        // für settleInvestment() test -> fallback mehrfahc aufrufe
+        // @TODO: investment tätigen investor1 -> 2eth
+        // @TODO: investment tätigen investor1 -> 3eth
+        // @TODO: investment tätigen investor2 -> 3eth
+        // @TODO: investment tätigen investor1 -> 2eth
 
         // buyTokens(msg.sender);
 
@@ -351,7 +355,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to trigger mintTokenPreSale in contribution period', async () => {
         try {
-            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3, {from: activeInvestor2});
+            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3, {from: activeInvestor2, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -359,9 +363,9 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    it('should fail, because we try to trigger confirmPayment in contribution period', async () => {
+    it('should fail, because we try to trigger confirmPayment with non manager account', async () => {
         try {
-            await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager});
+            await icoCrowdsaleInstance.confirmPayment(0, {from: inactiveManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -369,9 +373,9 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    it('should fail, because we try to trigger batchConfirmPayments in contribution period', async () => {
+    it('should fail, because we try to trigger batchConfirmPayments with non manager account', async () => {
         try {
-            await icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: activeManager});
+            await icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: inactiveManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -379,41 +383,14 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    it('should fail, because we try to trigger unConfirmPayment in contribution period', async () => {
+    it('should fail, because we try to trigger unConfirmPayment with non manager accoutn', async () => {
         try {
-            await icoCrowdsaleInstance.unConfirmPayment(0, {from: activeManager});
+            await icoCrowdsaleInstance.unConfirmPayment(0, {from: inactiveManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
             assertJump(e);
         }
-    });
-
-    it('should unwhitelist investor account', async () => {
-        const tx            = await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor1, {from: activeManager});
-        const whitelisted   = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
-
-        assert.isFalse(whitelisted, 'activeInvestor1 should be unwhitelisted');
-
-        // Testing events
-        const events = getEvents(tx, 'ChangedInvestorWhitelisting');
-
-        assert.equal(events[0].investor, activeInvestor1, 'activeInvestor1 address doesn\'t match');
-        assert.isFalse(events[0].whitelisted, 'activeInvestor1 should be unwhitelisted');
-    });
-
-    it('should whitelist investor accounts', async () => {
-        const tx1 = await icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: owner});
-
-        const whitelisted1 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
-
-        assert.isTrue(whitelisted1, 'Investor1 should be whitelisted');
-
-        // Testing events
-        const events1 = getEvents(tx1, 'ChangedInvestorWhitelisting');
-
-        assert.equal(events1[0].investor, activeInvestor1, 'Investor1 address doesn\'t match');
-        assert.isTrue(events1[0].whitelisted, 'Investor1 should be whitelisted');
     });
 
     /**
@@ -444,9 +421,14 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    it('should fail, because we try to trigger batchConfirmPayments in Confirmation period', async () => {
+    // @TODO: confirmBatchPayment success
+    // mit den IDs 0 1 2 3 4 für später
+
+    //@TODO: unconfirm 2 success
+
+    it('should fail, because we try to trigger batchConfirmPayments with non manager account', async () => {
         try {
-            await icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: activeManager});
+            await icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: inactiveManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -456,39 +438,12 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to trigger unConfirmPayment in Confirmation period', async () => {
         try {
-            await icoCrowdsaleInstance.unConfirmPayment(0, {from: activeManager});
+            await icoCrowdsaleInstance.unConfirmPayment(0, {from: activeManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
             assertJump(e);
         }
-    });
-
-    it('should unwhitelist investor account', async () => {
-        const tx            = await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor1, {from: activeManager});
-        const whitelisted   = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
-
-        assert.isFalse(whitelisted, 'activeInvestor1 should be unwhitelisted');
-
-        // Testing events
-        const events = getEvents(tx, 'ChangedInvestorWhitelisting');
-
-        assert.equal(events[0].investor, activeInvestor1, 'activeInvestor1 address doesn\'t match');
-        assert.isFalse(events[0].whitelisted, 'activeInvestor1 should be unwhitelisted');
-    });
-
-    it('should whitelist investor accounts', async () => {
-        const tx1 = await icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: owner});
-
-        const whitelisted1 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
-
-        assert.isTrue(whitelisted1, 'Investor1 should be whitelisted');
-
-        // Testing events
-        const events1 = getEvents(tx1, 'ChangedInvestorWhitelisting');
-
-        assert.equal(events1[0].investor, activeInvestor1, 'Investor1 address doesn\'t match');
-        assert.isTrue(events1[0].whitelisted, 'Investor1 should be whitelisted');
     });
 
     // test ./test/contracts/IcoCrowdsale.js
@@ -500,7 +455,11 @@ contract('IcoCrowdsale', (accounts) => {
     //     console.log('[ Contribution period ]'.yellow);
     //     // await waitNDays(30);
     // });
+
     // @TODO: failtest: confirmPayment(uint256 investmentId)
     // @TODO: failtest: batchConfirmPayments(uint256[] investmentIds)
     // @TODO: failtest: unConfirmPayment(uint256 investmentId)
+
+    // @TODO: settleInvestment(uint256 investmentId)
+    // @TODO: settleBatchInvestment(uint256 investmentId)
 });

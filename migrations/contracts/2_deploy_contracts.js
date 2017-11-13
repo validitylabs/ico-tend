@@ -15,5 +15,5 @@ module.exports = function (deployer, network, accounts) { // eslint-disable-line
     const _cap      = new BigNumber(cnf.cap);
     const cap       = _cap.mul(10e18);
 
-    deployer.deploy(IcoCrowdsale, cnf.startTime, cnf.endTime, cnf.rateEthPerToken, wallet, cap, cnf.confirmationPeriod);
+    deployer.deploy(IcoCrowdsale, cnf.startTime, cnf.endTime, cnf.rateTokenPerChf, cnf.rateWeiPerChf, wallet, cap, cnf.confirmationPeriod);
 };
