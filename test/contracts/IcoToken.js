@@ -9,7 +9,7 @@ const IcoToken = artifacts.require('./IcoToken');
 
 import {waitNDays, getEvents, debug, BigNumber} from './helpers/tools'; // eslint-disable-line
 const moment        = require('moment'); // eslint-disable-line
-const assertJump    = require('./helpers/assertJump');
+const assertJump    = require('../../node_modules/zeppelin-solidity/test/helpers/assertJump');
 
 const should = require('chai') // eslint-disable-line
     .use(require('chai-as-promised'))

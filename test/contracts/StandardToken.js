@@ -2,8 +2,8 @@
 
 /* eslint-disable */
 
-const assertJump = require('./helpers/assertJump');
-var StandardTokenMock = artifacts.require('./helpers/StandardTokenMock.sol');
+const assertJump        = require('../../node_modules/zeppelin-solidity/test/helpers/assertJump');
+var StandardTokenMock   = artifacts.require('./helpers/StandardTokenMock.sol');
 
 contract('StandardToken', function(accounts) {
 

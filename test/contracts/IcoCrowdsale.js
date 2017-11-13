@@ -5,7 +5,6 @@
  * > test ./test/contracts/IcoCrowdsale.js
  */
 
-// @TODO: use zeppelin helper directly
 // @TODO: Helper Zeppeling test -> setToTime
 // startTime
 // einamlig oben setzen: export function increaseTimeTo(dts from xmas) {
@@ -17,7 +16,7 @@ import {startTime, endTime, rateEthPerToken} from '../../ico.cnf.json';
 import {waitNDays, getEvents, debug, BigNumber, cnf} from './helpers/tools'; // eslint-disable-line
 
 const moment        = require('moment'); // eslint-disable-line
-const assertJump    = require('./helpers/assertJump');
+const assertJump    = require('../../node_modules/zeppelin-solidity/test/helpers/assertJump');
 
 const should = require('chai') // eslint-disable-line
     .use(require('chai-as-promised'))
