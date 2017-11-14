@@ -9,6 +9,7 @@ pragma solidity ^0.4.18;
 
 import "../../../node_modules/zeppelin-solidity/contracts/crowdsale/Crowdsale.sol";
 import "../../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "../../../node_modules/zeppelin-solidity/contracts/lifecycle/Pausable.sol";
 import "./IcoToken.sol";
 
 contract IcoCrowdsale is Crowdsale, Ownable {
@@ -261,4 +262,10 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         }
     }
 
+    function unpauseToken() public {
+        // only possible after confirmationPeriodOver has been manually set OR after time is over
+        require(confirmationPeriodOver || now > endTime.add(confirmationPeriod));
+        
+        Pausable(token).unpause();
+    }
 }
