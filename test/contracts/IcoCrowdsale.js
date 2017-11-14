@@ -574,11 +574,20 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should run batchConfirmPayments() successfully', async () => {
         const tx = await icoCrowdsaleInstance.batchConfirmPayments(
-            [0, 1, 2, 3, 4],
+            [0, 1, 2, 3],
             {from: activeManager, gas: 1000000}
         );
 
-        const events = getEvents(tx, 'ChangedInvestmentConfirmation');
+        const investment4   = await icoCrowdsaleInstance.investments(4);
+        const events        = getEvents(tx, 'ChangedInvestmentConfirmation');
+        const twenty        = new BigNumber(web3.toWei(20, 'ether'));
+
+        assert.equal(investment4[0], activeInvestor1);      // Investor
+        assert.equal(investment4[1], activeInvestor1);      // Beneficiary
+        investment4[2].should.be.bignumber.equal(twenty);   // Amount
+        assert.isFalse(investment4[3]);                     // Confirmed
+        assert.isFalse(investment4[4]);                     // AttemptedSettlement
+        assert.isFalse(investment4[5]);                     // CompletedSettlement
 
         assert.equal(events[0].investmentId, 0);
         assert.equal(events[0].investor, activeInvestor2);
@@ -595,37 +604,6 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events[3].investmentId, 3);
         assert.equal(events[3].investor, activeInvestor2);
         assert.isTrue(events[3].confirmed);
-
-        assert.equal(events[4].investmentId, 4);
-        assert.equal(events[4].investor, activeInvestor1);
-        assert.isTrue(events[4].confirmed);
-
-        // console.log(events);
-        // @TODO: check correctness of investor addresses
-        // activeInvestor2
-        //     [ { investmentId: BigNumber { s: 1, e: 0, c: [Array] },
-        //     investor: '0x0d1d4e623d10f9fba5db95830f7d3839406c6af2',
-        //     confirmed: true },
-
-        // activeInvestor1
-        //   { investmentId: BigNumber { s: 1, e: 0, c: [Array] },
-        //     investor: '0x821aea9a577a9b44299b9c15c88cf3087f3b5544',
-        //     confirmed: true },
-
-        // activeInvestor1
-        //   { investmentId: BigNumber { s: 1, e: 0, c: [Array] },
-        //     investor: '0x821aea9a577a9b44299b9c15c88cf3087f3b5544',
-        //     confirmed: true },
-
-        // activeInvestor2
-        //   { investmentId: BigNumber { s: 1, e: 0, c: [Array] },
-        //     investor: '0x0d1d4e623d10f9fba5db95830f7d3839406c6af2',
-        //     confirmed: true },
-
-        // activeInvestor1
-        //   { investmentId: BigNumber { s: 1, e: 0, c: [Array] },
-        //     investor: '0x821aea9a577a9b44299b9c15c88cf3087f3b5544',
-        //     confirmed: true } ]
     });
 
     it('should run unConfirmPayment() successfully', async () => {
