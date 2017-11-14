@@ -334,6 +334,14 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
+    // @TODO: check investment fail for 1 ETH contribution (under 500CHF), e.g.:
+    /*const tx1   = await icoCrowdsaleInstance.sendTransaction({
+            from:   activeInvestor1,
+            value:  web3.toWei(1, 'ether'),
+            gas:    1000000
+        });
+        */
+
     // @TODO: Check investments (via fallback call)
     it('should call the fallback function successfully', async () => {
         const zero  = new BigNumber(0);
@@ -357,6 +365,7 @@ contract('IcoCrowdsale', (accounts) => {
             value:  web3.toWei(3, 'ether'),
             gas:    1000000
         });
+        // @TODO: here read investment[2] (or whatever the index is) and check if it got written to storage too
 
         // Testing events
         const events2 = getEvents(tx2, 'TokenPurchase');
@@ -372,6 +381,7 @@ contract('IcoCrowdsale', (accounts) => {
             value:  web3.toWei(3, 'ether'),
             gas:    1000000
         });
+        // @TODO: here read investment[2] (or whatever the index is) and check if it got written to storage too
 
         // Testing events
         const events3 = getEvents(tx3, 'TokenPurchase');
@@ -396,6 +406,7 @@ contract('IcoCrowdsale', (accounts) => {
 
         events4[0].value.should.be.bignumber.equal(web3.toWei(2, 'ether'));
         events4[0].amount.should.be.bignumber.equal(zero);
+        // @TODO: here read investment[2] (or whatever the index is) and check if it got written to storage too
     });
 
     it('should fail, because we try to trigger mintTokenPreSale in contribution period', async () => {
