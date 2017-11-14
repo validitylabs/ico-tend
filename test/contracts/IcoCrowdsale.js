@@ -16,6 +16,14 @@ const should = require('chai') // eslint-disable-line
     .use(require('chai-bignumber')(BigNumber))
     .should();
 
+const zero      = new BigNumber(0);
+const two       = new BigNumber(web3.toWei(2, 'ether'));
+const five      = new BigNumber(web3.toWei(5, 'ether'));
+const nine      = new BigNumber(web3.toWei(9, 'ether'));
+const ten       = new BigNumber(10);
+const fourteen  = new BigNumber(web3.toWei(14, 'ether'));
+const twenty    = new BigNumber(web3.toWei(20, 'ether'));
+
 /**
  * IcoToken contract
  */
@@ -266,9 +274,8 @@ contract('IcoCrowdsale', (accounts) => {
     it('should mint tokens for presale as owner', async () => {
         const activeInvestor1Balance1   = await icoTokenInstance.balanceOf(activeInvestor1);
         const activeInvestor2Balance1   = await icoTokenInstance.balanceOf(activeInvestor2);
-        const zero                      = new BigNumber(0);
-        const ten                       = new BigNumber(10);
-        const five                      = new BigNumber(5);
+        const tenB                       = new BigNumber(10);
+        const fiveB                      = new BigNumber(5);
 
         activeInvestor1Balance1.should.be.bignumber.equal(zero);
         activeInvestor2Balance1.should.be.bignumber.equal(zero);
@@ -279,8 +286,8 @@ contract('IcoCrowdsale', (accounts) => {
         const activeInvestor1Balance2 = await icoTokenInstance.balanceOf(activeInvestor1);
         const activeInvestor2Balance2 = await icoTokenInstance.balanceOf(activeInvestor2);
 
-        activeInvestor1Balance2.should.be.bignumber.equal(ten);
-        activeInvestor2Balance2.should.be.bignumber.equal(five);
+        activeInvestor1Balance2.should.be.bignumber.equal(tenB);
+        activeInvestor2Balance2.should.be.bignumber.equal(fiveB);
 
         // Testing events
         const events1 = getEvents(tx1, 'TokenPurchase');
@@ -293,10 +300,10 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events2[0].beneficiary, activeInvestor2, '');
 
         events1[0].value.should.be.bignumber.equal(zero);
-        events1[0].amount.should.be.bignumber.equal(ten);
+        events1[0].amount.should.be.bignumber.equal(tenB);
 
         events2[0].value.should.be.bignumber.equal(zero);
-        events2[0].amount.should.be.bignumber.equal(five);
+        events2[0].amount.should.be.bignumber.equal(fiveB);
     });
 
     /**
@@ -321,7 +328,7 @@ contract('IcoCrowdsale', (accounts) => {
         try {
             await icoCrowdsaleInstance.buyTokens(
                 activeInvestor1,
-                {from: inactiveInvestor1, gas: 1000000, value: web3.toWei(1, 'ether')}
+                {from: activeInvestor1, gas: 1000000, value: web3.toWei(1, 'ether')}
             );
 
             assert.fail('should have thrown before');
@@ -331,14 +338,12 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should buyTokens properly', async () => {
-        const zero  = new BigNumber(0);
         const tx    = await icoCrowdsaleInstance.buyTokens(
             activeInvestor1,
             {from: activeInvestor2, gas: 1000000, value: web3.toWei(2, 'ether')}
         );
 
         const investment    = await icoCrowdsaleInstance.investments(0);
-        const two           = new BigNumber(web3.toWei(2, 'ether'));
 
         assert.equal(investment[0], activeInvestor2);   // Investor
         assert.equal(investment[1], activeInvestor1);   // Beneficiary
@@ -358,15 +363,13 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should call the fallback function successfully', async () => {
-        const zero  = new BigNumber(0);
         const tx1   = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor1,
             value:  web3.toWei(3, 'ether'),
             gas:    1000000
         });
 
-        const investment1   = await icoCrowdsaleInstance.investments(1);
-        const five          = new BigNumber(web3.toWei(5, 'ether'));
+        const investment1 = await icoCrowdsaleInstance.investments(1);
 
         assert.equal(investment1[0], activeInvestor1);   // Investor
         assert.equal(investment1[1], activeInvestor1);   // Beneficiary
@@ -390,8 +393,7 @@ contract('IcoCrowdsale', (accounts) => {
             gas:    1000000
         });
 
-        const investment2   = await icoCrowdsaleInstance.investments(2);
-        const nine          = new BigNumber(web3.toWei(9, 'ether'));
+        const investment2 = await icoCrowdsaleInstance.investments(2);
 
         assert.equal(investment2[0], activeInvestor1);   // Investor
         assert.equal(investment2[1], activeInvestor1);   // Beneficiary
@@ -415,8 +417,7 @@ contract('IcoCrowdsale', (accounts) => {
             gas:    1000000
         });
 
-        const investment3   = await icoCrowdsaleInstance.investments(3);
-        const fourteen      = new BigNumber(web3.toWei(14, 'ether'));
+        const investment3 = await icoCrowdsaleInstance.investments(3);
 
         assert.equal(investment3[0], activeInvestor2);      // Investor
         assert.equal(investment3[1], activeInvestor2);      // Beneficiary
@@ -440,8 +441,7 @@ contract('IcoCrowdsale', (accounts) => {
             gas:    1000000
         });
 
-        const investment4   = await icoCrowdsaleInstance.investments(4);
-        const twenty        = new BigNumber(web3.toWei(20, 'ether'));
+        const investment4 = await icoCrowdsaleInstance.investments(4);
 
         assert.equal(investment4[0], activeInvestor1);      // Investor
         assert.equal(investment4[1], activeInvestor1);      // Beneficiary
@@ -536,11 +536,6 @@ contract('IcoCrowdsale', (accounts) => {
         const investment2   = await icoCrowdsaleInstance.investments(2);
         const investment3   = await icoCrowdsaleInstance.investments(3);
         const investment4   = await icoCrowdsaleInstance.investments(4);
-        const two           = new BigNumber(web3.toWei(2, 'ether'));
-        const five          = new BigNumber(web3.toWei(5, 'ether'));
-        const nine          = new BigNumber(web3.toWei(9, 'ether'));
-        const fourteen      = new BigNumber(web3.toWei(14, 'ether'));
-        const twenty        = new BigNumber(web3.toWei(20, 'ether'));
 
         assert.equal(investment[0], activeInvestor2);   // Investor
         assert.equal(investment[1], activeInvestor1);   // Beneficiary
@@ -590,7 +585,6 @@ contract('IcoCrowdsale', (accounts) => {
 
         const investment4   = await icoCrowdsaleInstance.investments(4);
         const events        = getEvents(tx, 'ChangedInvestmentConfirmation');
-        const twenty        = new BigNumber(web3.toWei(20, 'ether'));
 
         assert.equal(investment4[0], activeInvestor1);      // Investor
         assert.equal(investment4[1], activeInvestor1);      // Beneficiary
@@ -624,11 +618,6 @@ contract('IcoCrowdsale', (accounts) => {
         const investment2   = await icoCrowdsaleInstance.investments(2);
         const investment3   = await icoCrowdsaleInstance.investments(3);
         const investment4   = await icoCrowdsaleInstance.investments(4);
-        const two           = new BigNumber(web3.toWei(2, 'ether'));
-        const five          = new BigNumber(web3.toWei(5, 'ether'));
-        const nine          = new BigNumber(web3.toWei(9, 'ether'));
-        const fourteen      = new BigNumber(web3.toWei(14, 'ether'));
-        const twenty        = new BigNumber(web3.toWei(20, 'ether'));
 
         assert.equal(investment[0], activeInvestor2);   // Investor
         assert.equal(investment[1], activeInvestor1);   // Beneficiary
@@ -673,6 +662,26 @@ contract('IcoCrowdsale', (accounts) => {
     it('should fail, because we try to trigger batchConfirmPayments with non manager account', async () => {
         try {
             await icoCrowdsaleInstance.batchConfirmPayments([3, 4], {from: inactiveManager, gas: 1000000});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to trigger settleInvestment before confirmation period is over', async () => {
+        try {
+            await icoCrowdsaleInstance.settleInvestment(0, {from: activeManager, gas: 1000000});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to trigger batchSettleInvestments before confirmation period is over', async () => {
+        try {
+            await icoCrowdsaleInstance.batchSettleInvestments([0, 1, 2], {from: activeManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -728,13 +737,160 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    // @TODO: settleInvestment(uint256 investmentId) -> check investments from fallback test
-    it.skip('should run settleInvestment successfully', async () => {
+    it('should fail, because we try to trigger first settleInvestments with investmentId > 0', async () => {
+        try {
+            await icoCrowdsaleInstance.settleInvestment(1, {from: activeInvestor1, gas: 1000000});
 
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
     });
 
-    // @TODO: settleBatchInvestment(uint256 investmentId)
-    it.skip('should run settleBatchInvestment successfully', async () => {
+    it('should fail, because we try to trigger first batchSettleInvestments with wrong investmentId order', async () => {
+        try {
+            await icoCrowdsaleInstance.batchSettleInvestments([2, 1, 0], {from: activeInvestor2, gas: 1000000});
 
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should run settleInvestment for first investment successfully', async () => {
+        const investment    = await icoCrowdsaleInstance.investments(0);
+        const investment1   = await icoCrowdsaleInstance.investments(1);
+        const investment2   = await icoCrowdsaleInstance.investments(2);
+        const investment3   = await icoCrowdsaleInstance.investments(3);
+        const investment4   = await icoCrowdsaleInstance.investments(4);
+
+        investment[2].should.be.bignumber.equal(two);   // Amount
+        assert.isTrue(investment[3]);                   // Confirmed
+        assert.isFalse(investment[4]);                  // AttemptedSettlement
+        assert.isFalse(investment[5]);                  // CompletedSettlement
+
+        investment1[2].should.be.bignumber.equal(five); // Amount
+        assert.isTrue(investment1[3]);                  // Confirmed
+        assert.isFalse(investment1[4]);                 // AttemptedSettlement
+        assert.isFalse(investment1[5]);                 // CompletedSettlement
+
+        investment2[2].should.be.bignumber.equal(nine); // Amount
+        assert.isTrue(investment2[3]);                  // Confirmed
+        assert.isFalse(investment2[4]);                 // AttemptedSettlement
+        assert.isFalse(investment2[5]);                 // CompletedSettlement
+
+        investment3[2].should.be.bignumber.equal(fourteen); // Amount
+        assert.isFalse(investment3[3]);                     // Confirmed
+        assert.isFalse(investment3[4]);                     // AttemptedSettlement
+        assert.isFalse(investment3[5]);                     // CompletedSettlement
+
+        investment4[2].should.be.bignumber.equal(twenty);   // Amount
+        assert.isFalse(investment4[3]);                     // Confirmed
+        assert.isFalse(investment4[4]);                     // AttemptedSettlement
+        assert.isFalse(investment4[5]);                     // CompletedSettlement
+
+        // @TODO: Really from any account?
+        await icoCrowdsaleInstance.settleInvestment(0, {from: inactiveInvestor1, gas: 1000000});
+
+        // @TODO: No meaningful events for mint, transfer received
+
+        const investmentAfter    = await icoCrowdsaleInstance.investments(0);
+        const investmentAfter1   = await icoCrowdsaleInstance.investments(1);
+        const investmentAfter2   = await icoCrowdsaleInstance.investments(2);
+        const investmentAfter3   = await icoCrowdsaleInstance.investments(3);
+        const investmentAfter4   = await icoCrowdsaleInstance.investments(4);
+
+        // @TODO: Amount untouched?
+
+        investmentAfter[2].should.be.bignumber.equal(two);  // Amount
+        assert.isTrue(investmentAfter[3]);                  // Confirmed
+        assert.isTrue(investmentAfter[4]);                  // AttemptedSettlement
+        assert.isTrue(investmentAfter[5]);                  // CompletedSettlement
+
+        investmentAfter1[2].should.be.bignumber.equal(five);    // Amount
+        assert.isTrue(investmentAfter1[3]);                     // Confirmed
+        assert.isFalse(investmentAfter1[4]);                    // AttemptedSettlement
+        assert.isFalse(investmentAfter1[5]);                    // CompletedSettlement
+
+        investmentAfter2[2].should.be.bignumber.equal(nine);    // Amount
+        assert.isTrue(investmentAfter2[3]);                     // Confirmed
+        assert.isFalse(investmentAfter2[4]);                    // AttemptedSettlement
+        assert.isFalse(investmentAfter2[5]);                    // CompletedSettlement
+
+        investmentAfter3[2].should.be.bignumber.equal(fourteen);    // Amount
+        assert.isFalse(investmentAfter3[3]);                        // Confirmed
+        assert.isFalse(investmentAfter3[4]);                        // AttemptedSettlement
+        assert.isFalse(investmentAfter3[5]);                        // CompletedSettlement
+
+        investmentAfter4[2].should.be.bignumber.equal(twenty);  // Amount
+        assert.isFalse(investmentAfter4[3]);                    // Confirmed
+        assert.isFalse(investmentAfter4[4]);                    // AttemptedSettlement
+        assert.isFalse(investmentAfter4[5]);                    // CompletedSettlement
+    });
+
+    it('should run settleBatchInvestment successfully', async () => {
+        const investment    = await icoCrowdsaleInstance.investments(0);
+        const investment1   = await icoCrowdsaleInstance.investments(1);
+        const investment2   = await icoCrowdsaleInstance.investments(2);
+        const investment3   = await icoCrowdsaleInstance.investments(3);
+        const investment4   = await icoCrowdsaleInstance.investments(4);
+
+        investment[2].should.be.bignumber.equal(two);   // Amount
+        assert.isTrue(investment[3]);                   // Confirmed
+        assert.isTrue(investment[4]);                   // AttemptedSettlement
+        assert.isTrue(investment[5]);                   // CompletedSettlement
+
+        investment1[2].should.be.bignumber.equal(five); // Amount
+        assert.isTrue(investment1[3]);                  // Confirmed
+        assert.isFalse(investment1[4]);                 // AttemptedSettlement
+        assert.isFalse(investment1[5]);                 // CompletedSettlement
+
+        investment2[2].should.be.bignumber.equal(nine); // Amount
+        assert.isTrue(investment2[3]);                  // Confirmed
+        assert.isFalse(investment2[4]);                 // AttemptedSettlement
+        assert.isFalse(investment2[5]);                 // CompletedSettlement
+
+        investment3[2].should.be.bignumber.equal(fourteen); // Amount
+        assert.isFalse(investment3[3]);                     // Confirmed
+        assert.isFalse(investment3[4]);                     // AttemptedSettlement
+        assert.isFalse(investment3[5]);                     // CompletedSettlement
+
+        investment4[2].should.be.bignumber.equal(twenty);   // Amount
+        assert.isFalse(investment4[3]);                     // Confirmed
+        assert.isFalse(investment4[4]);                     // AttemptedSettlement
+        assert.isFalse(investment4[5]);                     // CompletedSettlement
+
+        await icoCrowdsaleInstance.batchSettleInvestments([0, 1, 2]);
+
+        const investmentAfter    = await icoCrowdsaleInstance.investments(0);
+        const investmentAfter1   = await icoCrowdsaleInstance.investments(1);
+        const investmentAfter2   = await icoCrowdsaleInstance.investments(2);
+        const investmentAfter3   = await icoCrowdsaleInstance.investments(3);
+        const investmentAfter4   = await icoCrowdsaleInstance.investments(4);
+
+        investmentAfter[2].should.be.bignumber.equal(two);  // Amount
+        assert.isTrue(investmentAfter[3]);                  // Confirmed
+        assert.isTrue(investmentAfter[4]);                  // AttemptedSettlement
+        assert.isTrue(investmentAfter[5]);                  // CompletedSettlement
+
+        investmentAfter1[2].should.be.bignumber.equal(five);   // Amount
+        assert.isTrue(investmentAfter1[3]);                    // Confirmed
+        assert.isTrue(investmentAfter1[4]);                    // AttemptedSettlement
+        assert.isTrue(investmentAfter1[5]);                    // CompletedSettlement
+
+        investmentAfter2[2].should.be.bignumber.equal(nine);   // Amount
+        assert.isTrue(investmentAfter2[3]);                    // Confirmed
+        assert.isTrue(investmentAfter2[4]);                    // AttemptedSettlement
+        assert.isTrue(investmentAfter2[5]);                    // CompletedSettlement
+
+        investmentAfter3[2].should.be.bignumber.equal(fourteen);    // Amount
+        assert.isFalse(investmentAfter3[3]);                        // Confirmed
+        assert.isFalse(investmentAfter3[4]);                        // AttemptedSettlement
+        assert.isFalse(investmentAfter3[5]);                        // CompletedSettlement
+
+        investmentAfter4[2].should.be.bignumber.equal(twenty);  // Amount
+        assert.isFalse(investmentAfter4[3]);                    // Confirmed
+        assert.isFalse(investmentAfter4[4]);                    // AttemptedSettlement
+        assert.isFalse(investmentAfter4[5]);                    // CompletedSettlement
     });
 });
