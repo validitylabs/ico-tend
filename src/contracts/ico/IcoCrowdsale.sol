@@ -163,6 +163,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function confirmPayment(uint256 investmentId) public {
         require(isManager[msg.sender]);
         require(now > endTime && now <= endTime.add(confirmationPeriod));
+        require(!confirmationPeriodOver && now <= endTime.add(confirmationPeriod));
 
         investments[investmentId].confirmed = true;
         ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, true);
@@ -171,6 +172,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function batchConfirmPayments(uint256[] investmentIds) public {
         require(isManager[msg.sender]);
         require(now > endTime && now <= endTime.add(confirmationPeriod));
+        require(!confirmationPeriodOver && now <= endTime.add(confirmationPeriod));
 
         uint256 investmentId;
 
@@ -184,6 +186,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function unConfirmPayment(uint256 investmentId) public {
         require(isManager[msg.sender]);
         require(now > endTime && now <= endTime.add(confirmationPeriod));
+        require(!confirmationPeriodOver && now <= endTime.add(confirmationPeriod));
 
         investments[investmentId].confirmed = false;
         ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, false);
@@ -207,7 +210,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     function settleInvestment(uint256 investmentId) public {
         // only possible after confirmationPeriodOver has been manually set OR after time is over
-        require(confirmationPeriodOver || now > startTime.add(confirmationPeriod));
+        require(confirmationPeriodOver || now > endTime.add(confirmationPeriod));
 
         // investments have to be processed in right order
         // unless we're at first investment, the previous has needs to have undergone an attempted settlement
@@ -224,6 +227,9 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
             // calculate number of tokens to be issued to investor
             uint256 tokens = p.amount.mul(rate);
+
+            require(alreadyMinted.add(tokens) <= cap);
+            alreadyMinted = alreadyMinted.add(tokens);
 
             // mint tokens for investor
             token.mint(p.beneficiary, tokens);
