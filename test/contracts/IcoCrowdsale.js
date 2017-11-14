@@ -307,12 +307,45 @@ contract('IcoCrowdsale', (accounts) => {
         await waitNDays(35);
     });
 
+    it('should fail, because we try to trigger buyTokens as unwhitelisted investor', async () => {
+        try {
+            await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: inactiveInvestor1, gas: 1000000, value: web3.toWei(2, 'ether')});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to trigger buyTokens with a too low investment', async () => {
+        try {
+            await icoCrowdsaleInstance.buyTokens(
+                activeInvestor1,
+                {from: inactiveInvestor1, gas: 1000000, value: web3.toWei(1, 'ether')}
+            );
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
     it('should buyTokens properly', async () => {
         const zero  = new BigNumber(0);
         const tx    = await icoCrowdsaleInstance.buyTokens(
             activeInvestor1,
             {from: activeInvestor2, gas: 1000000, value: web3.toWei(2, 'ether')}
         );
+
+        const investment    = await icoCrowdsaleInstance.investments(0);
+        const two           = new BigNumber(web3.toWei(2, 'ether'));
+
+        assert.equal(investment[0], activeInvestor2);   // Investor
+        assert.equal(investment[1], activeInvestor1);   // Beneficiary
+        investment[2].should.be.bignumber.equal(two);   // Amount
+        assert.isFalse(investment[3]);                  // Confirmed
+        assert.isFalse(investment[4]);                  // AttemptedSettlement
+        assert.isFalse(investment[5]);                  // CompletedSettlement
 
         // Testing events
         const events = getEvents(tx, 'TokenPurchase');
@@ -324,32 +357,23 @@ contract('IcoCrowdsale', (accounts) => {
         events[0].amount.should.be.bignumber.equal(zero);
     });
 
-    it('should fail, because we try to trigger buyTokens as unwhitelisted investor', async () => {
-        try {
-            await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: inactiveInvestor1, gas: 1000000, value: web3.toWei(2, 'ether')});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
-    });
-
-    // @TODO: check investment fail for 1 ETH contribution (under 500CHF), e.g.:
-    /*const tx1   = await icoCrowdsaleInstance.sendTransaction({
-            from:   activeInvestor1,
-            value:  web3.toWei(1, 'ether'),
-            gas:    1000000
-        });
-        */
-
-    // @TODO: Check investments (via fallback call)
     it('should call the fallback function successfully', async () => {
         const zero  = new BigNumber(0);
         const tx1   = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor1,
-            value:  web3.toWei(2, 'ether'),
+            value:  web3.toWei(3, 'ether'),
             gas:    1000000
         });
+
+        const investment1   = await icoCrowdsaleInstance.investments(1);
+        const five          = new BigNumber(web3.toWei(5, 'ether'));
+
+        assert.equal(investment1[0], activeInvestor1);   // Investor
+        assert.equal(investment1[1], activeInvestor1);   // Beneficiary
+        investment1[2].should.be.bignumber.equal(five);  // Amount
+        assert.isFalse(investment1[3]);                  // Confirmed
+        assert.isFalse(investment1[4]);                  // AttemptedSettlement
+        assert.isFalse(investment1[5]);                  // CompletedSettlement
 
         // Testing events
         const events1 = getEvents(tx1, 'TokenPurchase');
@@ -357,15 +381,24 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events1[0].purchaser, activeInvestor1, 'activeInvestor1 does not match purchaser');
         assert.equal(events1[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
 
-        events1[0].value.should.be.bignumber.equal(web3.toWei(2, 'ether'));
+        events1[0].value.should.be.bignumber.equal(web3.toWei(3, 'ether'));
         events1[0].amount.should.be.bignumber.equal(zero);
 
         const tx2   = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor1,
-            value:  web3.toWei(3, 'ether'),
+            value:  web3.toWei(4, 'ether'),
             gas:    1000000
         });
-        // @TODO: here read investment[2] (or whatever the index is) and check if it got written to storage too
+
+        const investment2   = await icoCrowdsaleInstance.investments(2);
+        const nine          = new BigNumber(web3.toWei(9, 'ether'));
+
+        assert.equal(investment2[0], activeInvestor1);   // Investor
+        assert.equal(investment2[1], activeInvestor1);   // Beneficiary
+        investment2[2].should.be.bignumber.equal(nine);  // Amount
+        assert.isFalse(investment2[3]);                  // Confirmed
+        assert.isFalse(investment2[4]);                  // AttemptedSettlement
+        assert.isFalse(investment2[5]);                  // CompletedSettlement
 
         // Testing events
         const events2 = getEvents(tx2, 'TokenPurchase');
@@ -373,15 +406,24 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events2[0].purchaser, activeInvestor1, 'activeInvestor1 does not match purchaser');
         assert.equal(events2[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
 
-        events2[0].value.should.be.bignumber.equal(web3.toWei(3, 'ether'));
+        events2[0].value.should.be.bignumber.equal(web3.toWei(4, 'ether'));
         events2[0].amount.should.be.bignumber.equal(zero);
 
         const tx3   = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor2,
-            value:  web3.toWei(3, 'ether'),
+            value:  web3.toWei(5, 'ether'),
             gas:    1000000
         });
-        // @TODO: here read investment[2] (or whatever the index is) and check if it got written to storage too
+
+        const investment3   = await icoCrowdsaleInstance.investments(3);
+        const fourteen      = new BigNumber(web3.toWei(14, 'ether'));
+
+        assert.equal(investment3[0], activeInvestor2);      // Investor
+        assert.equal(investment3[1], activeInvestor2);      // Beneficiary
+        investment3[2].should.be.bignumber.equal(fourteen); // Amount
+        assert.isFalse(investment3[3]);                     // Confirmed
+        assert.isFalse(investment3[4]);                     // AttemptedSettlement
+        assert.isFalse(investment3[5]);                     // CompletedSettlement
 
         // Testing events
         const events3 = getEvents(tx3, 'TokenPurchase');
@@ -389,14 +431,24 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events3[0].purchaser, activeInvestor2, 'activeInvestor2 does not match purchaser');
         assert.equal(events3[0].beneficiary, activeInvestor2, 'activeInvestor2 does not match beneficiary');
 
-        events3[0].value.should.be.bignumber.equal(web3.toWei(3, 'ether'));
+        events3[0].value.should.be.bignumber.equal(web3.toWei(5, 'ether'));
         events3[0].amount.should.be.bignumber.equal(zero);
 
         const tx4   = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor1,
-            value:  web3.toWei(2, 'ether'),
+            value:  web3.toWei(6, 'ether'),
             gas:    1000000
         });
+
+        const investment4   = await icoCrowdsaleInstance.investments(4);
+        const twenty        = new BigNumber(web3.toWei(20, 'ether'));
+
+        assert.equal(investment4[0], activeInvestor1);      // Investor
+        assert.equal(investment4[1], activeInvestor1);      // Beneficiary
+        investment4[2].should.be.bignumber.equal(twenty);   // Amount
+        assert.isFalse(investment4[3]);                     // Confirmed
+        assert.isFalse(investment4[4]);                     // AttemptedSettlement
+        assert.isFalse(investment4[5]);                     // CompletedSettlement
 
         // Testing events
         const events4 = getEvents(tx4, 'TokenPurchase');
@@ -404,9 +456,8 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events4[0].purchaser, activeInvestor1, 'activeInvestor1 does not match purchaser');
         assert.equal(events4[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
 
-        events4[0].value.should.be.bignumber.equal(web3.toWei(2, 'ether'));
+        events4[0].value.should.be.bignumber.equal(web3.toWei(6, 'ether'));
         events4[0].amount.should.be.bignumber.equal(zero);
-        // @TODO: here read investment[2] (or whatever the index is) and check if it got written to storage too
     });
 
     it('should fail, because we try to trigger mintTokenPreSale in contribution period', async () => {
