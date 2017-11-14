@@ -193,6 +193,24 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
+    it('should fail, because we try to run batchWhiteListInvestors with a non manager account', async () => {
+        try {
+            await icoCrowdsaleInstance.batchWhiteListInvestors([activeInvestor1, activeInvestor2], {from: activeInvestor2, gas: 1000000});
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to run unWhiteListInvestor with a non manager account', async () => {
+        try {
+            await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor1, {from: activeInvestor2, gas: 1000000});
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
     it('should whitelist 2 investors by batch function', async () => {
         await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor1, {from: owner, gas: 1000000});
         await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor2, {from: owner, gas: 1000000});
@@ -269,7 +287,7 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    it('should mint tokens for presale as owner', async () => {
+    it('should mint tokens for presale', async () => {
         const activeInvestor1Balance1   = await icoTokenInstance.balanceOf(activeInvestor1);
         const activeInvestor2Balance1   = await icoTokenInstance.balanceOf(activeInvestor2);
         const tenB                       = new BigNumber(10);
@@ -514,6 +532,36 @@ contract('IcoCrowdsale', (accounts) => {
     it('should fail, because we try to run finaliseConfirmationPeriod with a non manager account', async () => {
         try {
             await icoCrowdsaleInstance.finaliseConfirmationPeriod({from: activeInvestor1, gas: 1000000});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to trigger unConfirmPayment before Confirmation period', async () => {
+        try {
+            await icoCrowdsaleInstance.unConfirmPayment(0, {from: activeManager, gas: 1000000});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to trigger batchConfirmPayments before Confirmation period', async () => {
+        try {
+            await icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: activeManager, gas: 1000000});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should fail, because we try to trigger confirmPayment before Confirmation period', async () => {
+        try {
+            await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -925,11 +973,27 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(investmentAfter4[5]);                    // CompletedSettlement
     });
 
+    // it('should turn the time 10 days forward to Confirmation period', async () => {
+    //     console.log('[ Confirmation period ]'.yellow);
+    //     await waitNDays(50);
+    // });
+
+    // it('should fail, because we try to mint tokens for presale in confirmation period', async () => {
+    //     try {
+    //         await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1, {from: activeManager, gas: 1000000});
+
+    //         assert.fail('should have thrown before');
+    //     } catch (e) {
+    //         assertJump(e);
+    //     }
+    // });
+
     it.skip('should build instance of icoToken, then check if it really is paused and unpause it', async () => {
-        let paused = await icoTokenInstance.paused();
+        let paused          = await icoTokenInstance.paused();
+        const tokenOwner    = await icoTokenInstance.owner();
 
         if (paused === true) {
-            await icoTokenInstance.unpause({from: owner});
+            await icoTokenInstance.unpause({from: tokenOwner});
         }
 
         paused = await icoTokenInstance.paused();

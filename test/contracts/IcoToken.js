@@ -59,13 +59,10 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should unpause ICO token correctly', async () => {
-        const tx = await icoTokenInstance.unpause({from: owner});
+        await icoTokenInstance.unpause({from: owner});
+        const paused = await icoTokenInstance.paused();
 
-        // Testing event
-        const events = getEvents(tx, 'Unpause');
-
-        assert.isArray(events, 'Events expected to be an array');
-        assert.equal(events.length, 1, 'Events length expected to have a length of 1');
+        assert.isFalse(paused);
     });
 
     it('should add treasurer accounts', async () => {
