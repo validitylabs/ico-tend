@@ -1069,7 +1069,6 @@ contract('IcoCrowdsale', (accounts) => {
         investmentAfter[2].should.be.bignumber.equal(web3.toWei(7, 'ether'));  // Amount
         assert.isFalse(investmentAfter[3]);                  // Confirmed
         assert.isTrue(investmentAfter[4]);                  // AttemptedSettlement
-        assert.isFalse(investmentAfter[5]);                  // CompletedSettlement
     });
     
 });
