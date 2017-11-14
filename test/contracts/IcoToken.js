@@ -1,8 +1,7 @@
 /**
  * Test for IcoToken
  *
- * yarn run dev
- * > test ./test/contracts/IcoToken.js
+ * @author Validity Labs AG <info@validitylabs.org>
  */
 
 const IcoToken = artifacts.require('./IcoToken');

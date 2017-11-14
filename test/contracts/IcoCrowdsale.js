@@ -1,8 +1,7 @@
 /**
  * Test for IcoCrowdsale
  *
- * yarn run dev
- * > test ./test/contracts/IcoCrowdsale.js
+ * @author Validity Labs AG <info@validitylabs.org>
  */
 import {waitNDays, getEvents, debug, BigNumber, cnf, increaseTimeTo, duration} from './helpers/tools'; // eslint-disable-line
 

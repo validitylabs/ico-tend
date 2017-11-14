@@ -3,7 +3,7 @@
  * Simple time and capped based crowdsale.
  *
  * @version 1.0
- * @author Patrice Juergens <pj@validitylabs.org>
+ * @author Validity Labs AG <info@validitylabs.org>
  */
 pragma solidity ^0.4.18;
 
