@@ -494,7 +494,6 @@ contract('IcoCrowdsale', (accounts) => {
         );
 
         const investment    = await icoCrowdsaleInstance.investments(5);
-        console.log('iiiiiiiiii: ' + investment);
 
         assert.equal(investment[0], activeInvestor2);   // Investor
         assert.equal(investment[1], tokenAddress);      // Beneficiary
