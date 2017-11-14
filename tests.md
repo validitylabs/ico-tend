@@ -53,3 +53,11 @@ Complete test procedure with asserts and events, grouped by test cases.
 
 
 ## IcoCrowdsale
+Investments:
+0: 2
+1: 3
+2: 4
+3: 5
+4: 6
+
+test ./test/contracts/IcoCrowdsale.js

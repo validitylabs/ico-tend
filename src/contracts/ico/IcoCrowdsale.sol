@@ -149,7 +149,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         TokenPurchase(msg.sender, beneficiary, weiAmount, 0);
 
         // register payment so that later on it can be confirmed (and tokens issued and Ether paid out)
-        Payment memory newPayment = Payment(msg.sender, beneficiary, weiRaised, false, false, false);
+        Payment memory newPayment = Payment(msg.sender, beneficiary, weiAmount, false, false, false);
         investments.push(newPayment);
     }
 
@@ -236,7 +236,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             require(alreadyMinted.add(tokens) <= cap);
             alreadyMinted = alreadyMinted.add(tokens);
 
-            // mint tokens for investor
+            // mint tokens for beneficiary
             token.mint(p.beneficiary, tokens);
 
             // send Ether to project wallet
