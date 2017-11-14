@@ -607,11 +607,56 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should run unConfirmPayment() successfully', async () => {
-        const tx        = await icoCrowdsaleInstance.unConfirmPayment(2, {from: activeManager, gas: 1000000});
-        const events    = getEvents(tx, 'ChangedInvestmentConfirmation');
+        const tx            = await icoCrowdsaleInstance.unConfirmPayment(3, {from: activeManager, gas: 1000000});
+        const events        = getEvents(tx, 'ChangedInvestmentConfirmation');
+        const investment    = await icoCrowdsaleInstance.investments(0);
+        const investment1   = await icoCrowdsaleInstance.investments(1);
+        const investment2   = await icoCrowdsaleInstance.investments(2);
+        const investment3   = await icoCrowdsaleInstance.investments(3);
+        const investment4   = await icoCrowdsaleInstance.investments(4);
+        const two           = new BigNumber(web3.toWei(2, 'ether'));
+        const five          = new BigNumber(web3.toWei(5, 'ether'));
+        const nine          = new BigNumber(web3.toWei(9, 'ether'));
+        const fourteen      = new BigNumber(web3.toWei(14, 'ether'));
+        const twenty        = new BigNumber(web3.toWei(20, 'ether'));
 
-        assert.equal(events[0].investmentId, 2);
-        assert.equal(events[0].investor, activeInvestor1);
+        assert.equal(investment[0], activeInvestor2);   // Investor
+        assert.equal(investment[1], activeInvestor1);   // Beneficiary
+        investment[2].should.be.bignumber.equal(two);   // Amount
+        assert.isTrue(investment[3]);                   // Confirmed
+        assert.isFalse(investment[4]);                  // AttemptedSettlement
+        assert.isFalse(investment[5]);                  // CompletedSettlement
+
+        assert.equal(investment1[0], activeInvestor1);   // Investor
+        assert.equal(investment1[1], activeInvestor1);   // Beneficiary
+        investment1[2].should.be.bignumber.equal(five);  // Amount
+        assert.isTrue(investment1[3]);                  // Confirmed
+        assert.isFalse(investment1[4]);                  // AttemptedSettlement
+        assert.isFalse(investment1[5]);                  // CompletedSettlement
+
+        assert.equal(investment2[0], activeInvestor1);   // Investor
+        assert.equal(investment2[1], activeInvestor1);   // Beneficiary
+        investment2[2].should.be.bignumber.equal(nine);  // Amount
+        assert.isTrue(investment2[3]);                  // Confirmed
+        assert.isFalse(investment2[4]);                  // AttemptedSettlement
+        assert.isFalse(investment2[5]);                  // CompletedSettlement
+
+        assert.equal(investment3[0], activeInvestor2);      // Investor
+        assert.equal(investment3[1], activeInvestor2);      // Beneficiary
+        investment3[2].should.be.bignumber.equal(fourteen); // Amount
+        assert.isFalse(investment3[3]);                     // Confirmed
+        assert.isFalse(investment3[4]);                     // AttemptedSettlement
+        assert.isFalse(investment3[5]);                     // CompletedSettlement
+
+        assert.equal(investment4[0], activeInvestor1);      // Investor
+        assert.equal(investment4[1], activeInvestor1);      // Beneficiary
+        investment4[2].should.be.bignumber.equal(twenty);   // Amount
+        assert.isFalse(investment4[3]);                     // Confirmed
+        assert.isFalse(investment4[4]);                     // AttemptedSettlement
+        assert.isFalse(investment4[5]);                     // CompletedSettlement
+
+        assert.equal(events[0].investmentId, 3);
+        assert.equal(events[0].investor, activeInvestor2);
         assert.isFalse(events[0].confirmed);
     });
 
