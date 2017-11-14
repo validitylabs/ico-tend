@@ -799,7 +799,20 @@ contract('IcoCrowdsale', (accounts) => {
         // @TODO: check web3.eth.getBalance(icoCrowdsaleInstance.address)
         // @TODO: check balanceOf(tokenOolderXY)
 
-        const tx = await icoCrowdsaleInstance.settleInvestment(0, {from: inactiveInvestor1, gas: 1000000});
+        const balanceContractBefore     = await web3.eth.getBalance(icoCrowdsaleInstance.address);
+        const balanceInvestor1Before    = await icoTokenInstance.balanceOf(activeInvestor1);
+        const balanceInvestor2Before    = await icoTokenInstance.balanceOf(activeInvestor2);
+        console.log(balanceContractBefore.toNumber(), balanceInvestor1Before.toNumber(), balanceInvestor2Before.toNumber());
+
+        await icoCrowdsaleInstance.settleInvestment(0, {from: inactiveInvestor1, gas: 1000000});
+
+        const balanceContractAfter     = await web3.eth.getBalance(icoCrowdsaleInstance.address);
+        const balanceInvestor1After    = await icoTokenInstance.balanceOf(activeInvestor1);
+        const balanceInvestor2After    = await icoTokenInstance.balanceOf(activeInvestor2);
+        console.log(balanceContractAfter.toNumber(), balanceInvestor1After.toNumber(), balanceInvestor2After.toNumber());
+
+        // 20000000000000000000 10 5
+        // 18000000000000000000 666000000000000000000 5
 
         const investmentAfter    = await icoCrowdsaleInstance.investments(0);
         const investmentAfter1   = await icoCrowdsaleInstance.investments(1);
