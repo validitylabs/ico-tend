@@ -749,6 +749,16 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
+    it('should fail, because we try to trigger unpauseToken before confirmation period is over', async () => {
+        try {
+            await icoCrowdsaleInstance.unpauseToken();
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
     /**
      * [ Confirmation period over ]
      */
@@ -984,16 +994,13 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(investmentAfter4[5]);                    // CompletedSettlement
     });
 
-    // it.skip('should build instance of icoToken, then check if it really is paused and unpause it', async () => {
-    //     let paused          = await icoTokenInstance.paused();
-    //     const tokenOwner    = await icoTokenInstance.owner();
+    it('should call unpauseToken successfully', async () => {
+        let paused = await icoTokenInstance.paused();
+        assert.isTrue(paused);
 
-    //     if (paused === true) {
-    //         await icoTokenInstance.unpause({from: tokenOwner});
-    //     }
+        await icoCrowdsaleInstance.unpauseToken();
 
-    //     paused = await icoTokenInstance.paused();
-
-    //     assert.isFalse(paused);
-    // });
+        paused = await icoTokenInstance.paused();
+        assert.isFalse(paused);
+    });
 });
