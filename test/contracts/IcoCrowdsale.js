@@ -763,6 +763,16 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
+    it('should fail, because we try to trigger unpauseToken before confirmation period is over', async () => {
+        try {
+            await icoCrowdsaleInstance.unpauseToken();
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
     /**
      * [ Confirmation period over ]
      */
@@ -1000,14 +1010,14 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should run settleInvestment for investment 3 (not confirmed)', async () => {
         const investment3 = await icoCrowdsaleInstance.investments(3);
-        
+
         assert.equal(investment3[0], activeInvestor2);      // Investor
         assert.equal(investment3[1], activeInvestor2);      // Beneficiary
         investment3[2].should.be.bignumber.equal(web3.toWei(5, 'ether')); // Amount
         assert.isFalse(investment3[3]);                     // Confirmed
         assert.isFalse(investment3[4]);                     // AttemptedSettlement
         assert.isFalse(investment3[5]);                     // CompletedSettlement
-        
+
         const etherContractBefore     = await web3.eth.getBalance(icoCrowdsaleInstance.address);
         const etherWalletBefore       = await web3.eth.getBalance(wallet);
         const etherInvestorBefore     = await web3.eth.getBalance(activeInvestor2);
@@ -1027,17 +1037,11 @@ contract('IcoCrowdsale', (accounts) => {
         tokenInvestor3Before.should.be.bignumber.equal(5);
     });
 
-
-    // it.skip('should build instance of icoToken, then check if it really is paused and unpause it', async () => {
-    //     let paused          = await icoTokenInstance.paused();
-    //     const tokenOwner    = await icoTokenInstance.owner();
-
-    //     if (paused === true) {
-    //         await icoTokenInstance.unpause({from: tokenOwner});
-    //     }
-
-    //     paused = await icoTokenInstance.paused();
-
-    //     assert.isFalse(paused);
-    // });
+    it('should call unpauseToken successfully', async () => {
+        let paused = await icoTokenInstance.paused();
+        assert.isTrue(paused);
+        await icoCrowdsaleInstance.unpauseToken();
+        paused = await icoTokenInstance.paused();
+        assert.isFalse(paused);
+    });
 });
