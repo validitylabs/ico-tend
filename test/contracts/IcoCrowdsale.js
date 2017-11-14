@@ -924,4 +924,16 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(investmentAfter4[4]);                    // AttemptedSettlement
         assert.isFalse(investmentAfter4[5]);                    // CompletedSettlement
     });
+
+    it.skip('should build instance of icoToken, then check if it really is paused and unpause it', async () => {
+        let paused = await icoTokenInstance.paused();
+
+        if (paused === true) {
+            await icoTokenInstance.unpause({from: owner});
+        }
+
+        paused = await icoTokenInstance.paused();
+
+        assert.isFalse(paused);
+    });
 });
