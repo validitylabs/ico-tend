@@ -500,6 +500,16 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
+    it('should fail, because we try to run finaliseConfirmationPeriod with a non manager account', async () => {
+        try {
+            await icoCrowdsaleInstance.finaliseConfirmationPeriod({from: activeInvestor1, gas: 1000000});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
     /**
      * [ Confirmation period ]
      */
@@ -662,7 +672,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to trigger batchConfirmPayments with non manager account', async () => {
         try {
-            await icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: inactiveManager, gas: 1000000});
+            await icoCrowdsaleInstance.batchConfirmPayments([3, 4], {from: inactiveManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -678,6 +688,16 @@ contract('IcoCrowdsale', (accounts) => {
         await waitNDays(30);
     });
 
+    // @FIXME:
+    // it('should run finaliseConfirmationPeriod successfully', async () => {
+    //     const confirmationPeriodOverBefore  = await icoCrowdsaleInstance.confirmationPeriodOver();
+    //     icoCrowdsaleInstance.finaliseConfirmationPeriod({from: owner, gas: 1000000});
+    //     const confirmationPeriodOverAfter   = await icoCrowdsaleInstance.confirmationPeriodOver();
+
+    //     assert.isFalse(confirmationPeriodOverBefore);
+    //     assert.isTrue(confirmationPeriodOverAfter);
+    // });
+
     it('should fail, because we try to trigger confirmPayment after Confirmation period is over', async () => {
         try {
             await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000});
@@ -690,7 +710,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to trigger batchConfirmPayments after Confirmation period is over', async () => {
         try {
-            await icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: activeManager, gas: 1000000});
+            await icoCrowdsaleInstance.batchConfirmPayments([3, 4], {from: activeManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -700,7 +720,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to trigger unConfirmPayment after Confirmation period is over', async () => {
         try {
-            await icoCrowdsaleInstance.unConfirmPayment(0, {from: inactiveManager, gas: 1000000});
+            await icoCrowdsaleInstance.unConfirmPayment(0, {from: activeManager, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
