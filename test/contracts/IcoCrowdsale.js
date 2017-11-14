@@ -255,7 +255,8 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to mint tokens more as cap limit allows', async () => {
         try {
-            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, (cnf.cap + 1), {from: activeManager, gas: 1000000});
+            // @TODO: check cap
+            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, (cnf.cap + 1));
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -491,7 +492,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to trigger mintTokenPreSale in contribution period', async () => {
         try {
-            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3, {from: activeInvestor2, gas: 1000000});
+            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3);
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -579,7 +580,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to trigger mintTokenPreSale in Confirmation period', async () => {
         try {
-            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3, {from: activeInvestor2, gas: 1000000});
+            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3);
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -760,6 +761,16 @@ contract('IcoCrowdsale', (accounts) => {
 
         assert.isFalse(confirmationPeriodOverBefore);
         assert.isTrue(confirmationPeriodOverAfter);
+    });
+
+    it('should fail, because we try to mint tokens for presale after Confirmation period is over', async () => {
+        try {
+            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1);
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
     });
 
     it('should fail, because we try to trigger confirmPayment after Confirmation period is over', async () => {
@@ -973,31 +984,16 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(investmentAfter4[5]);                    // CompletedSettlement
     });
 
-    // it('should turn the time 10 days forward to Confirmation period', async () => {
-    //     console.log('[ Confirmation period ]'.yellow);
-    //     await waitNDays(50);
-    // });
+    // it.skip('should build instance of icoToken, then check if it really is paused and unpause it', async () => {
+    //     let paused          = await icoTokenInstance.paused();
+    //     const tokenOwner    = await icoTokenInstance.owner();
 
-    // it('should fail, because we try to mint tokens for presale in confirmation period', async () => {
-    //     try {
-    //         await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1, {from: activeManager, gas: 1000000});
-
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
+    //     if (paused === true) {
+    //         await icoTokenInstance.unpause({from: tokenOwner});
     //     }
+
+    //     paused = await icoTokenInstance.paused();
+
+    //     assert.isFalse(paused);
     // });
-
-    it.skip('should build instance of icoToken, then check if it really is paused and unpause it', async () => {
-        let paused          = await icoTokenInstance.paused();
-        const tokenOwner    = await icoTokenInstance.owner();
-
-        if (paused === true) {
-            await icoTokenInstance.unpause({from: tokenOwner});
-        }
-
-        paused = await icoTokenInstance.paused();
-
-        assert.isFalse(paused);
-    });
 });
