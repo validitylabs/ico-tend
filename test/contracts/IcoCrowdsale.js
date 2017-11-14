@@ -836,7 +836,17 @@ contract('IcoCrowdsale', (accounts) => {
         // @TODO: check balanceOf(tokenOolderXY)
     });
 
-    it.skip('should run settleBatchInvestment successfully', async () => {
+    it('should fail, because we try to settle an already settled investement again', async () => {
+        try {
+            await icoCrowdsaleInstance.settleInvestment(0, {from: activeInvestor2, gas: 1000000});
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
+    it('should run settleBatchInvestment successfully', async () => {
         const investment    = await icoCrowdsaleInstance.investments(0);
         const investment1   = await icoCrowdsaleInstance.investments(1);
         const investment2   = await icoCrowdsaleInstance.investments(2);
@@ -868,7 +878,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(investment4[4]);                     // AttemptedSettlement
         assert.isFalse(investment4[5]);                     // CompletedSettlement
 
-        await icoCrowdsaleInstance.batchSettleInvestments([0, 1, 2]); // @FIXME: should fail -> separate test
+        await icoCrowdsaleInstance.batchSettleInvestments([1, 2]);
 
         const investmentAfter    = await icoCrowdsaleInstance.investments(0);
         const investmentAfter1   = await icoCrowdsaleInstance.investments(1);
