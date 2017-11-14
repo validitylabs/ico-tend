@@ -486,6 +486,24 @@ contract('IcoCrowdsale', (accounts) => {
         events4[0].amount.should.be.bignumber.equal(zero);
     });
 
+    it('should buyTokens (for token contract) properly', async () => {
+        const tokenAddress = await icoCrowdsaleInstance.token();
+
+        const tx    = await icoCrowdsaleInstance.buyTokens(
+            tokenAddress,
+            {from: activeInvestor2, gas: 1000000, value: web3.toWei(7, 'ether')}
+        );
+
+        const investment    = await icoCrowdsaleInstance.investments(6);
+
+        assert.equal(investment[0], activeInvestor2);   // Investor
+        assert.equal(investment[1], tokenAddress);      // Beneficiary
+        investment[2].should.be.bignumber.equal(web3.toWei(7, 'ether'));   // Amount
+        assert.isFalse(investment[3]);                  // Confirmed
+        assert.isFalse(investment[4]);                  // AttemptedSettlement
+        assert.isFalse(investment[5]);                  // CompletedSettlement
+    });
+    
     it('should fail, because we try to trigger mintTokenPreSale in contribution period', async () => {
         try {
             await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3);
