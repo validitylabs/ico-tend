@@ -255,8 +255,8 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to mint tokens more as cap limit allows', async () => {
         try {
-            // @TODO: check cap
-            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, (cnf.cap + 1));
+            const big = new BigNumber(95000000 * 1e18);
+            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, (cnf.cap + big.add(1)));
 
             assert.fail('should have thrown before');
         } catch (e) {
