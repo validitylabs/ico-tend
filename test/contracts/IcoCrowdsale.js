@@ -7,7 +7,6 @@ import {waitNDays, getEvents, debug, BigNumber, cnf, increaseTimeTo, duration} f
 
 const IcoCrowdsale  = artifacts.require('./IcoCrowdsale');
 const IcoToken      = artifacts.require('./IcoToken');
-const moment        = require('moment'); // eslint-disable-line
 const assertJump    = require('../../node_modules/zeppelin-solidity/test/helpers/assertJump');
 
 const should = require('chai') // eslint-disable-line
@@ -504,7 +503,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(investment[4]);                  // AttemptedSettlement
         assert.isFalse(investment[5]);                  // CompletedSettlement
     });
-    
+
     it('should fail, because we try to trigger mintTokenPreSale in contribution period', async () => {
         try {
             await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3);
