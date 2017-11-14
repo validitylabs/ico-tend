@@ -20,7 +20,6 @@ const zero      = new BigNumber(0);
 const two       = new BigNumber(web3.toWei(2, 'ether'));
 const five      = new BigNumber(web3.toWei(5, 'ether'));
 const nine      = new BigNumber(web3.toWei(9, 'ether'));
-const ten       = new BigNumber(10);
 const fourteen  = new BigNumber(web3.toWei(14, 'ether'));
 const twenty    = new BigNumber(web3.toWei(20, 'ether'));
 
@@ -692,20 +691,16 @@ contract('IcoCrowdsale', (accounts) => {
     /**
      * [ Confirmation period over ]
      */
-    it('should turn the time 30 days forward, after the Confirmation period is over', async () => {
+    it('should run finaliseConfirmationPeriod successfully before confirmation period is over', async () => {
         console.log('[ Confirmation period over ]'.yellow);
-        await waitNDays(30);
+
+        const confirmationPeriodOverBefore  = await icoCrowdsaleInstance.confirmationPeriodOver();
+        await icoCrowdsaleInstance.finaliseConfirmationPeriod({from: owner, gas: 1000000});
+        const confirmationPeriodOverAfter   = await icoCrowdsaleInstance.confirmationPeriodOver();
+
+        assert.isFalse(confirmationPeriodOverBefore);
+        assert.isTrue(confirmationPeriodOverAfter);
     });
-
-    // @FIXME:
-    // it('should run finaliseConfirmationPeriod successfully', async () => {
-    //     const confirmationPeriodOverBefore  = await icoCrowdsaleInstance.confirmationPeriodOver();
-    //     icoCrowdsaleInstance.finaliseConfirmationPeriod({from: owner, gas: 1000000});
-    //     const confirmationPeriodOverAfter   = await icoCrowdsaleInstance.confirmationPeriodOver();
-
-    //     assert.isFalse(confirmationPeriodOverBefore);
-    //     assert.isTrue(confirmationPeriodOverAfter);
-    // });
 
     it('should fail, because we try to trigger confirmPayment after Confirmation period is over', async () => {
         try {
