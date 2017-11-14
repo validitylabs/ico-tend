@@ -796,23 +796,26 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(investment4[4]);                     // AttemptedSettlement
         assert.isFalse(investment4[5]);                     // CompletedSettlement
 
-        // @TODO: check web3.eth.getBalance(icoCrowdsaleInstance.address)
-        // @TODO: check balanceOf(tokenOolderXY)
-
         const balanceContractBefore     = await web3.eth.getBalance(icoCrowdsaleInstance.address);
+        const balanceWalletBefore       = await web3.eth.getBalance(wallet);
         const balanceInvestor1Before    = await icoTokenInstance.balanceOf(activeInvestor1);
         const balanceInvestor2Before    = await icoTokenInstance.balanceOf(activeInvestor2);
-        console.log(balanceContractBefore.toNumber(), balanceInvestor1Before.toNumber(), balanceInvestor2Before.toNumber());
 
         await icoCrowdsaleInstance.settleInvestment(0, {from: inactiveInvestor1, gas: 1000000});
 
         const balanceContractAfter     = await web3.eth.getBalance(icoCrowdsaleInstance.address);
         const balanceInvestor1After    = await icoTokenInstance.balanceOf(activeInvestor1);
         const balanceInvestor2After    = await icoTokenInstance.balanceOf(activeInvestor2);
-        console.log(balanceContractAfter.toNumber(), balanceInvestor1After.toNumber(), balanceInvestor2After.toNumber());
 
-        // 20000000000000000000 10 5
-        // 18000000000000000000 666000000000000000000 5
+        balanceContractBefore.sub(balanceContractAfter).should.be.bignumber.equal(two);
+        balanceInvestor2Before.should.be.bignumber.equal(balanceInvestor2After);
+
+        const sixsixsix = new BigNumber(666);
+
+        balanceContractAfter.add(web3.toWei(102, 'ether')).should.be.bignumber.equal(balanceContractBefore.add(balanceWalletBefore));
+
+        balanceInvestor1Before.should.be.bignumber.equal(10);
+        balanceInvestor1After.should.be.bignumber.equal(web3.toWei(sixsixsix, 'ether').add(10));
 
         const investmentAfter    = await icoCrowdsaleInstance.investments(0);
         const investmentAfter1   = await icoCrowdsaleInstance.investments(1);
@@ -844,9 +847,6 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(investmentAfter4[3]);                    // Confirmed
         assert.isFalse(investmentAfter4[4]);                    // AttemptedSettlement
         assert.isFalse(investmentAfter4[5]);                    // CompletedSettlement
-
-        // @TODO: check web3.eth.getBalance(icoCrowdsaleInstance.address) -> should 0
-        // @TODO: check balanceOf(tokenOolderXY)
     });
 
     it('should fail, because we try to settle an already settled investement again', async () => {
