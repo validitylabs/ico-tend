@@ -212,9 +212,13 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         // only possible after confirmationPeriodOver has been manually set OR after time is over
         require(confirmationPeriodOver || now > endTime.add(confirmationPeriod));
 
+        Payment storage p = investments[investmentId];
+
+        // investment should not be settled already (prevent double token issueing or repayment)
+        require(!p.completedSettlement);
+
         // investments have to be processed in right order
         // unless we're at first investment, the previous has needs to have undergone an attempted settlement
-        Payment storage p = investments[investmentId];
         require(investmentId == 0 || investments[investmentId.sub(1)].attemptedSettlement);
 
         p.attemptedSettlement = true;
