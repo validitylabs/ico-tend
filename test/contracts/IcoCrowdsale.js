@@ -494,7 +494,8 @@ contract('IcoCrowdsale', (accounts) => {
             {from: activeInvestor2, gas: 1000000, value: web3.toWei(7, 'ether')}
         );
 
-        const investment    = await icoCrowdsaleInstance.investments(6);
+        const investment    = await icoCrowdsaleInstance.investments(5);
+        console.log('iiiiiiiiii: ' + investment);
 
         assert.equal(investment[0], activeInvestor2);   // Investor
         assert.equal(investment[1], tokenAddress);      // Beneficiary
@@ -763,9 +764,9 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    it('should fail, because we try to trigger unpauseToken before confirmation period is over', async () => {
+    it('should fail, because we try to trigger finalize before confirmation period is over', async () => {
         try {
-            await icoCrowdsaleInstance.unpauseToken();
+            await icoCrowdsaleInstance.finalize();
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -1037,11 +1038,39 @@ contract('IcoCrowdsale', (accounts) => {
         tokenInvestor3Before.should.be.bignumber.equal(5);
     });
 
-    it('should call unpauseToken successfully', async () => {
+    it('should call finalize successfully', async () => {
+        let tokenAddress = await icoCrowdsaleInstance.token();
+
         let paused = await icoTokenInstance.paused();
+        let owner = await icoTokenInstance.owner();
+        let isTreasurerBefore = await icoTokenInstance.isTreasurer(icoCrowdsaleInstance.address);
+        assert.isTrue(isTreasurerBefore);
         assert.isTrue(paused);
-        await icoCrowdsaleInstance.unpauseToken();
+
+        await icoCrowdsaleInstance.finalize();
+
         paused = await icoTokenInstance.paused();
         assert.isFalse(paused);
+
+        let isTreasurerAfter = await icoTokenInstance.isTreasurer(icoCrowdsaleInstance.address);
+        owner = await icoTokenInstance.owner();
+        assert.isFalse(isTreasurerAfter);
+        
     });
+
+    it('should settle unconfirmed investment non non-payable beneficiary wallet (token contract)', async () => {
+        let contractBalanceEthBefore = await web3.eth.getBalance(icoCrowdsaleInstance.address);
+        
+        await icoCrowdsaleInstance.batchSettleInvestments([4, 5]);
+        
+        let contractBalanceEthAfter = await web3.eth.getBalance(icoCrowdsaleInstance.address);        
+
+        const investmentAfter = await icoCrowdsaleInstance.investments(5);
+
+        investmentAfter[2].should.be.bignumber.equal(web3.toWei(7, 'ether'));  // Amount
+        assert.isFalse(investmentAfter[3]);                  // Confirmed
+        assert.isTrue(investmentAfter[4]);                  // AttemptedSettlement
+        assert.isFalse(investmentAfter[5]);                  // CompletedSettlement
+    });
+    
 });

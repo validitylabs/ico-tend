@@ -262,10 +262,19 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         }
     }
 
-    function unpauseToken() public {
+    function finalize() public {
         // only possible after confirmationPeriodOver has been manually set OR after time is over
         require(confirmationPeriodOver || now > endTime.add(confirmationPeriod));
         
         Pausable(token).unpause();
+
+        // this crowdsale also should not be treasurer of the token anymore
+        IcoToken(token).setTreasurer(this, false);
+
+        // until now the owner of the token is this crowdsale contract
+        // in order for a human owner to make use of the tokens onlyOwner functions
+        // we need to transfer the ownership
+        // in the end the owner of this crowdsale will also be the owner of the token
+        Ownable(token).transferOwnership(owner);
     }
 }

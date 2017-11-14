@@ -172,7 +172,6 @@ contract DividendToken is StandardToken, Ownable {
         require(endTime < now);
 
         currentDividend = this.balance;
-        // @TODO: check if msg.value is already added to this.balance before this function is over (I think so)
 
         // No active dividend cycle found, initialize new round
         endTime = now.add(dividendCycleTime);
