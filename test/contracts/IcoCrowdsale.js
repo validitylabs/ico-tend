@@ -335,6 +335,19 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
+    it('should fail, because we try to trigger buyTokens for beneficiary 0x0', async () => {
+        try {
+            await icoCrowdsaleInstance.buyTokens(
+                '0x0',
+                {from: activeInvestor1, gas: 1000000, value: web3.toWei(1, 'ether')}
+            );
+
+            assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
     it('should buyTokens properly', async () => {
         const tx    = await icoCrowdsaleInstance.buyTokens(
             activeInvestor1,
