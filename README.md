@@ -35,7 +35,7 @@ To deploy the ICO smart contracts, go into the projects root directory, and chan
 ```
 cd <project base directory>
 source ./initShell.sh
-yarn run develop
+yarn run dev
 ```
 
 Now you can compile, migrate and run tests.
