@@ -171,6 +171,13 @@ contract DividendToken is StandardToken, Ownable {
         require(isTreasurer[msg.sender]);
         require(endTime < now);
 
+        // pay back unclaimed dividend that might not have been claimed by owner yet
+        if (this.balance > msg.value) {
+            uint256 payout = this.balance.sub(msg.value);
+            owner.transfer(payout);
+            Reclaimed(payout, endTime, now);
+        }
+
         currentDividend = this.balance;
 
         // No active dividend cycle found, initialize new round

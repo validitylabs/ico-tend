@@ -1056,6 +1056,15 @@ contract('IcoCrowdsale', (accounts) => {
         
     });
 
+    it('should not mint more tokens after finalize()', async () => {
+        try {
+          await icoTokenInstance.mint(owner, 1, {from: owner, gas: 1000000});
+          assert.fail('should have thrown before');
+        } catch (e) {
+            assertJump(e);
+        }
+    });
+
     it('should settle unconfirmed investment non non-payable beneficiary wallet (token contract)', async () => {
         let contractBalanceEthBefore = await web3.eth.getBalance(icoCrowdsaleInstance.address);
         

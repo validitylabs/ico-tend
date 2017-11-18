@@ -447,4 +447,26 @@ contract('IcoToken', (accounts) => {
         tokenHolder1UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder1UnclaimedDividendAfter.plus(tokenHolder2UnclaimedDividendAfter));
         tokenHolder1Balance1.plus(tokenHolder2Balance1).should.be.bignumber.equal(tokenHolder1Balance2.plus(tokenHolder2Balance2));
     });
+    
+    it('should increase the owner\'s balance, because token balance is not 0 while doing a Payin. Token balance should be the same as the Payin afterwards', async() => {
+        const endTime       = await icoTokenInstance.endTime();
+        const newTime       = endTime + 1;
+        await increaseTimeTo(newTime);
+        // Dividends were not claimed by the holders
+        // nor reclaimed by the owner
+        const ownerBalanceBefore = await web3.eth.getBalance(owner);
+        const payIn = web3.toWei(30, 'ether');
+
+        await icoTokenInstance.sendTransaction({
+            from:   activeTreasurer1,
+            value:  payIn,
+            gas:    700000
+        });
+
+        const ownerBalanceAfter = await web3.eth.getBalance(owner);
+        assert.isTrue(ownerBalanceAfter.gt(ownerBalanceBefore));
+
+        const newTokenBalance = web3.eth.getBalance(icoTokenInstance.address);
+        newTokenBalance.should.be.bignumber.equal(payIn);
+    });
 });

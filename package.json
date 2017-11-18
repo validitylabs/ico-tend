@@ -22,7 +22,9 @@
     "jsdoc": "jsdoc -c jsdoc.cnf.json",
     "clean": "rimraf dist build bin",
     "reset": "rimraf node_modules; npm run clean",
-    "upgrade": "yarn run reset; yarn upgrade"
+    "upgrade": "yarn run reset; yarn upgrade",
+    "postinstall": "tools/hashCheck.js"
+
   },
   "dependencies": {
     "moment": "^2.19.1",

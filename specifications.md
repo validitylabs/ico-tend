@@ -32,7 +32,7 @@
     - batch whitelisting of array of addresses
 - escrow and confirmation:
     - Ether will remain in contract in escrow until issueing of tokens happens or payback to non-approved addresses
-    - after contribution period is over, managers have 30 days confirmation period to block contributing transactions (not-confirmed in potential secondary KYC step), by default all transactions are marked as "confirmed" unless explicitely set to "not-confirmed"/"blocked".
+    - after contribution period is over, managers have 30 days confirmation period to block contributing transactions (not-confirmed in potential secondary KYC step), by default all transactions are marked as "not-confirmed"/"blocked" unless explicitely set to "confirmed".
     - confirmation period can be marked as "completed" by owner earlier than 30 days time window
     - if confirmation period is over, tokens can be made available
 - token issueing:

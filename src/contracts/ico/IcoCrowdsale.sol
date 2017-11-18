@@ -164,7 +164,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function confirmPayment(uint256 investmentId) public {
         require(isManager[msg.sender]);
         require(now > endTime && now <= endTime.add(confirmationPeriod));
-        require(!confirmationPeriodOver && now <= endTime.add(confirmationPeriod));
+        require(!confirmationPeriodOver);
 
         investments[investmentId].confirmed = true;
         ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, true);
@@ -173,7 +173,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function batchConfirmPayments(uint256[] investmentIds) public {
         require(isManager[msg.sender]);
         require(now > endTime && now <= endTime.add(confirmationPeriod));
-        require(!confirmationPeriodOver && now <= endTime.add(confirmationPeriod));
+        require(!confirmationPeriodOver);
 
         uint256 investmentId;
 
@@ -187,7 +187,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function unConfirmPayment(uint256 investmentId) public {
         require(isManager[msg.sender]);
         require(now > endTime && now <= endTime.add(confirmationPeriod));
-        require(!confirmationPeriodOver && now <= endTime.add(confirmationPeriod));
+        require(!confirmationPeriodOver);
 
         investments[investmentId].confirmed = false;
         ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, false);
@@ -270,6 +270,9 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
         // this crowdsale also should not be treasurer of the token anymore
         IcoToken(token).setTreasurer(this, false);
+
+        // do not allow new owner to mint further tokens
+        MintableToken(token).finishMinting();
 
         // until now the owner of the token is this crowdsale contract
         // in order for a human owner to make use of the tokens onlyOwner functions
