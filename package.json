@@ -24,7 +24,6 @@
     "reset": "rimraf node_modules; npm run clean",
     "upgrade": "yarn run reset; yarn upgrade",
     "postinstall": "tools/hashCheck.js"
-
   },
   "dependencies": {
     "moment": "^2.19.1",
@@ -49,6 +48,7 @@
     "rimraf": "^2.6.2",
     "solc": "0.4.18",
     "solidity-coverage": "git://github.com/validitylabs/solidity-coverage.git",
+    "web3-utils": "^1.0.0-beta.26",
     "truffle": "^4.0.1"
   },
   "optionalDevDependencies": {

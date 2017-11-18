@@ -6,7 +6,7 @@
 
 const IcoToken = artifacts.require('./IcoToken');
 
-import {waitNDays, getEvents, debug, BigNumber} from './helpers/tools'; // eslint-disable-line
+import {increaseTimeTo, increaseTime, waitNDays, getEvents, debug, BigNumber} from './helpers/tools'; // eslint-disable-line
 const assertJump    = require('../../node_modules/zeppelin-solidity/test/helpers/assertJump');
 
 const should = require('chai') // eslint-disable-line

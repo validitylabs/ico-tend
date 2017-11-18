@@ -1,8 +1,8 @@
 require('babel-register');
 require('babel-polyfill');
 
-import {increaseTimeTo, duration} from './increaseTime';
-export {increaseTimeTo, duration};
+import {increaseTime, increaseTimeTo, duration} from './increaseTime';
+export {increaseTime, increaseTimeTo, duration};
 
 /**
  * @const BigNumber Pointer to web3.BigNumber
