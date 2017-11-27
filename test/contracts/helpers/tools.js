@@ -1,8 +1,12 @@
-require('babel-register');
-require('babel-polyfill');
-
-import {increaseTime, increaseTimeTo, duration} from './increaseTime';
-export {increaseTime, increaseTimeTo, duration};
+/**
+ * Asserts an exception just before
+ *
+ * @param {object} error ErrorObject
+ * @returns {void}
+ */
+export function assertJump(error) {
+    assert.isAbove(error.message.search('invalid opcode'), -1, 'Invalid opcode error must be returned');
+}
 
 /**
  * @const BigNumber Pointer to web3.BigNumber
@@ -77,44 +81,71 @@ export function getEvents(tx, event = null) {
 }
 
 /**
- * Debug helper
+ * Increases testrpc time by the passed duration in seconds
  *
- * @param {IcoToken} icoTokenInstance Instance of IcoToken
- * @param {string} tokenHolder1 Tokenholder1
- * @param {string} tokenHolder2 Tokenholder2
- * @param {string} tokenHolder3 Tokenholder3
- * @param {string} owner Owner
- * @param {string} activeTreasurer1 Active treasurer
- * @returns {undefined}
+ * @param {object} duration Duration
+ * @returns {promise} promise
  */
-export async function debug(icoTokenInstance, tokenHolder1, tokenHolder2, tokenHolder3, owner, activeTreasurer1) { // eslint-disable-line
-    const tokenHolder1Token     = await icoTokenInstance.balanceOf(tokenHolder1);
-    const tokenHolder2Token     = await icoTokenInstance.balanceOf(tokenHolder2);
-    const tokenHolder3Token     = await icoTokenInstance.balanceOf(tokenHolder3);
-    const ownerToken            = await icoTokenInstance.balanceOf(owner);
-    const activeTreasurer1Token = await icoTokenInstance.balanceOf(activeTreasurer1);
+export default function increaseTime(duration) {
+    const now = Date.now();
 
-    const tokenHolder1ClaimableDiv      = await icoTokenInstance.getClaimableDividend(tokenHolder1);
-    const tokenHolder2ClaimableDiv      = await icoTokenInstance.getClaimableDividend(tokenHolder2);
-    const tokenHolder3ClaimableDiv      = await icoTokenInstance.getClaimableDividend(tokenHolder3);
-    const ownerClaimableDiv             = await icoTokenInstance.getClaimableDividend(owner);
-    const activeTreasurer1ClaimableDiv  = await icoTokenInstance.getClaimableDividend(activeTreasurer1);
+    return new Promise((resolve, reject) => {
+        web3.currentProvider.sendAsync({
+            jsonrpc:    '2.0',
+            method:     'evm_increaseTime',
+            params:     [duration],
+            id:         now
+        }, (err1) => {
+            if (err1) {
+                return reject(err1);
+            }
 
-    const fundsHolder1Eth       = web3.eth.getBalance(tokenHolder1);
-    const fundsHolder2Eth       = web3.eth.getBalance(tokenHolder2);
-    const fundsHolder3Eth       = web3.eth.getBalance(tokenHolder3);
-    const ownerEth              = web3.eth.getBalance(owner);
-    const activeTreasurer1Eth   = web3.eth.getBalance(activeTreasurer1);
-    const contractEth           = web3.eth.getBalance(icoTokenInstance.address);
-
-    console.log('====================================');
-    console.log('ACCOUNT | ETH | TOKEN | UNCLAIMED DIVIDEND');
-    console.log('------------------------------------');
-    console.log('CONTRCT | ' + Math.ceil(contractEth / 1e18) + '    | ');
-    console.log('TREASUR | ' + Math.ceil(activeTreasurer1Eth / 1e18) + '   | ' + activeTreasurer1Token.toNumber() + ' | ' + (activeTreasurer1ClaimableDiv / 1e18));
-    console.log('OWNER   | ' + Math.ceil(ownerEth / 1e18) + '   | ' + ownerToken.toNumber() + ' | ' + (ownerClaimableDiv / 1e18));
-    console.log('USER 1  | ' + Math.ceil(fundsHolder1Eth / 1e18) + '  | ' + tokenHolder1Token.toNumber() + ' | ' + (tokenHolder1ClaimableDiv / 1e18));
-    console.log('USER 2  | ' + Math.ceil(fundsHolder2Eth / 1e18) + '  | ' + tokenHolder2Token.toNumber() + ' | ' + (tokenHolder2ClaimableDiv / 1e18));
-    console.log('USER 3  | ' + Math.ceil(fundsHolder3Eth / 1e18) + '  | ' + tokenHolder3Token.toNumber() + ' | ' + (tokenHolder3ClaimableDiv / 1e18));
-    console.log('====================================');
+            web3.currentProvider.sendAsync({
+                jsonrpc: '2.0',
+                method: 'evm_mine',
+                id: now + 1
+            }, (err2, res) => {
+                return err2 ? reject(err2) : resolve(res);
+            });
+        });
+    });
 }
+
+/**
+ * Beware that due to the need of calling two separate testrpc methods and rpc calls overhead
+ * it's hard to increase time precisely to a target point so design your test to tolerate
+ * small fluctuations from time to time.
+ *
+ * @param {integer} target Time in seconds
+ * @returns {promise} increaseTime() Increase time
+ */
+export function increaseTimeTo(target) {
+    const now = web3.eth.getBlock('latest').timestamp;
+
+    if (target < now) {
+        throw Error(`Cannot increase current time(${now}) to a moment in the past(${target})`);
+    }
+
+    return increaseTime(target - now);
+}
+
+export const duration = {
+    seconds: (val) => {
+        return val;
+    },
+    minutes: (val) => {
+        return val * this.seconds(60);
+    },
+    hours: (val) => {
+        return val * this.minutes(60);
+    },
+    days: (val) => {
+        return val * this.hours(24);
+    },
+    weeks: (val) => {
+        return val * this.days(7);
+    },
+    years: (val) => {
+        return val * this.days(365);
+    }
+};

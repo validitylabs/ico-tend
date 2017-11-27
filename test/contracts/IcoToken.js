@@ -4,10 +4,9 @@
  * @author Validity Labs AG <info@validitylabs.org>
  */
 
-const IcoToken = artifacts.require('./IcoToken');
+import {assertJump, waitNDays, getEvents, BigNumber, increaseTimeTo} from './helpers/tools';
 
-import {increaseTimeTo, increaseTime, waitNDays, getEvents, debug, BigNumber} from './helpers/tools'; // eslint-disable-line
-const assertJump    = require('../../node_modules/zeppelin-solidity/test/helpers/assertJump');
+const IcoToken = artifacts.require('./IcoToken');
 
 const should = require('chai') // eslint-disable-line
     .use(require('chai-as-promised'))
@@ -447,7 +446,7 @@ contract('IcoToken', (accounts) => {
         tokenHolder1UnclaimedDividendBefore.should.be.bignumber.equal(tokenHolder1UnclaimedDividendAfter.plus(tokenHolder2UnclaimedDividendAfter));
         tokenHolder1Balance1.plus(tokenHolder2Balance1).should.be.bignumber.equal(tokenHolder1Balance2.plus(tokenHolder2Balance2));
     });
-    
+
     it('should increase the owner\'s balance, because token balance is not 0 while doing a Payin. Token balance should be the same as the Payin afterwards', async() => {
         const endTime       = await icoTokenInstance.endTime();
         const newTime       = endTime + 1;

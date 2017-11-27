@@ -3,11 +3,11 @@
  *
  * @author Validity Labs AG <info@validitylabs.org>
  */
-import {waitNDays, getEvents, debug, BigNumber, cnf, increaseTimeTo, duration} from './helpers/tools'; // eslint-disable-line
+
+import {assertJump, waitNDays, getEvents, BigNumber, cnf, increaseTimeTo} from './helpers/tools';
 
 const IcoCrowdsale  = artifacts.require('./IcoCrowdsale');
 const IcoToken      = artifacts.require('./IcoToken');
-const assertJump    = require('../../node_modules/zeppelin-solidity/test/helpers/assertJump');
 
 const should = require('chai') // eslint-disable-line
     .use(require('chai-as-promised'))
@@ -488,7 +488,7 @@ contract('IcoCrowdsale', (accounts) => {
     it('should buyTokens (for token contract) properly', async () => {
         const tokenAddress = await icoCrowdsaleInstance.token();
 
-        const tx    = await icoCrowdsaleInstance.buyTokens(
+        await icoCrowdsaleInstance.buyTokens(
             tokenAddress,
             {from: activeInvestor2, gas: 1000000, value: web3.toWei(7, 'ether')}
         );
@@ -1037,11 +1037,12 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should call finalize successfully', async () => {
-        let tokenAddress = await icoCrowdsaleInstance.token();
+        await icoCrowdsaleInstance.token();
 
         let paused = await icoTokenInstance.paused();
-        let owner = await icoTokenInstance.owner();
-        let isTreasurerBefore = await icoTokenInstance.isTreasurer(icoCrowdsaleInstance.address);
+        await icoTokenInstance.owner();
+        const isTreasurerBefore = await icoTokenInstance.isTreasurer(icoCrowdsaleInstance.address);
+
         assert.isTrue(isTreasurerBefore);
         assert.isTrue(paused);
 
@@ -1050,33 +1051,31 @@ contract('IcoCrowdsale', (accounts) => {
         paused = await icoTokenInstance.paused();
         assert.isFalse(paused);
 
-        let isTreasurerAfter = await icoTokenInstance.isTreasurer(icoCrowdsaleInstance.address);
-        owner = await icoTokenInstance.owner();
+        const isTreasurerAfter = await icoTokenInstance.isTreasurer(icoCrowdsaleInstance.address);
+        await icoTokenInstance.owner();
+
         assert.isFalse(isTreasurerAfter);
-        
     });
 
     it('should not mint more tokens after finalize()', async () => {
         try {
-          await icoTokenInstance.mint(owner, 1, {from: owner, gas: 1000000});
-          assert.fail('should have thrown before');
+            await icoTokenInstance.mint(owner, 1, {from: owner, gas: 1000000});
+
+            assert.fail('should have thrown before');
         } catch (e) {
             assertJump(e);
         }
     });
 
     it('should settle unconfirmed investment non non-payable beneficiary wallet (token contract)', async () => {
-        let contractBalanceEthBefore = await web3.eth.getBalance(icoCrowdsaleInstance.address);
-        
+        await web3.eth.getBalance(icoCrowdsaleInstance.address);
         await icoCrowdsaleInstance.batchSettleInvestments([4, 5]);
-        
-        let contractBalanceEthAfter = await web3.eth.getBalance(icoCrowdsaleInstance.address);        
+        await web3.eth.getBalance(icoCrowdsaleInstance.address);
 
         const investmentAfter = await icoCrowdsaleInstance.investments(5);
 
-        investmentAfter[2].should.be.bignumber.equal(web3.toWei(7, 'ether'));  // Amount
-        assert.isFalse(investmentAfter[3]);                  // Confirmed
-        assert.isTrue(investmentAfter[4]);                  // AttemptedSettlement
+        investmentAfter[2].should.be.bignumber.equal(web3.toWei(7, 'ether'));   // Amount
+        assert.isFalse(investmentAfter[3]);                                     // Confirmed
+        assert.isTrue(investmentAfter[4]);                                      // AttemptedSettlement
     });
-    
 });
