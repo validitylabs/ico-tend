@@ -30,6 +30,9 @@ yarn install
 ```
 This will install all required dependecies in the directory _node_modules_.
 
+## NVM
+You can load the configured lts/carbon NodeJS version (8.x LTS) for this project by running `nvm use` in project root directory.
+
 ## Compile, migrate and run unit tests
 To deploy the ICO smart contracts, go into the projects root directory, and change into the truffle development console.
 ```

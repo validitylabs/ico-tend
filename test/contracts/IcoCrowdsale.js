@@ -46,8 +46,7 @@ contract('IcoCrowdsale', (accounts) => {
     it('should instantiate the ICO crowdsale correctly', async () => {
         console.log('[ Pre contribution period ]'.yellow);
 
-        // Set DTS to 2017-12-24T00:00:00Z CET
-        await increaseTimeTo(1514113200);
+        await increaseTimeTo(cnf.startTimeTesting);
 
         const _startTime            = await icoCrowdsaleInstance.startTime();
         const _endTime              = await icoCrowdsaleInstance.endTime();
