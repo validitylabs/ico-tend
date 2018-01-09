@@ -465,7 +465,7 @@ contract('IcoToken', (accounts) => {
         const ownerBalanceAfter = await web3.eth.getBalance(owner);
         assert.isTrue(ownerBalanceAfter.gt(ownerBalanceBefore));
 
-        const newTokenBalance = web3.eth.getBalance(icoTokenInstance.address);
+        const newTokenBalance = await web3.eth.getBalance(icoTokenInstance.address);
         newTokenBalance.should.be.bignumber.equal(payIn);
     });
 });
