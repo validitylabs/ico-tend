@@ -4,7 +4,7 @@
  * @author Validity Labs AG <info@validitylabs.org>
  */
 
- // TODO: Update test cases for change requests
+// TODO: Update test cases for change requests
 
 import {assertJump, waitNDays, getEvents, BigNumber, cnf, increaseTimeTo} from './helpers/tools';
 
@@ -544,9 +544,9 @@ contract('IcoCrowdsale', (accounts) => {
         }
     });
 
-    it('should fail, because we try to run finaliseConfirmationPeriod with a non manager account', async () => {
+    it('should fail, because we try to run finalizeConfirmationPeriod with a non manager account', async () => {
         try {
-            await icoCrowdsaleInstance.finaliseConfirmationPeriod({from: activeInvestor1, gas: 1000000});
+            await icoCrowdsaleInstance.finalizeConfirmationPeriod({from: activeInvestor1, gas: 1000000});
 
             assert.fail('should have thrown before');
         } catch (e) {
@@ -776,11 +776,11 @@ contract('IcoCrowdsale', (accounts) => {
     /**
      * [ Confirmation period over ]
      */
-    it('should run finaliseConfirmationPeriod successfully before confirmation period is over', async () => {
+    it('should run finalizeConfirmationPeriod successfully before confirmation period is over', async () => {
         console.log('[ Confirmation period over ]'.yellow);
 
         const confirmationPeriodOverBefore  = await icoCrowdsaleInstance.confirmationPeriodOver();
-        await icoCrowdsaleInstance.finaliseConfirmationPeriod({from: owner, gas: 1000000});
+        await icoCrowdsaleInstance.finalizeConfirmationPeriod({from: owner, gas: 1000000});
         const confirmationPeriodOverAfter   = await icoCrowdsaleInstance.confirmationPeriodOver();
 
         assert.isFalse(confirmationPeriodOverBefore);

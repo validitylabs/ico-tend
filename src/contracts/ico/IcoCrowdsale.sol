@@ -32,13 +32,9 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public constant TEAM_TOKEN_CAP= 15e5 * 1e18;        // 1.5 million * 1e18
     uint256 public constant VESTED_TOKEN_CAP = 2e6 * 1e18;      // 2 million * 1e18
     uint256 public constant ICO_TOKEN_CAP = 95e5 * 1e18;        // 9.5 million  * 1e18
-    // Amount of discount tokens per discount stage
+    // Amount of discounted tokens per discount stage (2 stages total; each being the same amount)
     uint256 public constant DISCOUNT_TOKEN_AMOUNT = 3e6 * 1e18; // 3 million * 1e18
 
-    // Constants for discounts for the 1st 3 million and 2nd 3 million token purchases
-    uint256 public constant TEN_PERCENT_DISCOUNT = 10;
-    uint256 public constant TWENTY_PRECENT_DISCOUNT = 20;
-    
     // Track tokens depending which stage that the ICO is in
     uint256 public tokensToMint;            // tokens to be minted after confirmation 
     uint256 public tokensMinted;            // already minted tokens (maximally = cap)
@@ -53,10 +49,8 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     struct Payment {
         address investor;
         address beneficiary;
-        // updated amounts to weiAmount and added
         uint256 weiAmount;
         uint256 tokenAmount;
-        //
         bool confirmed;
         bool attemptedSettlement;
         bool completedSettlement;
@@ -122,7 +116,10 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         ChangedManager(manager, active);
     }
 
-    //TODO: comments
+    /**
+     * @dev whitelist investors to allow the direct investment of this crowdsale
+     * @param investor address address of the investor to be whitelisted
+     */
     function whiteListInvestor(address investor) public {
         require(isManager[msg.sender]);
 
@@ -130,7 +127,10 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         ChangedInvestorWhitelisting(investor, true);
     }
 
-    //TODO: comments
+    /**
+     * @dev whitelist several investors via a batch method
+     * @param investors address[] array of addresses of the beneficiaries to receive tokens after they have been confirmed
+     */
     function batchWhiteListInvestors(address[] investors) public {
         require(isManager[msg.sender]);
 
@@ -143,7 +143,10 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         }
     }
 
-    //TODO: comments
+    /**
+     * @dev unwhitelist investor from participating in the crowdsale 
+     * @param investor address address of the investor to disallowed participation 
+     */
     function unWhiteListInvestor(address investor) public {
         require(isManager[msg.sender]);
 
@@ -151,10 +154,11 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         ChangedInvestorWhitelisting(investor, false);
     }
 
-    // override (not extend! because we only issues tokens after final KYC confirm phase)
-    // core functionality by whitelist check and registration of payment
-    // TODO: add f(x)ilty for 3 million at 20% discount and next 3 million at 10%... presale tokens come into play or na?
-    // TODO: comments
+    /**
+     * @dev override (not extend! because we only issues tokens after final KYC confirm phase)
+     *      core functionality by whitelist check and registration of payment
+     * @param beneficiary address address of the beneficiary to receive tokens after they have been confirmed
+     */
     function buyTokens(address beneficiary) public payable {
         require(beneficiary != 0x0);
         require(validPurchase());
@@ -184,15 +188,19 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         investments.push(newPayment);
     }
 
-    //TODO: comments
-    // extend base functionality with min investment amount
-    function validPurchase() internal constant returns (bool) {
+    /**
+     * @dev extend base functionality with min investment amount
+     */
+    function validPurchase() internal view returns (bool) {
         // minimal investment: 500 CHF
         require (msg.value.div(weiPerChf) >= 500);
         return super.validPurchase();
     }
 
-    //TODO: comments
+    /**
+     * @dev confirms payment
+     * @param investmentId uint256 uint256 of the investment id to confirm
+     */
     function confirmPayment(uint256 investmentId) public {
         require(isManager[msg.sender]);
         require(now > endTime && now <= endTime.add(confirmationPeriod));
@@ -202,7 +210,10 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, true);
     }
 
-    //TODO: comments
+    /**
+     * @dev confirms payments via a batch method
+     * @param investmentIds uint256[] array of uint256 of the investment ids to confirm
+     */
     function batchConfirmPayments(uint256[] investmentIds) public {
         require(isManager[msg.sender]);
         require(now > endTime && now <= endTime.add(confirmationPeriod));
@@ -217,7 +228,10 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         }
     }
 
-    //TODO: comments
+    /**
+     * @dev unconfirms payment made via investment id
+     * @param investmentId uint256 uint256 of the investment to unconfirm
+     */
     function unConfirmPayment(uint256 investmentId) public {
         require(isManager[msg.sender]);
         require(now > endTime && now <= endTime.add(confirmationPeriod));
@@ -227,8 +241,11 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, false);
     }
 
-    // TODO: Add doxity comments 
-    // TODO: update functionaily to push onto payments array. Should not mint tokens
+    /**
+     * @dev allows contract owner to mint team tokens per TEAM_TOKEN_CAP and transfer to the team wallet
+     * @param _beneficiary address address of the beneficiary to receive tokens
+     * @param _tokens uint256 uint256 of the token amount to mint
+     */
     function mintTokenPreSale(address _beneficiary, uint256 _tokens) public onlyOwner {
         // during pre-sale we can issue tokens for fiat or other contributions
         // pre-sale ends with start of public sales round (accepting Ether)
@@ -253,22 +270,26 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         token.mint(_teamAddress, TEAM_TOKEN_CAP);
     }
 
-    /** TODO: Updated for vested tokens. 
+    /** TODO: Updated for vested tokens using the vested tokens OZ 
      * @dev allows contract owner to mint team tokens per TEAM_TOKEN_CAP and transfer to the team wallet
-     * @param _companyAddress address address of the team's wallet
+     * @param _companyAddress address address of the company's wallet
      */
     function mintVestedTokens(address _companyAddress) public onlyOwner {
         require(_companyAddress != address(0));
         token.mint(_companyAddress, VESTED_TOKEN_CAP);
     }
 
-    //TODO: comments
-    function finaliseConfirmationPeriod() public onlyOwner {
+    /**
+     * @dev set final the confirmation period
+     */
+    function finalizeConfirmationPeriod() public onlyOwner {
         confirmationPeriodOver = true;
     }
 
-    // TODO: Update functionality to handle presale tokens bought via fiat and not crypto (ether)
-    // TODO: add doxity comments
+    /**
+     * @dev settlement of investment made via investment id
+     * @param investmentId uint256 uint256 being the investment id
+     */
     function settleInvestment(uint256 investmentId) public {
         // only possible after confirmationPeriodOver has been manually set OR after time is over
         require(confirmationPeriodOver || now > endTime.add(confirmationPeriod));
@@ -304,8 +325,10 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
             // send Ether to project wallet
             // throws if wallet throws
-            wallet.transfer(p.weiAmount);
-
+            if (p.investor != address(0) && p.weiAmount > 0) {
+                wallet.transfer(p.weiAmount);
+            }
+            
             p.completedSettlement = true;
         } else {
             // if not confirmed -> reimburse ETH or if fiat (presale) investor: do nothing
@@ -321,14 +344,19 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         }
     }
 
-    //TODO: comments
+    /**
+     * @dev allows the batch settlement of investments made
+     * @param investmentIds uint256[] array of uint256 of investment ids
+     */
     function batchSettleInvestments(uint256[] investmentIds) public {
         for (uint256 c; c < investmentIds.length; c = c.add(1)) {
             settleInvestment(investmentIds[c]);
         }
     }
 
-    //TODO: comments
+    /** 
+     * @dev allows contract owner to finalize the ICO, unpause tokens, set treasurer, finish minting, and transfer ownship of the token contract
+     */
     function finalize() public {
         // only possible after confirmationPeriodOver has been manually set OR after time is over
         require(confirmationPeriodOver || now > endTime.add(confirmationPeriod));
