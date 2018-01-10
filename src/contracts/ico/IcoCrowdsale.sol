@@ -10,6 +10,7 @@ pragma solidity ^0.4.18;
 import "../../../node_modules/zeppelin-solidity/contracts/crowdsale/Crowdsale.sol";
 import "../../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../../../node_modules/zeppelin-solidity/contracts/lifecycle/Pausable.sol";
+import "../../../node_modules/zeppelin-solidity/contracts/token/TokenVesting.sol";
 import "./IcoToken.sol";
 
 contract IcoCrowdsale is Crowdsale, Ownable {
@@ -45,6 +46,9 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public weiPerChf;
 
     uint256 public investmentIdLastAttemptedToSettle;
+
+    TokenVesting public vestedCompanyTokens;
+    uint256 public constant FOUR_YEARS = 48 * 30 days;
 
     struct Payment {
         address investor;
@@ -270,13 +274,16 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         token.mint(_teamAddress, TEAM_TOKEN_CAP);
     }
 
-    /** TODO: Updated for vested tokens using the vested tokens OZ 
+    /**
      * @dev allows contract owner to mint team tokens per TEAM_TOKEN_CAP and transfer to the team wallet
+     *      Start: ??? , Cliff: 1 year, Duration: 4 years, Revocable: true? TODO: verify params for TokenVesting
      * @param _companyAddress address address of the company's wallet
      */
     function mintVestedTokens(address _companyAddress) public onlyOwner {
         require(_companyAddress != address(0));
-        token.mint(_companyAddress, VESTED_TOKEN_CAP);
+        // Create vested contract - params: address, start, cliff, duration, revocable
+        vestedCompanyTokens = new TokenVesting(_companyAddress, endTime.add(confirmationPeriod), 1 years, FOUR_YEARS, true);
+        token.mint(vestedCompanyTokens, VESTED_TOKEN_CAP);
     }
 
     /**
@@ -323,8 +330,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             // mint tokens for beneficiary
             token.mint(p.beneficiary, tokens);
 
-            // send Ether to project wallet
-            // throws if wallet throws
+            // send Ether to project wallet throws if wallet throws
             if (p.investor != address(0) && p.weiAmount > 0) {
                 wallet.transfer(p.weiAmount);
             }
@@ -332,7 +338,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             p.completedSettlement = true;
         } else {
             // if not confirmed -> reimburse ETH or if fiat (presale) investor: do nothing
-
             // only complete settlement if investor got their money back
             // (does not throw (as .transfer would)
             // otherwise we would block settlement process of all following investments)
@@ -374,5 +379,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         // we need to transfer the ownership
         // in the end the owner of this crowdsale will also be the owner of the token
         Ownable(token).transferOwnership(owner);
+
+        //TODO: Does vestedCompanyTokens need to be transferred as well?
     }
 }

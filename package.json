@@ -10,26 +10,13 @@
     "node": "^8.x"
   },
   "scripts": {
-    "postinstall": "node ./tools/hashChecker.js",
     "start": "yarn run develop",
-    "compile": "cross-env NODE_ENV=develop cross-env TASK=compile node ./tools/index",
-    "migrate": "yarn run migrate-dev",
-    "migrate-dev": "cross-env NODE_ENV=develop cross-env TASK=migrate node ./tools/index",
-    "test": "yarn test-dev",
-    "test-dev": "cross-env NODE_ENV=develop cross-env TASK=test node ./tools/index",
-    "migrate-ropsten": "truffle migrate --reset --compile-all --network ropsten",
-    "test-ropsten": "truffle test --compile-all --network ropsten",
-    "faucet": "babel-node --ignore 'node_modules/(?!@validitylabs/js-utils)' tools/leechFaucet.js",
     "coverage": "solidity-coverage",
     "dev": "truffle develop",
-    "console": "truffle console --network develop",
-    "geth": "geth --datadir geth-db --networkid 4447 --ws --wsport 8546 --wsorigins '' --rpc --rpcport 8545 --rpccorsdomain '' --nodiscover console",
-    "testrpc": "truffle develop --log --gasPrice 0x02 --gasLimit 0x100000 --mnemonic 'waste system voyage dentist fine donate purpose truly cactus chest coyote globe' --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501200,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501201,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501202,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501203,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501204,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501205,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501206,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501207,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501208,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501209,1000000000000000000000000\"",
-    "debug": "truffle debug --network develop",
-    "jsdoc": "jsdoc -c jsdoc.cnf.json",
-    "clean": "shx rm -fr db geth-db dist build bin coverage coverage.json",
-    "reset": "npm run clean; shx rm -fr  node_modules",
-    "upgrade": "yarn run reset; yarn upgrade"
+    "clean": "rimraf dist build bin coverage coverage.json",
+    "reset": "rimraf node_modules; npm run clean",
+    "upgrade": "yarn run reset; yarn upgrade",
+    "postinstall": "tools/hashChecker.js"
   },
   "dependencies": {
     "chalk": "^2.3.0",
