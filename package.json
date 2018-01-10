@@ -16,7 +16,7 @@
     "clean": "rimraf dist build bin coverage coverage.json",
     "reset": "rimraf node_modules; npm run clean",
     "upgrade": "yarn run reset; yarn upgrade",
-    "postinstall": "tools/hashChecker.js"
+    "postinstall": "node ./tools/hashChecker.js"
   },
   "dependencies": {
     "chalk": "^2.3.0",

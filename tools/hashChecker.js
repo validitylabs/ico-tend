@@ -21,7 +21,7 @@ const hashes = {
     Crowdsale     : '0x28cb2854ac11de737339b5271d7e658df9f526fcf2af8c5f753ce453f291f4fc',
     MintableToken : '0x203a748c796f14ce7651dc1acd10fbd3f4aee071e4050d2e694663731b09d567',
     PausableToken : '0x6b5058991c4b32a84efeedf4c83c5942f01a9c6f6b444187a12d6d18a6a2b7a3',
-    StandardToken : '0x084ea849f0633218be73d3eeb6a995027665aa21c3d1b7db7826a0a8794654c8',
+    StandardToken : '0xadeb69c89557f19128024e6fda37c12fdd8a7a9fb81a2b8447e53697d42fc018',
     Pausable      : '0x49d41cc2b80f7732cdb504d67cd9a84ebeee38f8ec7204c96c2bded71e295f6a',
     Ownable       : '0x0648cb798def395f9ba28affc7e9757cfa3bdb492925270cc493d6f565275358',
     ERC20         : '0xf1104e30218fcc107e27801b23ab2f48dac4b6e2ac624d572cc803faa3c2eae9',

@@ -381,5 +381,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         Ownable(token).transferOwnership(owner);
 
         //TODO: Does vestedCompanyTokens need to be transferred as well?
+        //Ownable(vestedCompanyTokens).transferOwnership(owner);
     }
 }
