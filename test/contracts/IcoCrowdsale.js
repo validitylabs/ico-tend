@@ -4,6 +4,8 @@
  * @author Validity Labs AG <info@validitylabs.org>
  */
 
+ // TODO: Update test cases for change requests
+
 import {assertJump, waitNDays, getEvents, BigNumber, cnf, increaseTimeTo} from './helpers/tools';
 
 const IcoCrowdsale  = artifacts.require('./IcoCrowdsale');

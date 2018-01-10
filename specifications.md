@@ -1,4 +1,4 @@
-# Token specifications and features
+# Token specifications and features  //TODO: Update specs of Token and Crowdsale
 - ERC20 compatible
 - decimals: 18
 - name: Tend Token

@@ -9,11 +9,8 @@ const IcoToken      = artifacts.require('./ico/IcoToken.sol');
 const IcoCrowdsale  = artifacts.require('./ico/IcoCrowdsale.sol');
 
 module.exports = function (deployer, network, accounts) { // eslint-disable-line
-    deployer.deploy(IcoToken);
-
     const wallet    = accounts[6];
-    const _cap      = new BigNumber(cnf.cap);
-    const cap       = _cap.mul(10e18);
 
-    deployer.deploy(IcoCrowdsale, cnf.startTime, cnf.endTime, cnf.rateTokenPerChf, cnf.rateWeiPerChf, wallet, cap, cnf.confirmationPeriod);
+    deployer.deploy(IcoToken);
+    deployer.deploy(IcoCrowdsale, cnf.startTime, cnf.endTime, cnf.rateTokenPerChf, cnf.rateWeiPerChf, wallet, cnf.confirmationPeriod);
 };

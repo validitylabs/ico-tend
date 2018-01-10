@@ -1,5 +1,7 @@
 # ICO for TEND
 
+TODO: include deployment to mainnet instructions
+
 ## Requirements
 The server side scripts requires NodeJS 8.
 Go to [NodeJS](https://nodejs.org/en/download/) and install the appropriate version for your system.
