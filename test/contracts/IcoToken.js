@@ -5,6 +5,7 @@
  */
 
 import {assertJump, waitNDays, getEvents, BigNumber, increaseTimeTo} from './helpers/tools';
+import expectThrow from './helpers/expectThrow';
 
 const IcoToken = artifacts.require('./IcoToken');
 

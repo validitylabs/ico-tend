@@ -15,10 +15,10 @@ Depending on your system the following components might be already available or 
 * On OSX the build tools included in XCode are required
 
 ## General
-Before running the provided scripts, you have to initialize your current terminal via `source ./initShell.sh` for every terminal in use. This will add the current directory to the system PATH variables and must be repeated for time you start a new terminal window from project base directory.
+Before running the provided scripts, you have to initialize your current terminal via `source ./tools/initShell.sh` for every terminal in use. This will add the current directory to the system PATH variables and must be repeated for time you start a new terminal window from project base directory.
 ```
 cd <project base directory>
-source ./initShell.sh
+source ./tools/initShell.sh
 ```
 
 __Every command must be executed from within the projects base directory!__
@@ -27,7 +27,7 @@ __Every command must be executed from within the projects base directory!__
 Open your terminal and change into your project base directory. From here, install all needed dependencies.
 ```
 cd <project base directory>
-source ./initShell.sh
+source ./tools/initShell.sh
 yarn install
 ```
 This will install all required dependecies in the directory _node_modules_.
@@ -39,7 +39,7 @@ You can load the configured lts/carbon NodeJS version (8.x LTS) for this project
 To deploy the ICO smart contracts, go into the projects root directory, and change into the truffle development console.
 ```
 cd <project base directory>
-source ./initShell.sh
+source ./tools/initShell.sh
 yarn run dev
 ```
 
@@ -62,7 +62,7 @@ __Because the test consumes a lot of ETH, please restart the development console
 To run the coverage tests, go into the projects root directory and run the coverage test like that.
 ```
 cd <project base directory>
-source ./initShell.sh
+source ./tools/initShell.sh
 yarn run coverage
 ```
 __The coverage test will automatically start it's own TestRPC server for you!__
