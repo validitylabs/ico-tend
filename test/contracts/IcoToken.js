@@ -48,13 +48,7 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should fail, because we try to transfer on a paused contract', async () => {
-        try {
-            await icoTokenInstance.transfer(tokenHolder2, 1, {from: tokenHolder1});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoTokenInstance.transfer(tokenHolder2, 1, {from: tokenHolder1}));
     });
 
     it('should unpause ICO token correctly', async () => {
@@ -175,55 +169,31 @@ contract('IcoToken', (accounts) => {
         // At this point, the contract should have 30 ETH
         web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(web3.toWei(30, 'ether'));
 
-        try {
-            await icoTokenInstance.sendTransaction({
-                from:   owner,
-                value:  web3.toWei(1, 'ether'),
-                gas:    700000
-            });
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoTokenInstance.sendTransaction({
+            from:   owner,
+            value:  web3.toWei(1, 'ether'),
+            gas:    700000
+        }));
     });
 
     it('should fail, because we try to increase dividend balance with a non treasurer account', async () => {
-        try {
-            await icoTokenInstance.sendTransaction({
-                from:   tokenHolder1,
-                value:  web3.toWei(1, 'ether'),
-                gas:    700000
-            });
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoTokenInstance.sendTransaction({
+            from:   tokenHolder1,
+            value:  web3.toWei(1, 'ether'),
+            gas:    700000
+        }));
     });
 
     it('should fail, because we try to increase dividend balance with a deactivated treasurer account', async () => {
-        try {
-            await icoTokenInstance.sendTransaction({
-                from:   inactiveTreasurer1,
-                value:  web3.toWei(1, 'ether'),
-                gas:    700000
-            });
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoTokenInstance.sendTransaction({
+            from:   inactiveTreasurer1,
+            value:  web3.toWei(1, 'ether'),
+            gas:    700000
+        }));
     });
 
     it('should fail, because requestUnclaimed() is called, but the reclaim period has not begun.', async () => {
-        try {
-            await icoTokenInstance.requestUnclaimed({from: owner});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoTokenInstance.requestUnclaimed({from: owner}));
     });
 
     it('should claim dividend (ETH)', async () => {
@@ -332,12 +302,7 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should fail, because we try to call claimDividend() after the claim period is over', async () => {
-        try {
-            await icoTokenInstance.claimDividend({from: tokenHolder1});
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoTokenInstance.claimDividend({from: tokenHolder1}));
     });
 
     it('should payout the unclaimed ETH to owner account.', async () => {
@@ -448,7 +413,7 @@ contract('IcoToken', (accounts) => {
         tokenHolder1Balance1.plus(tokenHolder2Balance1).should.be.bignumber.equal(tokenHolder1Balance2.plus(tokenHolder2Balance2));
     });
 
-    it('should increase the owner\'s balance, because token balance is not 0 while doing a Payin. Token balance should be the same as the Payin afterwards', async() => {
+    it('should increase the owner\'s balance, because token balance is not 0 while doing a Payin. Token balance should be the same as the Payin afterwards', async () => {
         const endTime       = await icoTokenInstance.endTime();
         const newTime       = endTime + 1;
         await increaseTimeTo(newTime);

@@ -130,12 +130,7 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should fail, because we try to set manager from unauthorized account', async () => {
-        try {
-            await icoCrowdsaleInstance.setManager(activeManager, false, {from: activeInvestor1, gas: 1000000});
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.setManager(activeManager, false, {from: activeInvestor1, gas: 1000000}));
     });
 
     it('should whitelist investor accounts', async () => {
@@ -173,39 +168,19 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should fail, because we try to whitelist investor from unauthorized account', async () => {
-        try {
-            await icoCrowdsaleInstance.whiteListInvestor(inactiveInvestor1, {from: activeInvestor2, gas: 1000000});
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.whiteListInvestor(inactiveInvestor1, {from: activeInvestor2, gas: 1000000}));
     });
 
     it('should fail, because we try to unwhitelist investor from unauthorized account', async () => {
-        try {
-            await icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: activeInvestor2, gas: 1000000});
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: activeInvestor2, gas: 1000000}));
     });
 
     it('should fail, because we try to run batchWhiteListInvestors with a non manager account', async () => {
-        try {
-            await icoCrowdsaleInstance.batchWhiteListInvestors([activeInvestor1, activeInvestor2], {from: activeInvestor2, gas: 1000000});
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.batchWhiteListInvestors([activeInvestor1, activeInvestor2], {from: activeInvestor2, gas: 1000000}));
     });
 
     it('should fail, because we try to run unWhiteListInvestor with a non manager account', async () => {
-        try {
-            await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor1, {from: activeInvestor2, gas: 1000000});
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor1, {from: activeInvestor2, gas: 1000000}));
     });
 
     it('should whitelist 2 investors by batch function', async () => {
@@ -241,48 +216,24 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should fail, because we try to mint tokens for presale with a non owner account', async () => {
-        try {
-            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1, {from: activeManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1, {from: activeManager, gas: 1000000}));
     });
 
     it('should fail, because we try to mint tokens more as cap limit allows', async () => {
-        try {
-            const big = new BigNumber(95000000 * 1e18);
-            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, (cnf.cap + big.add(1)));
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        const big = new BigNumber(95000000 * 1e18);
+        await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, (cnf.cap + big.add(1))));
     });
 
     it('should fail, because we try to trigger buyTokens in before contribution time is started', async () => {
-        try {
-            await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: activeInvestor2, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: activeInvestor2, gas: 1000000}));
     });
 
     it('should fail, because we try to trigger the fallback function before contribution time is started', async () => {
-        try {
-            await icoCrowdsaleInstance.sendTransaction({
-                from:   owner,
-                value:  web3.toWei(1, 'ether'),
-                gas:    700000
-            });
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.sendTransaction({
+            from:   owner,
+            value:  web3.toWei(1, 'ether'),
+            gas:    700000
+        }));
     });
 
     it('should mint tokens for presale', async () => {
@@ -329,39 +280,25 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should fail, because we try to trigger buyTokens as unwhitelisted investor', async () => {
-        try {
-            await icoCrowdsaleInstance.buyTokens(activeInvestor1, {from: inactiveInvestor1, gas: 1000000, value: web3.toWei(2, 'ether')});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.buyTokens(activeInvestor1, {
+            from: inactiveInvestor1,
+            gas: 1000000,
+            value: web3.toWei(2, 'ether')
+        }));
     });
 
     it('should fail, because we try to trigger buyTokens with a too low investment', async () => {
-        try {
-            await icoCrowdsaleInstance.buyTokens(
-                activeInvestor1,
-                {from: activeInvestor1, gas: 1000000, value: web3.toWei(1, 'ether')}
-            );
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.buyTokens(
+            activeInvestor1,
+            {from: activeInvestor1, gas: 1000000, value: web3.toWei(1, 'ether')}
+        ));
     });
 
     it('should fail, because we try to trigger buyTokens for beneficiary 0x0', async () => {
-        try {
-            await icoCrowdsaleInstance.buyTokens(
-                '0x0',
-                {from: activeInvestor1, gas: 1000000, value: web3.toWei(1, 'ether')}
-            );
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.buyTokens(
+            '0x0',
+            {from: activeInvestor1, gas: 1000000, value: web3.toWei(1, 'ether')}
+        ));
     });
 
     it('should buyTokens properly', async () => {
@@ -506,83 +443,35 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should fail, because we try to trigger mintTokenPreSale in contribution period', async () => {
-        try {
-            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3);
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3));
     });
 
     it('should fail, because we try to trigger confirmPayment with non manager account', async () => {
-        try {
-            await icoCrowdsaleInstance.confirmPayment(0, {from: inactiveManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.confirmPayment(0, {from: inactiveManager, gas: 1000000}));
     });
 
     it('should fail, because we try to trigger batchConfirmPayments with non manager account', async () => {
-        try {
-            await icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: inactiveManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: inactiveManager, gas: 1000000}));
     });
 
     it('should fail, because we try to trigger unConfirmPayment with non manager account', async () => {
-        try {
-            await icoCrowdsaleInstance.unConfirmPayment(0, {from: inactiveManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.unConfirmPayment(0, {from: inactiveManager, gas: 1000000}));
     });
 
     it('should fail, because we try to run finalizeConfirmationPeriod with a non manager account', async () => {
-        try {
-            await icoCrowdsaleInstance.finalizeConfirmationPeriod({from: activeInvestor1, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.finalizeConfirmationPeriod({from: activeInvestor1, gas: 1000000}));
     });
 
     it('should fail, because we try to trigger unConfirmPayment before Confirmation period', async () => {
-        try {
-            await icoCrowdsaleInstance.unConfirmPayment(0, {from: activeManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.unConfirmPayment(0, {from: activeManager, gas: 1000000}));
     });
 
     it('should fail, because we try to trigger batchConfirmPayments before Confirmation period', async () => {
-        try {
-            await icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: activeManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.batchConfirmPayments([0, 1], {from: activeManager, gas: 1000000}));
     });
 
     it('should fail, because we try to trigger confirmPayment before Confirmation period', async () => {
-        try {
-            await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000}));
     });
 
     /**
@@ -594,13 +483,7 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should fail, because we try to trigger mintTokenPreSale in Confirmation period', async () => {
-        try {
-            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3);
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3));
     });
 
     it('should trigger confirmPayment successfully', async () => {
@@ -735,43 +618,19 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should fail, because we try to trigger batchConfirmPayments with non manager account', async () => {
-        try {
-            await icoCrowdsaleInstance.batchConfirmPayments([3, 4], {from: inactiveManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.batchConfirmPayments([3, 4], {from: inactiveManager, gas: 1000000}));
     });
 
     it('should fail, because we try to trigger settleInvestment before confirmation period is over', async () => {
-        try {
-            await icoCrowdsaleInstance.settleInvestment(0, {from: activeManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.settleInvestment(0, {from: activeManager, gas: 1000000}));
     });
 
     it('should fail, because we try to trigger batchSettleInvestments before confirmation period is over', async () => {
-        try {
-            await icoCrowdsaleInstance.batchSettleInvestments([0, 1, 2], {from: activeManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.batchSettleInvestments([0, 1, 2], {from: activeManager, gas: 1000000}));
     });
 
     it('should fail, because we try to trigger finalize before confirmation period is over', async () => {
-        try {
-            await icoCrowdsaleInstance.finalize();
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.finalize());
     });
 
     /**
@@ -789,63 +648,27 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should fail, because we try to mint tokens for presale after Confirmation period is over', async () => {
-        try {
-            await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1);
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1));
     });
 
     it('should fail, because we try to trigger confirmPayment after Confirmation period is over', async () => {
-        try {
-            await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000}));
     });
 
     it('should fail, because we try to trigger batchConfirmPayments after Confirmation period is over', async () => {
-        try {
-            await icoCrowdsaleInstance.batchConfirmPayments([3, 4], {from: activeManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.batchConfirmPayments([3, 4], {from: activeManager, gas: 1000000}));
     });
 
     it('should fail, because we try to trigger unConfirmPayment after Confirmation period is over', async () => {
-        try {
-            await icoCrowdsaleInstance.unConfirmPayment(0, {from: activeManager, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.unConfirmPayment(0, {from: activeManager, gas: 1000000}));
     });
 
     it('should fail, because we try to trigger first settleInvestments with investmentId > 0', async () => {
-        try {
-            await icoCrowdsaleInstance.settleInvestment(1, {from: activeInvestor1, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.settleInvestment(1, {from: activeInvestor1, gas: 1000000}));
     });
 
     it('should fail, because we try to trigger first batchSettleInvestments with wrong investmentId order', async () => {
-        try {
-            await icoCrowdsaleInstance.batchSettleInvestments([2, 1, 0], {from: activeInvestor2, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.batchSettleInvestments([2, 1, 0], {from: activeInvestor2, gas: 1000000}));
     });
 
     it('should run settleInvestment for first investment successfully', async () => {
@@ -934,13 +757,7 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should fail, because we try to settle an already settled investement again', async () => {
-        try {
-            await icoCrowdsaleInstance.settleInvestment(0, {from: activeInvestor2, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoCrowdsaleInstance.settleInvestment(0, {from: activeInvestor2, gas: 1000000}));
     });
 
     it('should run settleBatchInvestment successfully', async () => {
@@ -1060,13 +877,7 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should not mint more tokens after finalize()', async () => {
-        try {
-            await icoTokenInstance.mint(owner, 1, {from: owner, gas: 1000000});
-
-            assert.fail('should have thrown before');
-        } catch (e) {
-            assertJump(e);
-        }
+        await expectThrow(icoTokenInstance.mint(owner, 1, {from: owner, gas: 1000000}));
     });
 
     it('should settle unconfirmed investment non non-payable beneficiary wallet (token contract)', async () => {

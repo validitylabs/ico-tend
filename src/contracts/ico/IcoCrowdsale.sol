@@ -104,13 +104,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     }
 
     /**
-     * @dev Create new instance of ico token contract
-     */
-    function createTokenContract() internal returns (MintableToken) {
-        return new IcoToken();
-    }
-
-    /**
      * @dev Set / alter manager / whitelister "account". This can be done from owner only
      * @param manager address address of the manager to create/alter
      * @param active bool flag that shows if the manager account is active
@@ -193,15 +186,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     }
 
     /**
-     * @dev extend base functionality with min investment amount
-     */
-    function validPurchase() internal view returns (bool) {
-        // minimal investment: 500 CHF
-        require (msg.value.div(weiPerChf) >= 500);
-        return super.validPurchase();
-    }
-
-    /**
      * @dev confirms payment
      * @param investmentId uint256 uint256 of the investment id to confirm
      */
@@ -276,13 +260,13 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     /**
      * @dev allows contract owner to mint team tokens per TEAM_TOKEN_CAP and transfer to the team wallet
-     *      Start: ??? , Cliff: 1 year, Duration: 4 years, Revocable: true? TODO: verify params for TokenVesting
+     *      Start: ??? , Cliff: 1 year, Duration: 4 years, Revocable: false? TODO: verify params for TokenVesting
      * @param _companyAddress address address of the company's wallet
      */
     function mintVestedTokens(address _companyAddress) public onlyOwner {
         require(_companyAddress != address(0));
         // Create vested contract - params: address, start, cliff, duration, revocable
-        vestedCompanyTokens = new TokenVesting(_companyAddress, endTime.add(confirmationPeriod), 1 years, FOUR_YEARS, true);
+        vestedCompanyTokens = new TokenVesting(_companyAddress, endTime.add(confirmationPeriod), 1 years, FOUR_YEARS, false);
         token.mint(vestedCompanyTokens, VESTED_TOKEN_CAP);
     }
 
@@ -382,5 +366,21 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
         //TODO: Does vestedCompanyTokens need to be transferred as well?
         //Ownable(vestedCompanyTokens).transferOwnership(owner);
+    }
+
+    /**
+     * @dev Create new instance of ico token contract
+     */
+    function createTokenContract() internal returns (MintableToken) {
+        return new IcoToken();
+    }
+
+    /**
+     * @dev extend base functionality with min investment amount
+     */
+    function validPurchase() internal view returns (bool) {
+        // minimal investment: 500 CHF
+        require (msg.value.div(weiPerChf) >= 500);
+        return super.validPurchase();
     }
 }
