@@ -307,8 +307,8 @@ contract('IcoCrowdsale', (accounts) => {
 
         assert.equal(investment2[0], activeInvestor2);                      // Investor
         assert.equal(investment2[1], activeInvestor1);                      // Beneficiary
-        investment2[2].should.be.bignumber.equal(web3.toWei(2, 'ether'));   // Amount
-        investment2[3].should.be.bignumber.equal(7992e+17);                 // @TODO: Calc actual token amount and replace w/ zero
+        investment2[2].should.be.bignumber.equal(web3.toWei(2, 'ether'));   // Wei Amount
+        investment2[3].should.be.bignumber.equal(7992e+17);                 // Token Amount
         assert.isFalse(investment2[4]);                                     // Confirmed
         assert.isFalse(investment2[5]);                                     // AttemptedSettlement
         assert.isFalse(investment2[6]);                                     // CompletedSettlement
@@ -319,7 +319,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events[0].purchaser, activeInvestor2, 'activeInvestor2 does not match purchaser');
         assert.equal(events[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
         events[0].value.should.be.bignumber.equal(web3.toWei(2, 'ether'));
-        events[0].amount.should.be.bignumber.equal(7992e17); // @TODO: Calc actual token amount and replace w/ zero
+        events[0].amount.should.be.bignumber.equal(7992e17);
     });
 
     it('should call the fallback function successfully', async () => {
@@ -333,8 +333,8 @@ contract('IcoCrowdsale', (accounts) => {
 
         assert.equal(investment3[0], activeInvestor1);                      // Investor
         assert.equal(investment3[1], activeInvestor1);                      // Beneficiary
-        investment3[2].should.be.bignumber.equal(web3.toWei(3, 'ether'));   // Amount
-        investment3[3].should.be.bignumber.equal(1.1988e21);                // Token Amount TODO: Calc actual token amount and replace w/ zero
+        investment3[2].should.be.bignumber.equal(web3.toWei(3, 'ether'));   // Wei Amount
+        investment3[3].should.be.bignumber.equal(1.1988e21);                // Token Amount
         assert.isFalse(investment3[4]);                                     // Confirmed
         assert.isFalse(investment3[5]);                                     // AttemptedSettlement
         assert.isFalse(investment3[6]);                                     // CompletedSettlement
@@ -346,7 +346,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events1[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
 
         events1[0].value.should.be.bignumber.equal(web3.toWei(3, 'ether'));
-        events1[0].amount.should.be.bignumber.equal(1.1988e21); // TODO: Calc actual token amount and replace w/ zero
+        events1[0].amount.should.be.bignumber.equal(1.1988e21);
 
         const tx2   = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor1,
@@ -358,8 +358,8 @@ contract('IcoCrowdsale', (accounts) => {
 
         assert.equal(investment4[0], activeInvestor1);                      // Investor
         assert.equal(investment4[1], activeInvestor1);                      // Beneficiary
-        investment4[2].should.be.bignumber.equal(web3.toWei(4, 'ether'));   // Amount
-        investment4[3].should.be.bignumber.equal(1.5984e21);                // Token Amount TODO: Calc actual token amount and replace w/ zero
+        investment4[2].should.be.bignumber.equal(web3.toWei(4, 'ether'));   // Wei Amount
+        investment4[3].should.be.bignumber.equal(1.5984e21);                // Token Amoun
         assert.isFalse(investment4[4]);                                     // Confirmed
         assert.isFalse(investment4[5]);                                     // AttemptedSettlement
         assert.isFalse(investment4[6]);                                     // CompletedSettlement
@@ -371,7 +371,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events2[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
 
         events2[0].value.should.be.bignumber.equal(web3.toWei(4, 'ether'));
-        events2[0].amount.should.be.bignumber.equal(1.5984e21); // TODO: Calc actual token amount and replace w/ zero
+        events2[0].amount.should.be.bignumber.equal(1.5984e21);
 
         const tx3   = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor2,
@@ -383,8 +383,8 @@ contract('IcoCrowdsale', (accounts) => {
 
         assert.equal(investment5[0], activeInvestor2);                      // Investor
         assert.equal(investment5[1], activeInvestor2);                      // Beneficiary
-        investment5[2].should.be.bignumber.equal(web3.toWei(5, 'ether'));   // Amount
-        investment5[3].should.be.bignumber.equal(1.998e21);                 // Token Amount TODO: Calc actual token amount and replace w/ zero
+        investment5[2].should.be.bignumber.equal(web3.toWei(5, 'ether'));   // Wei Amount
+        investment5[3].should.be.bignumber.equal(1.998e21);                 // Token Amount
         assert.isFalse(investment5[4]);                                     // Confirmed
         assert.isFalse(investment5[5]);                                     // AttemptedSettlement
         assert.isFalse(investment5[6]);                                     // CompletedSettlement
@@ -396,7 +396,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events3[0].beneficiary, activeInvestor2, 'activeInvestor2 does not match beneficiary');
 
         events3[0].value.should.be.bignumber.equal(web3.toWei(5, 'ether'));
-        events3[0].amount.should.be.bignumber.equal(1.998e21); // TODO: Calc actual token amount and replace w/ zero
+        events3[0].amount.should.be.bignumber.equal(1.998e21);
 
         const tx4   = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor1,
@@ -408,8 +408,8 @@ contract('IcoCrowdsale', (accounts) => {
 
         assert.equal(investment6[0], activeInvestor1);                      // Investor
         assert.equal(investment6[1], activeInvestor1);                      // Beneficiary
-        investment6[2].should.be.bignumber.equal(web3.toWei(6, 'ether'));   // Amount
-        investment6[3].should.be.bignumber.equal(2.3976e21);                // Token Amount TODO: Calc actual token amount and replace w/ zero
+        investment6[2].should.be.bignumber.equal(web3.toWei(6, 'ether'));   // Wei Amount
+        investment6[3].should.be.bignumber.equal(2.3976e21);                // Token Amount
         assert.isFalse(investment6[4]);                                     // Confirmed
         assert.isFalse(investment6[5]);                                     // AttemptedSettlement
         assert.isFalse(investment6[6]);                                     // CompletedSettlement
@@ -421,7 +421,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events4[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
 
         events4[0].value.should.be.bignumber.equal(web3.toWei(6, 'ether'));
-        events4[0].amount.should.be.bignumber.equal(2.3976e21); // TODO: Calc actual token amount and replace w/ zero
+        events4[0].amount.should.be.bignumber.equal(2.3976e21);
     });
 
     it('should buyTokens (for token contract) properly', async () => {
@@ -436,8 +436,8 @@ contract('IcoCrowdsale', (accounts) => {
 
         assert.equal(investment7[0], activeInvestor2);                      // Investor
         assert.equal(investment7[1], tokenAddress);                         // Beneficiary
-        investment7[2].should.be.bignumber.equal(web3.toWei(7, 'ether'));   // Amount
-        investment7[3].should.be.bignumber.equal(2.7972e21);                // Token Amount TODO: Calc actual token amount and replace w/ zero
+        investment7[2].should.be.bignumber.equal(web3.toWei(7, 'ether'));   // Wei Amount
+        investment7[3].should.be.bignumber.equal(2.7972e21);                // Token Amount
         assert.isFalse(investment7[4]);                                     // Confirmed
         assert.isFalse(investment7[5]);                                     // AttemptedSettlement
         assert.isFalse(investment7[6]);                                     // CompletedSettlement
@@ -489,13 +489,35 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should trigger confirmPayment successfully', async () => {
         const tx            = await icoCrowdsaleInstance.confirmPayment(2, {from: activeManager, gas: 1000000});
+        const tx2            = await icoCrowdsaleInstance.confirmPayment(0, {from: activeManager, gas: 1000000});
         const events        = getEvents(tx, 'ChangedInvestmentConfirmation');
-        const investment2    = await icoCrowdsaleInstance.investments(2);
+        const events2        = getEvents(tx2, 'ChangedInvestmentConfirmation');
+
+        const investment0   = await icoCrowdsaleInstance.investments(0);
+        const investment1   = await icoCrowdsaleInstance.investments(1);
+        const investment2   = await icoCrowdsaleInstance.investments(2);
         const investment3   = await icoCrowdsaleInstance.investments(3);
         const investment4   = await icoCrowdsaleInstance.investments(4);
         const investment5   = await icoCrowdsaleInstance.investments(5);
         const investment6   = await icoCrowdsaleInstance.investments(6);
 
+        // is presale
+        assert.equal(investment0[0], 0x0000000000000000000000000000000000000000);   // Investor
+        assert.equal(investment0[1], activeInvestor1);   // Beneficiary
+        investment0[2].should.be.bignumber.equal(web3.toWei(0, 'ether'));   // Amount
+        assert.isTrue(investment0[4]);                   // Confirmed
+        assert.isFalse(investment0[5]);                  // AttemptedSettlement
+        assert.isFalse(investment0[6]);                  // CompletedSettlement
+
+        // is presale
+        assert.equal(investment1[0], 0x0000000000000000000000000000000000000000);   // Investor
+        assert.equal(investment1[1], activeInvestor2);   // Beneficiary
+        investment1[2].should.be.bignumber.equal(web3.toWei(0, 'ether'));   // Amount
+        assert.isFalse(investment1[4]);                   // Confirmed
+        assert.isFalse(investment1[5]);                  // AttemptedSettlement
+        assert.isFalse(investment1[6]);                  // CompletedSettlement
+
+        // is crowdsales
         assert.equal(investment2[0], activeInvestor2);   // Investor
         assert.equal(investment2[1], activeInvestor1);   // Beneficiary
         investment2[2].should.be.bignumber.equal(web3.toWei(2, 'ether'));   // Amount
@@ -534,16 +556,21 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events[0].investmentId.toNumber(), 2);
         assert.equal(events[0].investor, activeInvestor2);
         assert.isTrue(events[0].confirmed);
+
+        assert.equal(events2[0].investmentId.toNumber(), 0);
+        assert.equal(events2[0].investor, 0x0000000000000000000000000000000000000000);
+        assert.isTrue(events2[0].confirmed);
     });
 
     it('should run batchConfirmPayments() successfully', async () => {
         const tx = await icoCrowdsaleInstance.batchConfirmPayments(
-            [2, 3, 4, 5],
+            [0, 1, 2, 3, 4, 5],
             {from: activeManager, gas: 1000000}
         );
 
-        const investment6   = await icoCrowdsaleInstance.investments(6);
         const events        = getEvents(tx, 'ChangedInvestmentConfirmation');
+
+        const investment6   = await icoCrowdsaleInstance.investments(6);
 
         assert.equal(investment6[0], activeInvestor1);      // Investor
         assert.equal(investment6[1], activeInvestor1);      // Beneficiary
@@ -552,32 +579,66 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(investment6[5]);                     // AttemptedSettlement
         assert.isFalse(investment6[6]);                     // CompletedSettlement
 
-        assert.equal(events[0].investmentId.toNumber(), 2);
-        assert.equal(events[0].investor, activeInvestor2);
+        // is presale
+        assert.equal(events[0].investmentId.toNumber(), 0);
+        assert.equal(events[0].investor, 0x0000000000000000000000000000000000000000);
         assert.isTrue(events[0].confirmed);
 
-        assert.equal(events[1].investmentId.toNumber(), 3);
-        assert.equal(events[1].investor, activeInvestor1);
+        // is presale
+        assert.equal(events[1].investmentId.toNumber(), 1);
+        assert.equal(events[1].investor, 0x0000000000000000000000000000000000000000);
         assert.isTrue(events[1].confirmed);
 
-        assert.equal(events[2].investmentId.toNumber(), 4);
-        assert.equal(events[2].investor, activeInvestor1);
+        // is crowdsales
+        assert.equal(events[2].investmentId.toNumber(), 2);
+        assert.equal(events[2].investor, activeInvestor2);
         assert.isTrue(events[2].confirmed);
 
-        assert.equal(events[3].investmentId.toNumber(), 5);
-        assert.equal(events[3].investor, activeInvestor2);
+        assert.equal(events[3].investmentId.toNumber(), 3);
+        assert.equal(events[3].investor, activeInvestor1);
         assert.isTrue(events[3].confirmed);
+
+        assert.equal(events[4].investmentId.toNumber(), 4);
+        assert.equal(events[4].investor, activeInvestor1);
+        assert.isTrue(events[4].confirmed);
+
+        assert.equal(events[5].investmentId.toNumber(), 5);
+        assert.equal(events[5].investor, activeInvestor2);
+        assert.isTrue(events[5].confirmed);
     });
 
     it('should run unConfirmPayment() successfully', async () => {
         const tx            = await icoCrowdsaleInstance.unConfirmPayment(5, {from: activeManager, gas: 1000000});
         const events        = getEvents(tx, 'ChangedInvestmentConfirmation');
+
+        const tx2            = await icoCrowdsaleInstance.unConfirmPayment(1, {from: activeManager, gas: 1000000});
+        const events2       = getEvents(tx2, 'ChangedInvestmentConfirmation');
+
+        const investment0   = await icoCrowdsaleInstance.investments(0);
+        const investment1   = await icoCrowdsaleInstance.investments(1);
         const investment2   = await icoCrowdsaleInstance.investments(2);
         const investment3   = await icoCrowdsaleInstance.investments(3);
         const investment4   = await icoCrowdsaleInstance.investments(4);
         const investment5   = await icoCrowdsaleInstance.investments(5);
         const investment6   = await icoCrowdsaleInstance.investments(6);
 
+        // is presale
+        assert.equal(investment0[0], 0x0000000000000000000000000000000000000000);   // Investor
+        assert.equal(investment0[1], activeInvestor1);   // Beneficiary
+        investment0[2].should.be.bignumber.equal(web3.toWei(0, 'ether'));   // Amount
+        assert.isTrue(investment0[4]);                   // Confirmed
+        assert.isFalse(investment0[5]);                  // AttemptedSettlement
+        assert.isFalse(investment0[6]);                  // CompletedSettlement
+
+        // is presale
+        assert.equal(investment1[0], 0x0000000000000000000000000000000000000000);   // Investor
+        assert.equal(investment1[1], activeInvestor2);   // Beneficiary
+        investment1[2].should.be.bignumber.equal(web3.toWei(0, 'ether'));   // Amount
+        assert.isFalse(investment1[4]);                   // Confirmed
+        assert.isFalse(investment1[5]);                  // AttemptedSettlement
+        assert.isFalse(investment1[6]);                  // CompletedSettlement
+
+        // starting crowdsale
         assert.equal(investment2[0], activeInvestor2);   // Investor
         assert.equal(investment2[1], activeInvestor1);   // Beneficiary
         investment2[2].should.be.bignumber.equal(web3.toWei(2, 'ether'));   // Amount
@@ -616,6 +677,10 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events[0].investmentId.toNumber(), 5);
         assert.equal(events[0].investor, activeInvestor2);
         assert.isFalse(events[0].confirmed);
+
+        assert.equal(events2[0].investmentId.toNumber(), 1);
+        assert.equal(events2[0].investor, 0x0000000000000000000000000000000000000000);
+        assert.isFalse(events2[0].confirmed);
     });
 
     it('should fail, because we try to trigger batchConfirmPayments with non manager account', async () => {
