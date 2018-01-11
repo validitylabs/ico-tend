@@ -6,8 +6,7 @@
 
 // TODO: Update test cases for change requests
 
-import {assertJump, waitNDays, getEvents, BigNumber, cnf, increaseTimeTo} from './helpers/tools';
-import expectThrow from './helpers/expectThrow';
+import {expectThrow, waitNDays, getEvents, BigNumber, cnf, increaseTimeTo} from './helpers/tools';
 
 const IcoCrowdsale  = artifacts.require('./IcoCrowdsale');
 const IcoToken      = artifacts.require('./IcoToken');

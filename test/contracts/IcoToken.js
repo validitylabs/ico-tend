@@ -4,8 +4,7 @@
  * @author Validity Labs AG <info@validitylabs.org>
  */
 
-import {assertJump, waitNDays, getEvents, BigNumber, increaseTimeTo} from './helpers/tools';
-import expectThrow from './helpers/expectThrow';
+import {expectThrow, waitNDays, getEvents, BigNumber, increaseTimeTo} from './helpers/tools';
 
 const IcoToken = artifacts.require('./IcoToken');
 
