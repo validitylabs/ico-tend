@@ -31,7 +31,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public constant MAX_TOKEN_CAP = 13e6 * 1e18;        // 13 million * 1e18
     // Bottom three should add to above
     uint256 public constant TEAM_TOKEN_CAP= 15e5 * 1e18;        // 1.5 million * 1e18
-    uint256 public constant VESTED_TOKEN_CAP = 2e6 * 1e18;      // 2 million * 1e18
+    uint256 public constant COMPANY_TOKEN_CAP = 2e6 * 1e18;      // 2 million * 1e18
     uint256 public constant ICO_TOKEN_CAP = 95e5 * 1e18;        // 9.5 million  * 1e18
     // Amount of discounted tokens per discount stage (2 stages total; each being the same amount)
     uint256 public constant DISCOUNT_TOKEN_AMOUNT = 3e6 * 1e18; // 3 million * 1e18
@@ -40,6 +40,8 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public tokensToMint;            // tokens to be minted after confirmation 
     uint256 public tokensMinted;            // already minted tokens (maximally = cap)
     uint256 public tokensBoughtWithEther;   // tokens bought with ether, not fiat
+    uint256 public teamTokensMinted;
+    //uint256 public companyTokensMinted;
 
     bool public confirmationPeriodOver;     // can be set by owner to finish confirmation in under 30 days
 
@@ -48,7 +50,8 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public investmentIdLastAttemptedToSettle;
 
     TokenVesting public vestedCompanyTokens;
-    uint256 public constant FOUR_YEARS = 48 * 30 days;
+    uint256 public constant THREE_YEARS = 36 * 30 days;
+    uint256 public deployment_time = 0;
 
     struct Payment {
         address investor;
@@ -97,8 +100,9 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         public
         Crowdsale(_startTime, _endTime, (10 ** uint256(18)).mul(_rateTokenPerChf).div(_rateWeiPerChf), _wallet)
     {
-        require(MAX_TOKEN_CAP == TEAM_TOKEN_CAP.add(ICO_TOKEN_CAP).add(VESTED_TOKEN_CAP));
+        require(MAX_TOKEN_CAP == TEAM_TOKEN_CAP.add(ICO_TOKEN_CAP).add(COMPANY_TOKEN_CAP));
         setManager(msg.sender, true);
+        deployment_time = now;
         weiPerChf = _rateWeiPerChf;
         confirmationPeriod = _confirmationPeriodDays * 1 days;
     }
@@ -253,9 +257,14 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      * @dev allows contract owner to mint team tokens per TEAM_TOKEN_CAP and transfer to the team wallet
      * @param _teamAddress address address of the team's wallet
      */
-    function mintTeamTokens(address _teamAddress) public onlyOwner {
+    function mintTeamTokens(address _teamAddress, uint256 _amount) public onlyOwner {
         require(_teamAddress != address(0));
+        require(_amount > 0);
+         _amount = _amount.mul(1e18);
+        require(teamTokensMinted.add(_amount) <= TEAM_TOKEN_CAP);
+
         token.mint(_teamAddress, TEAM_TOKEN_CAP);
+        teamTokensMinted = teamTokensMinted.add(_amount);
     }
 
     /**
@@ -265,9 +274,10 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      */
     function mintVestedTokens(address _companyAddress) public onlyOwner {
         require(_companyAddress != address(0));
+
         // Create vested contract - params: address, start, cliff, duration, revocable
-        vestedCompanyTokens = new TokenVesting(_companyAddress, endTime.add(confirmationPeriod), 1 years, FOUR_YEARS, false);
-        token.mint(vestedCompanyTokens, VESTED_TOKEN_CAP);
+        vestedCompanyTokens = new TokenVesting(_companyAddress, deployment_time, 1 years, THREE_YEARS, false);
+        token.mint(vestedCompanyTokens, COMPANY_TOKEN_CAP);
     }
 
     /**

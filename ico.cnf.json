@@ -6,7 +6,7 @@
     "comment endTime":              "2018-03-03T11:00:00Z",
     "endTime":                      1520074800,
     "comment cap":                  "Will be calculated to 95000000 * 10**18 in migration script",
-    "cap":                          95000000,
+    "cap":                          13000000,
     "comment confirmationPeriod":   "confirmation period in days",
     "confirmationPeriod":           30,
     "comment rateTokenPerChf":      "ratio tokens per CHF",
