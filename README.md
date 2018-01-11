@@ -4,7 +4,8 @@ TODO: include deployment to mainnet instructions
 
 ## Requirements
 The server side scripts requires NodeJS 8.
-Go to [NodeJS](https://nodejs.org/en/download/) and install the appropriate version for your system.
+Go to [NVM](https://github.com/creationix/nvm) and follow the installation description.
+By running `source ./tools/initShell.sh`, the correct NodeJs version will be activated for the current shell.
 
 Yarn is required to be installed globally to minimize the risk of dependency issues.
 Go to [Yarn](https://yarnpkg.com/en/docs/install) and choose the right installer for your system.
