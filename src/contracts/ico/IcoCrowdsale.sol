@@ -305,6 +305,11 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
         // investments have to be processed in right order
         // unless we're at first investment, the previous has needs to have undergone an attempted settlement
+
+        /**
+         * @FIXME: So know that going in, investments[0 & 1] are presale investments that have no investor address and 0 value for the wei.
+         * They have a beneficiary address and a token amount.
+         */
         require(investmentId == 0 || investments[investmentId.sub(1)].attemptedSettlement);
 
         p.attemptedSettlement = true;
