@@ -27,17 +27,20 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     uint256 public confirmationPeriod;
 
-    // Different levels of caps per allotment 
+    // Different levels of caps per allotment
+    // @TODO: use mul() here ?
     uint256 public constant MAX_TOKEN_CAP = 13e6 * 1e18;        // 13 million * 1e18
+
     // Bottom three should add to above
-    uint256 public constant TEAM_TOKEN_CAP= 15e5 * 1e18;        // 1.5 million * 1e18
-    uint256 public constant COMPANY_TOKEN_CAP = 2e6 * 1e18;      // 2 million * 1e18
+    uint256 public constant TEAM_TOKEN_CAP = 15e5 * 1e18;       // 1.5 million * 1e18
+    uint256 public constant COMPANY_TOKEN_CAP = 2e6 * 1e18;     // 2 million * 1e18
     uint256 public constant ICO_TOKEN_CAP = 95e5 * 1e18;        // 9.5 million  * 1e18
+
     // Amount of discounted tokens per discount stage (2 stages total; each being the same amount)
     uint256 public constant DISCOUNT_TOKEN_AMOUNT = 3e6 * 1e18; // 3 million * 1e18
 
     // Track tokens depending which stage that the ICO is in
-    uint256 public tokensToMint;            // tokens to be minted after confirmation 
+    uint256 public tokensToMint;            // tokens to be minted after confirmation
     uint256 public tokensMinted;            // already minted tokens (maximally = cap)
     uint256 public tokensBoughtWithEther;   // tokens bought with ether, not fiat
     uint256 public teamTokensMinted;
@@ -145,8 +148,8 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     }
 
     /**
-     * @dev unwhitelist investor from participating in the crowdsale 
-     * @param investor address address of the investor to disallowed participation 
+     * @dev unwhitelist investor from participating in the crowdsale
+     * @param investor address address of the investor to disallowed participation
      */
     function unWhiteListInvestor(address investor) public {
         require(isManager[msg.sender]);
@@ -260,7 +263,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function mintTeamTokens(address _teamAddress, uint256 _amount) public onlyOwner {
         require(_teamAddress != address(0));
         require(_amount > 0);
-         _amount = _amount.mul(1e18);
+        _amount = _amount.mul(1e18);
         require(teamTokensMinted.add(_amount) <= TEAM_TOKEN_CAP);
 
         token.mint(_teamAddress, TEAM_TOKEN_CAP);
@@ -276,7 +279,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         require(_companyAddress != address(0));
 
         // Create vested contract - params: address, start, cliff, duration, revocable
-        vestedCompanyTokens = new TokenVesting(_companyAddress, deployment_time, 1 years, THREE_YEARS, false);
+        vestedCompanyTokens = new TokenVesting(_companyAddress, deployment_time, 1 years, THREE_YEARS, false); // @TODO: use 3 years instead of THREE_YEARS?
         token.mint(vestedCompanyTokens, COMPANY_TOKEN_CAP);
     }
 
@@ -328,7 +331,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             if (p.investor != address(0) && p.weiAmount > 0) {
                 wallet.transfer(p.weiAmount);
             }
-            
+
             p.completedSettlement = true;
         } else {
             // if not confirmed -> reimburse ETH or if fiat (presale) investor: do nothing
@@ -353,13 +356,13 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         }
     }
 
-    /** 
+    /**
      * @dev allows contract owner to finalize the ICO, unpause tokens, set treasurer, finish minting, and transfer ownship of the token contract
      */
     function finalize() public {
         // only possible after confirmationPeriodOver has been manually set OR after time is over
         require(confirmationPeriodOver || now > endTime.add(confirmationPeriod));
-        
+
         Pausable(token).unpause();
 
         // this crowdsale also should not be treasurer of the token anymore
