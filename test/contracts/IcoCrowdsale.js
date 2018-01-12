@@ -16,7 +16,7 @@ const should = require('chai') // eslint-disable-line
 
 const MAX_TOKEN_CAP         = new BigNumber(13e6 * 1e18);
 const TEAM_TOKEN_CAP        = new BigNumber(15e5 * 1e18);
-const COMPANY_TOKEN_CAP     = new BigNumber(2e6 * 1e18);
+const DEVELOPMENT_TEAM_CAP  = new BigNumber(2e6 * 1e18);
 const ICO_TOKEN_CAP         = new BigNumber(95e5 * 1e18);
 const DISCOUNT_TOKEN_AMOUNT = new BigNumber(3e6 * 1e18);
 
@@ -223,7 +223,7 @@ contract('IcoCrowdsale', (accounts) => {
         await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1, {from: activeManager, gas: 1000000}));
     });
 
-    it('should fail, because we try to mint team tokens with non owner account', async () => {
+    it('should fail, because we try to mint ICO enabler tokens with non owner account', async () => {
         await expectThrow(icoCrowdsaleInstance.mintIcoEnablersTokens(
             activeManager,
             1,
@@ -231,7 +231,7 @@ contract('IcoCrowdsale', (accounts) => {
         ));
     });
 
-    it('should fail, because we try to mint team tokens with zero amount', async () => {
+    it('should fail, because we try to mint ICO enabler tokens with zero amount', async () => {
         await expectThrow(icoCrowdsaleInstance.mintIcoEnablersTokens(
             activeManager,
             0,
@@ -239,7 +239,23 @@ contract('IcoCrowdsale', (accounts) => {
         ));
     });
 
-    it('should fail, because we try to mint team tokens with value higher than cap', async () => {
+    it('should fail, because we try to mint DevelopmentTeamTokens with zero amount', async () => {
+        await expectThrow(icoCrowdsaleInstance.mintDevelopmentTeamTokens(
+            activeManager,
+            0,
+            {from: owner, gas: 1000000}
+        ));
+    });
+
+    it('should fail, because we try to mint DevelopmentTeamTokens with value higher than cap', async () => {
+        await expectThrow(icoCrowdsaleInstance.mintDevelopmentTeamTokens(
+            activeManager,
+            DEVELOPMENT_TEAM_CAP.add(1),
+            {from: owner, gas: 1000000}
+        ));
+    });
+
+    it('should fail, because we try to mint ICO enabler tokens with value higher than cap', async () => {
         await expectThrow(icoCrowdsaleInstance.mintIcoEnablersTokens(
             activeManager,
             TEAM_TOKEN_CAP.add(1),
@@ -264,7 +280,7 @@ contract('IcoCrowdsale', (accounts) => {
         }));
     });
 
-    it('should mint 10 team tokens', async () => {
+    it('should mint 10 ICO enabler tokens', async () => {
         const teamWalletBalance1 = await icoTokenInstance.balanceOf(teamWallet);
 
         icoCrowdsaleInstance.mintIcoEnablersTokens(
@@ -277,6 +293,21 @@ contract('IcoCrowdsale', (accounts) => {
 
         assert.equal(teamWalletBalance1, 0);
         assert.equal(teamWalletBalance2, 10);
+    });
+
+    it.skip('should mint 20 DevelopmentTeam Tokens', async () => {
+        const companyWalletBalance1 = await icoTokenInstance.balanceOf(companyWallet);
+
+        icoCrowdsaleInstance.mintDevelopmentTeamTokens(
+            companyWallet,
+            20,
+            {from: owner, gas: 1000000}
+        );
+
+        const companyWalletBalance2 = await icoTokenInstance.balanceOf(companyWallet);
+
+        assert.equal(companyWalletBalance1, 0);
+        assert.equal(companyWalletBalance2, 20);
     });
 
     it('should mint tokens for presale', async () => {
