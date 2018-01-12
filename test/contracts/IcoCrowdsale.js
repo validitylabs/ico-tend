@@ -14,6 +14,12 @@ const should = require('chai') // eslint-disable-line
     .use(require('chai-bignumber')(BigNumber))
     .should();
 
+const MAX_TOKEN_CAP         = new BigNumber(13e6 * 1e18);
+const TEAM_TOKEN_CAP        = new BigNumber(15e5 * 1e18);
+const COMPANY_TOKEN_CAP     = new BigNumber(2e6 * 1e18);
+const ICO_TOKEN_CAP         = new BigNumber(95e5 * 1e18);
+const DISCOUNT_TOKEN_AMOUNT = new BigNumber(3e6 * 1e18);
+
 /**
  * IcoToken contract
  */
@@ -27,8 +33,8 @@ contract('IcoCrowdsale', (accounts) => {
     const wallet            = accounts[6];
 
     // added wallets
-    // const teamWallet    = accounts[7]; // @TODO: test teamWallet
-    // const companyWallet = accounts[8]; // @TODO: test companyWallet
+    const teamWallet    = accounts[7];
+    const companyWallet = accounts[8];
     const bankFrick     = accounts[9];
 
     // Provide icoTokenInstance for every test case
@@ -56,12 +62,14 @@ contract('IcoCrowdsale', (accounts) => {
         const _wallet               = await icoCrowdsaleInstance.wallet();
         const _confirmationPeriod   = await icoCrowdsaleInstance.confirmationPeriod();
         const confirmationPeriod    = new BigNumber(cnf.confirmationPeriod);
+        const _bankFrick            = await icoCrowdsaleInstance.bankFrick();
 
         _startTime.should.be.bignumber.equal(cnf.startTime);
         _endTime.should.be.bignumber.equal(cnf.endTime);
         _weiPerChf.should.be.bignumber.equal(cnf.rateWeiPerChf);
         _wallet.should.be.equal(wallet);
         _confirmationPeriod.div(60 * 60 * 24).should.be.bignumber.equal(confirmationPeriod);
+        _bankFrick.should.be.equal(bankFrick);
     });
 
     it('should verify, the owner is added properly to manager accounts', async () => {
@@ -215,6 +223,28 @@ contract('IcoCrowdsale', (accounts) => {
         await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1, {from: activeManager, gas: 1000000}));
     });
 
+    it('should fail, because we try to mint team tokens with non owner account', async () => {
+        await expectThrow(icoCrowdsaleInstance.mintTeamTokens(
+            1,
+            {from: activeManager, gas: 1000000}
+        ));
+    });
+
+    it('should fail, because we try to mint team tokens with zero amount', async () => {
+        await expectThrow(icoCrowdsaleInstance.mintTeamTokens(
+            0,
+            {from: owner, gas: 1000000}
+        ));
+    });
+
+    it.skip('should fail, because we try to mint team tokens with value higher than cap', async () => {
+        // @FIXME: Evergreen, because BigNumber is far too big
+        await expectThrow(icoCrowdsaleInstance.mintTeamTokens(
+            TEAM_TOKEN_CAP.add(1),
+            {from: owner, gas: 1000000}
+        ));
+    });
+
     it('should fail, because we try to mint tokens more as cap limit allows', async () => {
         const big = new BigNumber(95000000 * 1e18);
         await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, (cnf.cap + big.add(1))));
@@ -230,6 +260,14 @@ contract('IcoCrowdsale', (accounts) => {
             value:  web3.toWei(1, 'ether'),
             gas:    700000
         }));
+    });
+
+    it.skip('should mint 10 team tokens', async () => {
+        // teamWallet
+        // const tx1 = icoCrowdsaleInstance.mintTeamTokens(
+        //     10,
+        //     {from: owner, gas: 1000000}
+        // );
     });
 
     it('should mint tokens for presale', async () => {
