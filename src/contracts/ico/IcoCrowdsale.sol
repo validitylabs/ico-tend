@@ -54,8 +54,10 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     TokenVesting public vestedCompanyTokens;
     TokenVesting public vestedTeamTokens;
 
+    // @TODO: change to underwriter
     address public bankFrick;
 
+    // @TODO: change to onlyUnderwriter
     modifier onlyBank() {
         require(msg.sender == bankFrick);
         _;
@@ -92,7 +94,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      * @dev Deploy capped ico crowdsale contract
      * @param _startTime uint256 Start time of the crowdsale
      * @param _endTime uint256 End time of the crowdsale
-     * @param _rateTokenPerChf uint256 issueing rate tokens per CHF
+     * @param _rateTokenPerChf uint256 issueing rate tokens (not sub-units, we multiply with 1e18 in code) per CHF
      * @param _rateWeiPerChf uint256 exchange rate Wei per CHF
      * @param _wallet address Wallet address of the crowdsale
      * @param _confirmationPeriodDays uint256 Confirmation period in days
@@ -190,15 +192,15 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         uint256 weiAmount = msg.value;
 
         // regular rate - no discount
-        uint256 tokenAmount = weiAmount.mul(rate);
+        uint256 tokenAmount = weiAmount.mul(ƒ);
 
         // Need a better way if we want a strict stop at 3 million tokens. Which could mean 1 investors gets partial bonus(es) E.g. (20% and 10%) or (10% and 0%)
         // 20% discount - 1st 3 million tokens
         if (tokensToMint <= DISCOUNT_TOKEN_AMOUNT) {
-            tokenAmount = tokenAmount.mul(12).div(10);
+            tokenAmount = tokenAmount.mul(12).div(10); // @TODO: IMO this should be mul(10).div(8)
         // 10% discount - 2nd 3 million tokens
         } else if (tokensToMint > DISCOUNT_TOKEN_AMOUNT && tokensToMint <= DISCOUNT_TOKEN_AMOUNT.mul(2)) {
-            tokenAmount = tokenAmount.mul(11).div(10);
+            tokenAmount = tokenAmount.mul(11).div(10); // @TODO: IMO this should be mul(10).div(9)
         }
 
         tokensToMint = tokensToMint.add(tokenAmount);
@@ -263,16 +265,15 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function mintTokenPreSale(address _beneficiary, uint256 _tokens) public onlyOwner {
         // during pre-sale we can issue tokens for fiat or other contributions
         // pre-sale ends with start of public sales round (accepting Ether)
-        uint256 tokens = _tokens.mul(1e18);
         require(now < startTime);
-        require(tokensToMint.add(tokens) <= ICO_TOKEN_CAP);
+        require(tokensToMint.add(_tokens) <= ICO_TOKEN_CAP);
 
-        tokensToMint = tokensToMint.add(tokens);
+        tokensToMint = tokensToMint.add(_tokens);
 
         // register payment so that later on it can be confirmed (and tokens issued and Ether paid out)
-        Payment memory newPayment = Payment(address(0), _beneficiary, 0, tokens, false, false, false);
+        Payment memory newPayment = Payment(address(0), _beneficiary, 0, _tokens, false, false, false);
         investments.push(newPayment);
-        TokenPurchase(msg.sender, _beneficiary, 0, tokens);
+        TokenPurchase(msg.sender, _beneficiary, 0, _tokens);
     }
 
     /**
@@ -281,7 +282,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      */
     function mintTeamTokens(uint256 _amount) public onlyOwner {
         require(_amount > 0);
-        _amount = _amount.mul(1e18);
         require(teamTokensMinted.add(_amount) <= TEAM_TOKEN_CAP);
 
         token.mint(vestedTeamTokens, TEAM_TOKEN_CAP);
@@ -389,9 +389,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         // we need to transfer the ownership
         // in the end the owner of this crowdsale will also be the owner of the token
         Ownable(token).transferOwnership(owner);
-
-        //TODO: Does vestedCompanyTokens need to be transferred as well?
-        //Ownable(vestedCompanyTokens).transferOwnership(owner);
     }
 
     /**
@@ -406,7 +403,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      */
     function validPurchase() internal view returns (bool) {
         // minimal investment: 500 CHF
-        require (msg.value.div(weiPerChf) >= 500);
+        require (msg.value.div(weiPerChf) >= 500); // @TODO: remove magic constant and make property constant
         return super.validPurchase();
     }
 }
