@@ -239,8 +239,7 @@ contract('IcoCrowdsale', (accounts) => {
         ));
     });
 
-    it.skip('should fail, because we try to mint team tokens with value higher than cap', async () => {
-        // @FIXME: Evergreen, because BigNumber is far too big
+    it('should fail, because we try to mint team tokens with value higher than cap', async () => {
         await expectThrow(icoCrowdsaleInstance.mintIcoEnablersTokens(
             activeManager,
             TEAM_TOKEN_CAP.add(1),
@@ -265,12 +264,19 @@ contract('IcoCrowdsale', (accounts) => {
         }));
     });
 
-    it.skip('should mint 10 team tokens', async () => {
-        // teamWallet
-        // const tx1 = icoCrowdsaleInstance.mintIcoEnablersTokens(
-        //     10,
-        //     {from: owner, gas: 1000000}
-        // );
+    it('should mint 10 team tokens', async () => {
+        const teamWalletBalance1 = await icoTokenInstance.balanceOf(teamWallet);
+
+        icoCrowdsaleInstance.mintIcoEnablersTokens(
+            teamWallet,
+            10,
+            {from: owner, gas: 1000000}
+        );
+
+        const teamWalletBalance2 = await icoTokenInstance.balanceOf(teamWallet);
+
+        assert.equal(teamWalletBalance1, 0);
+        assert.equal(teamWalletBalance2, 10);
     });
 
     it('should mint tokens for presale', async () => {
