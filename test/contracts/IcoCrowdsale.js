@@ -8,6 +8,7 @@ import {expectThrow, waitNDays, getEvents, BigNumber, cnf, increaseTimeTo} from 
 
 const IcoCrowdsale  = artifacts.require('./IcoCrowdsale');
 const IcoToken      = artifacts.require('./IcoToken');
+const TokenVesting  = artifacts.require('./TokenVesting');
 
 const should = require('chai') // eslint-disable-line
     .use(require('chai-as-promised'))
@@ -283,7 +284,7 @@ contract('IcoCrowdsale', (accounts) => {
     it('should mint 10 ICO enabler tokens', async () => {
         const teamWalletBalance1 = await icoTokenInstance.balanceOf(teamWallet);
 
-        icoCrowdsaleInstance.mintIcoEnablersTokens(
+        await icoCrowdsaleInstance.mintIcoEnablersTokens(
             teamWallet,
             10,
             {from: owner, gas: 1000000}
@@ -295,19 +296,29 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(teamWalletBalance2, 10);
     });
 
-    it.skip('should mint 20 DevelopmentTeam Tokens', async () => {
+    it('should mint 20 DevelopmentTeam Tokens', async () => {
         const companyWalletBalance1 = await icoTokenInstance.balanceOf(companyWallet);
+        let numVestingWallets = await icoCrowdsaleInstance.getVestingWalletLength();
+        assert.equal(numVestingWallets, 0);
 
-        icoCrowdsaleInstance.mintDevelopmentTeamTokens(
+        await icoCrowdsaleInstance.mintDevelopmentTeamTokens(
             companyWallet,
             20,
             {from: owner, gas: 1000000}
         );
 
+        numVestingWallets = await icoCrowdsaleInstance.getVestingWalletLength();
+        assert.equal(numVestingWallets, 1);
+
+        const vestingWallet0 = await icoCrowdsaleInstance.vestingWallets(0);
+        const balanceVestingWallet0 = await icoTokenInstance.balanceOf(vestingWallet0);
+
+        balanceVestingWallet0.should.be.bignumber.equal(20);
+
         const companyWalletBalance2 = await icoTokenInstance.balanceOf(companyWallet);
 
-        assert.equal(companyWalletBalance1, 0);
-        assert.equal(companyWalletBalance2, 20);
+        companyWalletBalance1.should.be.bignumber.equal(companyWalletBalance2);
+
     });
 
     it('should mint tokens for presale', async () => {
@@ -1146,5 +1157,32 @@ contract('IcoCrowdsale', (accounts) => {
         investmentAfter[3].should.be.bignumber.equal(2.7972e21);                // TokenAmount
         assert.isFalse(investmentAfter[4]);                                     // Confirmed
         assert.isTrue(investmentAfter[5]);                                      // AttemptedSettlement
+    });
+
+    it('should release vested tokens after 1 year', async () => {
+        await waitNDays(365);
+        console.log('[1 year later (cliff)]'.yellow);
+    });
+
+    it('should release vested tokens after 1 year', async () => {
+        const numVestingWallets = await icoCrowdsaleInstance.getVestingWalletLength();
+        assert.equal(numVestingWallets, 1);
+
+        const vestingWallet0 = await icoCrowdsaleInstance.vestingWallets(0);
+        const vestingInstance = await TokenVesting.at(vestingWallet0);
+        const balanceVestingWallet0Before = await icoTokenInstance.balanceOf(vestingWallet0);
+        const balanceCompanyWalletBefore = await icoTokenInstance.balanceOf(companyWallet);
+
+        
+        await vestingInstance.release(icoTokenInstance.address);
+        
+        const balanceVestingWallet0After = await icoTokenInstance.balanceOf(vestingWallet0);
+        const balanceCompanyWalletAfter = await icoTokenInstance.balanceOf(companyWallet);
+        
+        balanceVestingWallet0Before.should.be.bignumber.equal(20);
+        balanceVestingWallet0Before.add(balanceCompanyWalletBefore).should.be.bignumber.equal(
+            balanceVestingWallet0After.add(balanceCompanyWalletAfter)
+        );
+
     });
 });

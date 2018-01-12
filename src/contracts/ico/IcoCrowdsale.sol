@@ -49,6 +49,9 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public icoEnablersTokensMinted;
     uint256 public developmentTeamTokensMinted;
 
+    // for convenience we store vesting wallets
+    address[] public vestingWallets;
+
     bool public confirmationPeriodOver;     // can be set by owner to finish confirmation in under 30 days
 
     uint256 public weiPerChf;
@@ -295,7 +298,15 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         require(developmentTeamTokensMinted.add(_amount) <= DEVELOPMENT_TEAM_CAP);
 
         TokenVesting newVault = new TokenVesting(_to, now, VESTING_CLIFF, VESTING_DURATION, false);
+        vestingWallets.push(address(newVault)); // for convenience we keep them in storage so that they are easily accessible via MEW or etherscan
         token.mint(address(newVault), _amount);
+    }
+
+    /**
+     * @dev returns number of elements in the vestinWallets array
+     */
+    function getVestingWalletLength() public view returns (uint256) {
+        return vestingWallets.length;
     }
 
     /**
