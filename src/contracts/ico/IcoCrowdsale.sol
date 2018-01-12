@@ -178,6 +178,24 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     }
 
     /**
+     * @dev blacklist investor from participating in the crowdsale
+     * @param investor address address of the investor to disallowed participation
+     */
+    function blackListInvestor(address investor) public onlyManager {
+        isBlacklisted[investor] = true;
+        ChangedInvestorBlacklisting(investor, true);
+    }
+
+    /**
+     * @dev unblacklist investor from participating in the crowdsale
+     * @param investor address address of the investor to disallowed participation
+     */
+    function unBlackListInvestor(address investor) public onlyManager {
+        isBlacklisted[investor] = false;
+        ChangedInvestorBlacklisting(investor, false);
+    }
+
+    /**
      * @dev override (not extend! because we only issues tokens after final KYC confirm phase)
      *      core functionality by whitelist check and registration of payment
      * @param beneficiary address address of the beneficiary to receive tokens after they have been confirmed

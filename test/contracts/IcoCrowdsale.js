@@ -32,12 +32,13 @@ contract('IcoCrowdsale', (accounts) => {
     const inactiveInvestor1 = accounts[5];
     const wallet            = accounts[6];
 
-    const coinbaseWallet = '0xFc2f61eda5777dE5626320416F117d10Aac149a0';
-
     // added wallets
     const teamWallet    = accounts[7];
     const companyWallet = accounts[8];
     const underwriter   = accounts[9];
+
+    const coinbaseWallet = '0xFc2f61eda5777dE5626320416F117d10Aac149a0';
+    const coinbaseWallet2 = '0xfd7c5cb66af6Bf21023Aa559622a5a87B0ADE124';
 
     // Provide icoTokenInstance for every test case
     let icoCrowdsaleInstance;
@@ -219,6 +220,28 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isTrue(whitelisted1, 'activeInvestor1 should be whitelisted');
         assert.isTrue(whitelisted2, 'activeInvestor2 should be whitelisted');
         assert.isFalse(whitelisted3, 'inactiveInvestor1 should be unwhitelisted');
+    });
+
+    // Blacklist tests
+    it('should blacklist investor accounts', async () => {
+        const tx1 = await icoCrowdsaleInstance.whiteListInvestor(coinbaseWallet, {from: owner, gas: 1000000});
+        const tx2 = await icoCrowdsaleInstance.whiteListInvestor(coinbaseWallet2, {from: activeManager, gas: 1000000});
+
+        const whitelisted1 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
+        const whitelisted2 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor2);
+
+        assert.isTrue(whitelisted1, 'Investor1 should be whitelisted');
+        assert.isTrue(whitelisted2, 'Investor2 should be whitelisted');
+
+        // Testing events
+        const events1 = getEvents(tx1, 'ChangedInvestorWhitelisting');
+        const events2 = getEvents(tx2, 'ChangedInvestorWhitelisting');
+
+        assert.equal(events1[0].investor, activeInvestor1, 'Investor1 address doesn\'t match');
+        assert.isTrue(events1[0].whitelisted, 'Investor1 should be whitelisted');
+
+        assert.equal(events2[0].investor, activeInvestor2, 'Investor2 address doesn\'t match');
+        assert.isTrue(events2[0].whitelisted, 'Investor2 should be whitelisted');
     });
 
     it('should fail, because we try to mint tokens for presale with a non owner account', async () => {
