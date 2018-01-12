@@ -28,7 +28,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public confirmationPeriod;
 
     // Different levels of caps per allotment
-    // @TODO: use mul() here ? - throwing error when attempted to use .mul here
     uint256 public constant MAX_TOKEN_CAP = 13e6 * 1e18;        // 13 million * 1e18
 
     // Bottom three should add to above
@@ -319,10 +318,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         // investments have to be processed in right order
         // unless we're at first investment, the previous has needs to have undergone an attempted settlement
 
-        /**
-         * @FIXME: So know that going in, investments[0 & 1] are presale investments that have no investor address and 0 value for the wei.
-         * They have a beneficiary address and a token amount.  From Matt: updated test cases to confirm and settle 0 and 1 investments first
-         */
         require(investmentId == 0 || investments[investmentId.sub(1)].attemptedSettlement);
 
         p.attemptedSettlement = true;
