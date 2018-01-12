@@ -95,6 +95,7 @@ contract DividendToken is StandardToken, Ownable {
         unclaimedDividend[to] = unclaimedDividend[to].add(transAmount);
     }
 
+    // @TODO add comment block
     function updateDividend(address hodler) internal {
         // last update in previous period -> reset claimable dividend
         if (lastUpdate[hodler] < lastDividendIncreaseDate) {
@@ -103,6 +104,7 @@ contract DividendToken is StandardToken, Ownable {
         }
     }
 
+    // @TODO add comment block
     function getClaimableDividend(address hodler) public constant returns (uint256 claimableDividend) {
         if (lastUpdate[hodler] < lastDividendIncreaseDate) {
             return (currentDividend.mul(balanceOf(hodler))).div(totalSupply);
