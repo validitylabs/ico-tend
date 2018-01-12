@@ -77,6 +77,8 @@ migrate
 # Test the contract
 test
 ```
+To leave the development console, simply press <CTRL + D>.
+
 __The development console will automatically start it's own TestRPC server for you!__
 
 __Because the test consumes a lot of ETH, please restart the development console between each test!__
