@@ -1,5 +1,27 @@
 # ICO for TEND
 
+## Crowdsale Features:
+* 13 million total token cap
+    * 9.5 million presale & crowdsale cap
+    * 1.5 million team cap - vested
+    * 2 million company cap - vested
+* Vested tokens - 1 year cliff - 365 days
+    * 1/4 available after 1 year - 365 days
+    * 1/36th availabe after every 30 days
+    * non-recovable
+* mintTokenPreSale() - function for alloting tokens for presale investors that paid in fiat. Still requires confirmation and settlement
+* buyTokens() - requires confirmation and settlement
+* Discounts:
+    1st 3 million    -  20% discount -  1 token = 8 CHF
+    2nd 3 million    -  10% discount -  1 token = 9 CHF
+    last 3.5 million -  0% discount  -  1 token = 10 CHF
+* Bank Frick can only call finalize()
+* mintTeamTokens(uint256 amount) - mints up to 1.5 million tokens that are vested over 4 years
+* mintCompanyTokens - mints 2 million tokens that are vested over 4 years
+
+## Token Features:
+
+TODO: finish & verify features
 TODO: include deployment to mainnet instructions
 
 ## Requirements

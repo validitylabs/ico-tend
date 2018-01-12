@@ -28,7 +28,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public confirmationPeriod;
 
     // Different levels of caps per allotment
-    // @TODO: use mul() here ?
+    // @TODO: use mul() here ? - throwing error when attempted to use .mul here
     uint256 public constant MAX_TOKEN_CAP = 13e6 * 1e18;        // 13 million * 1e18
 
     // Bottom three should add to above
@@ -53,8 +53,14 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public investmentIdLastAttemptedToSettle;
 
     TokenVesting public vestedCompanyTokens;
-    uint256 public constant THREE_YEARS = 36 * 30 days;
-    uint256 public deployment_time = 0;
+    TokenVesting public vestedTeamTokens;
+
+    address public bankFrick;
+
+    modifier onlyBank() {
+        require(msg.sender == bankFrick);
+        _;
+    }
 
     struct Payment {
         address investor;
@@ -91,6 +97,8 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      * @param _rateWeiPerChf uint256 exchange rate Wei per CHF
      * @param _wallet address Wallet address of the crowdsale
      * @param _confirmationPeriodDays uint256 Confirmation period in days
+     * @param _teamAddress address wallet for team tokens to be vested to
+     * @param _companyAddress address wallet for company tokens to be vested to
      */
     function IcoCrowdsale(
         uint256 _startTime,
@@ -98,16 +106,28 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         uint256 _rateTokenPerChf,
         uint256 _rateWeiPerChf,
         address _wallet,
-        uint256 _confirmationPeriodDays
+        uint256 _confirmationPeriodDays,
+        address _teamAddress,
+        address _companyAddress,
+        address _bankFrick
     )
         public
         Crowdsale(_startTime, _endTime, (10 ** uint256(18)).mul(_rateTokenPerChf).div(_rateWeiPerChf), _wallet)
     {
         require(MAX_TOKEN_CAP == TEAM_TOKEN_CAP.add(ICO_TOKEN_CAP).add(COMPANY_TOKEN_CAP));
+        require(_teamAddress != address(0));
+        require(_companyAddress != address(0));
+        require(_bankFrick != address(0));
+
         setManager(msg.sender, true);
-        deployment_time = now;
+
         weiPerChf = _rateWeiPerChf;
         confirmationPeriod = _confirmationPeriodDays * 1 days;
+        bankFrick = _bankFrick;
+
+        // Create vested contracts for team tokens and company tokens - params: address, start, cliff, duration, revocable
+        vestedTeamTokens = new TokenVesting(_teamAddress, now, 1 years, 3 years, false);
+        vestedCompanyTokens = new TokenVesting(_companyAddress, now, 1 years, 3 years, false);
     }
 
     /**
@@ -251,35 +271,28 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         tokensToMint = tokensToMint.add(tokens);
 
         // register payment so that later on it can be confirmed (and tokens issued and Ether paid out)
-        Payment memory newPayment = Payment(address(0), _beneficiary, 0, _tokens, false, false, false);
+        Payment memory newPayment = Payment(address(0), _beneficiary, 0, tokens, false, false, false);
         investments.push(newPayment);
         TokenPurchase(msg.sender, _beneficiary, 0, tokens);
     }
 
-    /** TODO: add another check to make sure ICO is in certain stage first???
+    /**
      * @dev allows contract owner to mint team tokens per TEAM_TOKEN_CAP and transfer to the team wallet
-     * @param _teamAddress address address of the team's wallet
+     * @param _amount uint256 token amount to mint for team wallet
      */
-    function mintTeamTokens(address _teamAddress, uint256 _amount) public onlyOwner {
-        require(_teamAddress != address(0));
+    function mintTeamTokens(uint256 _amount) public onlyOwner {
         require(_amount > 0);
         _amount = _amount.mul(1e18);
         require(teamTokensMinted.add(_amount) <= TEAM_TOKEN_CAP);
 
-        token.mint(_teamAddress, TEAM_TOKEN_CAP);
+        token.mint(vestedTeamTokens, TEAM_TOKEN_CAP);
         teamTokensMinted = teamTokensMinted.add(_amount);
     }
 
     /**
      * @dev allows contract owner to mint team tokens per TEAM_TOKEN_CAP and transfer to the team wallet
-     *      Start: ??? , Cliff: 1 year, Duration: 4 years, Revocable: false? TODO: verify params for TokenVesting
-     * @param _companyAddress address address of the company's wallet
      */
-    function mintVestedTokens(address _companyAddress) public onlyOwner {
-        require(_companyAddress != address(0));
-
-        // Create vested contract - params: address, start, cliff, duration, revocable
-        vestedCompanyTokens = new TokenVesting(_companyAddress, deployment_time, 1 years, THREE_YEARS, false); // @TODO: use 3 years instead of THREE_YEARS?
+    function mintCompanyTokens() public onlyOwner {
         token.mint(vestedCompanyTokens, COMPANY_TOKEN_CAP);
     }
 
@@ -308,7 +321,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
         /**
          * @FIXME: So know that going in, investments[0 & 1] are presale investments that have no investor address and 0 value for the wei.
-         * They have a beneficiary address and a token amount.
+         * They have a beneficiary address and a token amount.  From Matt: updated test cases to confirm and settle 0 and 1 investments first
          */
         require(investmentId == 0 || investments[investmentId.sub(1)].attemptedSettlement);
 
@@ -364,7 +377,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     /**
      * @dev allows contract owner to finalize the ICO, unpause tokens, set treasurer, finish minting, and transfer ownship of the token contract
      */
-    function finalize() public {
+    function finalize() public onlyBank {
         // only possible after confirmationPeriodOver has been manually set OR after time is over
         require(confirmationPeriodOver || now > endTime.add(confirmationPeriod));
 
