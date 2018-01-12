@@ -1,5 +1,6 @@
 /**
  * @title Dividend contract
+ *
  * @version 1.0
  * @author Validity Labs AG <info@validitylabs.org>
  */
@@ -95,7 +96,10 @@ contract DividendToken is StandardToken, Ownable {
         unclaimedDividend[to] = unclaimedDividend[to].add(transAmount);
     }
 
-    // @TODO add comment block
+    /**
+     * @dev Update the dividend of hodler
+     * @param hodler address The Address of the hodler
+     */
     function updateDividend(address hodler) internal {
         // last update in previous period -> reset claimable dividend
         if (lastUpdate[hodler] < lastDividendIncreaseDate) {
@@ -104,7 +108,10 @@ contract DividendToken is StandardToken, Ownable {
         }
     }
 
-    // @TODO add comment block
+    /**
+     * @dev Get claimable dividend for the hodler
+     * @param hodler address The Address of the hodler
+     */
     function getClaimableDividend(address hodler) public constant returns (uint256 claimableDividend) {
         if (lastUpdate[hodler] < lastDividendIncreaseDate) {
             return (currentDividend.mul(balanceOf(hodler))).div(totalSupply);

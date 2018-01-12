@@ -31,9 +31,13 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public constant MAX_TOKEN_CAP = 13e6 * 1e18;        // 13 million * 1e18
 
     // Bottom three should add to above
-    uint256 public constant TEAM_TOKEN_CAP = 15e5 * 1e18;       // 1.5 million * 1e18
-    uint256 public constant COMPANY_TOKEN_CAP = 2e6 * 1e18;     // 2 million * 1e18
+    uint256 public constant ICO_ENABLERS_CAP = 15e5 * 1e18;     // 1.5 million * 1e18
+    uint256 public constant DEVELOPMENT_TEAM_CAP = 2e6 * 1e18;  // 2 million * 1e18
     uint256 public constant ICO_TOKEN_CAP = 95e5 * 1e18;        // 9.5 million  * 1e18
+
+    uint256 public constant MIN_CONTRIBUTION_CHF = 500;
+    uint256 public constant VESTING_CLIFF = 1 years;
+    uint256 public constant VESTING_DURATION = 3 years;
 
     // Amount of discounted tokens per discount stage (2 stages total; each being the same amount)
     uint256 public constant DISCOUNT_TOKEN_AMOUNT = 3e6 * 1e18; // 3 million * 1e18
@@ -42,7 +46,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public tokensToMint;            // tokens to be minted after confirmation
     uint256 public tokensMinted;            // already minted tokens (maximally = cap)
     uint256 public tokensBoughtWithEther;   // tokens bought with ether, not fiat
-    uint256 public teamTokensMinted;
+    uint256 public icoEnablersTokensMinted;
     //uint256 public companyTokensMinted;
 
     bool public confirmationPeriodOver;     // can be set by owner to finish confirmation in under 30 days
@@ -51,15 +55,10 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     uint256 public investmentIdLastAttemptedToSettle;
 
-    TokenVesting public vestedCompanyTokens;
-    TokenVesting public vestedTeamTokens;
+    address public underwriter;
 
-    // @TODO: change to underwriter
-    address public bankFrick;
-
-    // @TODO: change to onlyUnderwriter
-    modifier onlyBank() {
-        require(msg.sender == bankFrick);
+    modifier onlyUnderwriter() {
+        require(msg.sender == underwriter);
         _;
     }
 
@@ -100,6 +99,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      * @param _confirmationPeriodDays uint256 Confirmation period in days
      * @param _teamAddress address wallet for team tokens to be vested to
      * @param _companyAddress address wallet for company tokens to be vested to
+     * @param _underwriter address of the underwriter
      */
     function IcoCrowdsale(
         uint256 _startTime,
@@ -110,25 +110,21 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         uint256 _confirmationPeriodDays,
         address _teamAddress,
         address _companyAddress,
-        address _bankFrick
+        address _underwriter
     )
         public
         Crowdsale(_startTime, _endTime, (10 ** uint256(18)).mul(_rateTokenPerChf).div(_rateWeiPerChf), _wallet)
     {
-        require(MAX_TOKEN_CAP == TEAM_TOKEN_CAP.add(ICO_TOKEN_CAP).add(COMPANY_TOKEN_CAP));
+        require(MAX_TOKEN_CAP == ICO_ENABLERS_CAP.add(ICO_TOKEN_CAP).add(DEVELOPMENT_TEAM_CAP));
         require(_teamAddress != address(0));
         require(_companyAddress != address(0));
-        require(_bankFrick != address(0));
+        require(_underwriter != address(0));
 
         setManager(msg.sender, true);
 
         weiPerChf = _rateWeiPerChf;
         confirmationPeriod = _confirmationPeriodDays * 1 days;
-        bankFrick = _bankFrick;
-
-        // Create vested contracts for team tokens and company tokens - params: address, start, cliff, duration, revocable
-        vestedTeamTokens = new TokenVesting(_teamAddress, now, 1 years, 3 years, false);
-        vestedCompanyTokens = new TokenVesting(_companyAddress, now, 1 years, 3 years, false);
+        underwriter = _underwriter;
     }
 
     /**
@@ -192,7 +188,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         uint256 weiAmount = msg.value;
 
         // regular rate - no discount
-        uint256 tokenAmount = weiAmount.mul(ƒ);
+        uint256 tokenAmount = weiAmount.mul(rate);
 
         // Need a better way if we want a strict stop at 3 million tokens. Which could mean 1 investors gets partial bonus(es) E.g. (20% and 10%) or (10% and 0%)
         // 20% discount - 1st 3 million tokens
@@ -258,7 +254,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     }
 
     /**
-     * @dev allows contract owner to mint team tokens per TEAM_TOKEN_CAP and transfer to the team wallet
+     * @dev allows contract owner to mint team tokens per ICO_ENABLERS_CAP and transfer to the team wallet
      * @param _beneficiary address address of the beneficiary to receive tokens
      * @param _tokens uint256 uint256 of the token amount to mint
      */
@@ -277,22 +273,26 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     }
 
     /**
-     * @dev allows contract owner to mint team tokens per TEAM_TOKEN_CAP and transfer to the team wallet
-     * @param _amount uint256 token amount to mint for team wallet
+     * @dev allows contract owner to mint tokens for ICO enablers (no vesting)
+     * @param _to address for beneficiary
+     * @param _amount uint256 token amount to mint
      */
-    function mintTeamTokens(uint256 _amount) public onlyOwner {
+    function mintIcoEnablersTokens(address _to, uint256 _amount) public onlyOwner {
         require(_amount > 0);
-        require(teamTokensMinted.add(_amount) <= TEAM_TOKEN_CAP);
+        require(icoEnablersTokensMinted.add(_amount) <= ICO_ENABLERS_CAP);
 
-        token.mint(vestedTeamTokens, TEAM_TOKEN_CAP);
-        teamTokensMinted = teamTokensMinted.add(_amount);
+        token.mint(_to, _amount);
+        icoEnablersTokensMinted = icoEnablersTokensMinted.add(_amount);
     }
 
     /**
-     * @dev allows contract owner to mint team tokens per TEAM_TOKEN_CAP and transfer to the team wallet
+     * @dev allows contract owner to mint team tokens per ICO_ENABLERS_CAP and transfer to the team wallet
+     * @param _to address for beneficiary
+     * @param _amount uint256 token amount to mint
      */
-    function mintCompanyTokens() public onlyOwner {
-        token.mint(vestedCompanyTokens, COMPANY_TOKEN_CAP);
+    function mintDevelopmentTeamTokens(address _to, uint256 _amount) public onlyOwner {
+        TokenVesting newVault = new TokenVesting(_to, now, VESTING_CLIFF, VESTING_DURATION, false);
+        token.mint(address(newVault), _amount);
     }
 
     /**
@@ -372,7 +372,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     /**
      * @dev allows contract owner to finalize the ICO, unpause tokens, set treasurer, finish minting, and transfer ownship of the token contract
      */
-    function finalize() public onlyBank {
+    function finalize() public onlyUnderwriter {
         // only possible after confirmationPeriodOver has been manually set OR after time is over
         require(confirmationPeriodOver || now > endTime.add(confirmationPeriod));
 
@@ -403,7 +403,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      */
     function validPurchase() internal view returns (bool) {
         // minimal investment: 500 CHF
-        require (msg.value.div(weiPerChf) >= 500); // @TODO: remove magic constant and make property constant
+        require (msg.value.div(weiPerChf) >= MIN_CONTRIBUTION_CHF);
         return super.validPurchase();
     }
 }

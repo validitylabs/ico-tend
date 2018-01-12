@@ -11,8 +11,8 @@ module.exports = function (deployer, network, accounts) { // eslint-disable-line
     const wallet        = accounts[6];
     const teamWallet    = accounts[7];
     const companyWallet = accounts[8];
-    const bankFrick     = accounts[9];
+    const underwriter   = accounts[9];
 
     deployer.deploy(IcoToken);
-    deployer.deploy(IcoCrowdsale, cnf.startTime, cnf.endTime, cnf.rateTokenPerChf, cnf.rateWeiPerChf, wallet, cnf.confirmationPeriod, teamWallet, companyWallet, bankFrick);
+    deployer.deploy(IcoCrowdsale, cnf.startTime, cnf.endTime, cnf.rateTokenPerChf, cnf.rateWeiPerChf, wallet, cnf.confirmationPeriod, teamWallet, companyWallet, underwriter);
 };
