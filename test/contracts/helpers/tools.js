@@ -8,8 +8,8 @@ export async function expectThrow(promise) {
     try {
         await promise;
     } catch (error) {
-    // TODO: Check jump destination to destinguish between a throw
-    //       and an actual invalid jump.
+        // TODO: Check jump destination to destinguish between a throw
+        //       and an actual invalid jump.
         const invalidOpcode = error.message.search('invalid opcode') >= 0;
         // TODO: When we contract A calls contract B, and B throws, instead
         //       of an 'invalid jump', we get an 'out of gas' error. How do
