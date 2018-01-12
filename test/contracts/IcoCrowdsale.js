@@ -224,14 +224,16 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should fail, because we try to mint team tokens with non owner account', async () => {
-        await expectThrow(icoCrowdsaleInstance.mintTeamTokens(
+        await expectThrow(icoCrowdsaleInstance.mintIcoEnablersTokens(
+            activeManager,
             1,
             {from: activeManager, gas: 1000000}
         ));
     });
 
     it('should fail, because we try to mint team tokens with zero amount', async () => {
-        await expectThrow(icoCrowdsaleInstance.mintTeamTokens(
+        await expectThrow(icoCrowdsaleInstance.mintIcoEnablersTokens(
+            activeManager,
             0,
             {from: owner, gas: 1000000}
         ));
@@ -239,7 +241,8 @@ contract('IcoCrowdsale', (accounts) => {
 
     it.skip('should fail, because we try to mint team tokens with value higher than cap', async () => {
         // @FIXME: Evergreen, because BigNumber is far too big
-        await expectThrow(icoCrowdsaleInstance.mintTeamTokens(
+        await expectThrow(icoCrowdsaleInstance.mintIcoEnablersTokens(
+            activeManager,
             TEAM_TOKEN_CAP.add(1),
             {from: owner, gas: 1000000}
         ));
@@ -264,7 +267,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it.skip('should mint 10 team tokens', async () => {
         // teamWallet
-        // const tx1 = icoCrowdsaleInstance.mintTeamTokens(
+        // const tx1 = icoCrowdsaleInstance.mintIcoEnablersTokens(
         //     10,
         //     {from: owner, gas: 1000000}
         // );

@@ -47,7 +47,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public tokensMinted;            // already minted tokens (maximally = cap)
     uint256 public tokensBoughtWithEther;   // tokens bought with ether, not fiat
     uint256 public icoEnablersTokensMinted;
-    //uint256 public companyTokensMinted;
+    uint256 public developmentTeamTokensMinted;
 
     bool public confirmationPeriodOver;     // can be set by owner to finish confirmation in under 30 days
 
@@ -291,6 +291,9 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      * @param _amount uint256 token amount to mint
      */
     function mintDevelopmentTeamTokens(address _to, uint256 _amount) public onlyOwner {
+        require(_amount > 0);
+        require(developmentTeamTokensMinted.add(_amount) <= DEVELOPMENT_TEAM_CAP);
+
         TokenVesting newVault = new TokenVesting(_to, now, VESTING_CLIFF, VESTING_DURATION, false);
         token.mint(address(newVault), _amount);
     }
