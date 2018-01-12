@@ -141,88 +141,6 @@ contract('IcoCrowdsale', (accounts) => {
         await expectThrow(icoCrowdsaleInstance.setManager(activeManager, false, {from: activeInvestor1, gas: 1000000}));
     });
 
-    it('should whitelist investor accounts', async () => {
-        const tx1 = await icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: owner, gas: 1000000});
-        const tx2 = await icoCrowdsaleInstance.whiteListInvestor(activeInvestor2, {from: activeManager, gas: 1000000});
-
-        const whitelisted1 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
-        const whitelisted2 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor2);
-
-        assert.isTrue(whitelisted1, 'Investor1 should be whitelisted');
-        assert.isTrue(whitelisted2, 'Investor2 should be whitelisted');
-
-        // Testing events
-        const events1 = getEvents(tx1, 'ChangedInvestorWhitelisting');
-        const events2 = getEvents(tx2, 'ChangedInvestorWhitelisting');
-
-        assert.equal(events1[0].investor, activeInvestor1, 'Investor1 address doesn\'t match');
-        assert.isTrue(events1[0].whitelisted, 'Investor1 should be whitelisted');
-
-        assert.equal(events2[0].investor, activeInvestor2, 'Investor2 address doesn\'t match');
-        assert.isTrue(events2[0].whitelisted, 'Investor2 should be whitelisted');
-    });
-
-    it('should unwhitelist investor account', async () => {
-        const tx            = await icoCrowdsaleInstance.unWhiteListInvestor(inactiveInvestor1, {from: owner, gas: 1000000});
-        const whitelisted   = await icoCrowdsaleInstance.isWhitelisted(inactiveInvestor1);
-
-        assert.isFalse(whitelisted, 'inactiveInvestor1 should be unwhitelisted');
-
-        // Testing events
-        const events = getEvents(tx, 'ChangedInvestorWhitelisting');
-
-        assert.equal(events[0].investor, inactiveInvestor1, 'inactiveInvestor1 address doesn\'t match');
-        assert.isFalse(events[0].whitelisted, 'inactiveInvestor1 should be unwhitelisted');
-    });
-
-    it('should fail, because we try to whitelist investor from unauthorized account', async () => {
-        await expectThrow(icoCrowdsaleInstance.whiteListInvestor(inactiveInvestor1, {from: activeInvestor2, gas: 1000000}));
-    });
-
-    it('should fail, because we try to unwhitelist investor from unauthorized account', async () => {
-        await expectThrow(icoCrowdsaleInstance.whiteListInvestor(activeInvestor1, {from: activeInvestor2, gas: 1000000}));
-    });
-
-    it('should fail, because we try to run batchWhiteListInvestors with a non manager account', async () => {
-        await expectThrow(icoCrowdsaleInstance.batchWhiteListInvestors([activeInvestor1, activeInvestor2], {from: activeInvestor2, gas: 1000000}));
-    });
-
-    it('should fail, because we try to run unWhiteListInvestor with a non manager account', async () => {
-        await expectThrow(icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor1, {from: activeInvestor2, gas: 1000000}));
-    });
-
-    it('should whitelist 2 investors by batch function', async () => {
-        await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor1, {from: owner, gas: 1000000});
-        await icoCrowdsaleInstance.unWhiteListInvestor(activeInvestor2, {from: owner, gas: 1000000});
-
-        const tx = await icoCrowdsaleInstance.batchWhiteListInvestors([activeInvestor1, activeInvestor2], {from: owner, gas: 1000000});
-
-        const whitelisted1  = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
-        const whitelisted2  = await icoCrowdsaleInstance.isWhitelisted(activeInvestor2);
-
-        assert.isTrue(whitelisted1, 'activeInvestor1 should be whitelisted');
-        assert.isTrue(whitelisted2, 'activeInvestor2 should be whitelisted');
-
-        // Testing events
-        const events = getEvents(tx, 'ChangedInvestorWhitelisting');
-
-        assert.equal(events[0].investor, activeInvestor1, 'Investor1 address doesn\'t match');
-        assert.isTrue(events[0].whitelisted, 'Investor1 should be whitelisted');
-
-        assert.equal(events[1].investor, activeInvestor2, 'Investor2 address doesn\'t match');
-        assert.isTrue(events[1].whitelisted, 'Investor2 should be whitelisted');
-    });
-
-    it('should verify the investor account states succesfully', async () => {
-        const whitelisted1  = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
-        const whitelisted2  = await icoCrowdsaleInstance.isWhitelisted(activeInvestor2);
-        const whitelisted3  = await icoCrowdsaleInstance.isWhitelisted(inactiveInvestor1);
-
-        assert.isTrue(whitelisted1, 'activeInvestor1 should be whitelisted');
-        assert.isTrue(whitelisted2, 'activeInvestor2 should be whitelisted');
-        assert.isFalse(whitelisted3, 'inactiveInvestor1 should be unwhitelisted');
-    });
-
     // Start Blacklist f(x) tests
     it('should fail, because we try to blackListInvestor investor from unauthorized account', async () => {
         await expectThrow(icoCrowdsaleInstance.blackListInvestor(coinbaseWallet, {from: activeInvestor2, gas: 1000000}));
@@ -414,19 +332,11 @@ contract('IcoCrowdsale', (accounts) => {
     /**
      * [ Contribution period ]
      */
-
-    it('should fail, because we try to trigger buyTokens as unwhitelisted investor', async () => {
+    
+    it('should fail, because we try to trigger buyTokens with a too low investment', async () => {
         console.log('[ Contribution period ]'.yellow);
         await waitNDays(35);
 
-        await expectThrow(icoCrowdsaleInstance.buyTokens(activeInvestor1, {
-            from: inactiveInvestor1,
-            gas: 1000000,
-            value: web3.toWei(2, 'ether')
-        }));
-    });
-
-    it('should fail, because we try to trigger buyTokens with a too low investment', async () => {
         await expectThrow(icoCrowdsaleInstance.buyTokens(
             activeInvestor1,
             {from: activeInvestor1, gas: 1000000, value: web3.toWei(1, 'ether')}
@@ -950,33 +860,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(investment6[5]);                                     // AttemptedSettlement
         assert.isFalse(investment6[6]);                                     // CompletedSettlement
 
-        // const balanceContractBefore     = await web3.eth.getBalance(icoCrowdsaleInstance.address);
-        // const balanceWalletBefore       = await web3.eth.getBalance(wallet);
-        // const balanceInvestor1Before    = await icoTokenInstance.balanceOf(activeInvestor1);
-        // const balanceInvestor2Before    = await icoTokenInstance.balanceOf(activeInvestor2);
-
-        // @TODO: what about wallet and contract balance?
-
-        // @FIXME: switched from 2 to 0, because the requirement in IcoCrowdsale.sol:settleInvestment() => require(investmentId == 0 || investments[investmentId.sub(1)].attemptedSettlement);
-        // @TODO: Balances for wallet, contract and investors are unchanged after settleInvestment. Does this make sense?
         await icoCrowdsaleInstance.settleInvestment(0, {from: inactiveInvestor1, gas: 1000000});
-
-        // const balanceContractAfter     = await web3.eth.getBalance(icoCrowdsaleInstance.address);
-        // const balanceWalletAfter       = await web3.eth.getBalance(wallet);
-        // const balanceInvestor1After    = await icoTokenInstance.balanceOf(activeInvestor1);
-        // const balanceInvestor2After    = await icoTokenInstance.balanceOf(activeInvestor2);
-
-        // TODO: these 2 are no longer valid as 0 & 1 are now presale investments
-        // balanceContractBefore.sub(balanceContractAfter).should.be.bignumber.equal(two);
-        // balanceInvestor2Before.should.be.bignumber.equal(balanceInvestor2After);
-
-        // const sixsixsix = new BigNumber(666);
-
-        // TODO: Bottom 3 statements are no longer valid. Same reason as above's TODO: statement
-        //balanceContractAfter.add(web3.toWei(102, 'ether')).should.be.bignumber.equal(balanceContractBefore.add(balanceWalletBefore));
-
-        //balanceInvestor1Before.should.be.bignumber.equal(10);
-        //balanceInvestor1After.should.be.bignumber.equal(web3.toWei(sixsixsix, 'ether').add(10));
 
         const investmentAfter0   = await icoCrowdsaleInstance.investments(0);
         const investmentAfter1   = await icoCrowdsaleInstance.investments(1);
@@ -1109,9 +993,9 @@ contract('IcoCrowdsale', (accounts) => {
         // is presale
         investmentAfter1[2].should.be.bignumber.equal(web3.toWei(0, 'ether'));  // Wei Amount
         investmentAfter1[3].should.be.bignumber.equal(5);                       // Token Amount
-        assert.isFalse(investmentAfter1[4]);                                    // Confirmed @TODO: confirmed == false?
+        assert.isFalse(investmentAfter1[4]);                                    // Confirmed
         assert.isTrue(investmentAfter1[5]);                                     // AttemptedSettlement
-        assert.isFalse(investmentAfter1[6]);                                    // CompletedSettlement @TODO: completed == false?
+        assert.isFalse(investmentAfter1[6]);                                    // CompletedSettlement
 
         // is crowdfundings
         investmentAfter2[2].should.be.bignumber.equal(web3.toWei(2, 'ether'));  // Wei Amount

@@ -3,26 +3,37 @@
 ## Crowdsale Features:
 * 13 million total token cap
     * 9.5 million presale & crowdsale cap
-    * 1.5 million team cap - vested
-    * 2 million company cap - vested
-* Vested tokens - 1 year cliff - 365 days
-    * 1/4 available after 1 year - 365 days
-    * 1/36th availabe after every 30 days
-    * non-recovable
-* mintTokenPreSale() - function for alloting tokens for presale investors that paid in fiat. Still requires confirmation and settlement
-* buyTokens() - requires confirmation and settlement
+    * 1.5 million ICO enablers cap - not vested
+    * 2 million development team cap - vested
+* Vested tokens
+    * vesting period starts at the time that the admin allocates the tokens
+    * each beneficiary has their own vesting contract that locks up their tokens until they can be released by beneficiary themselves
+    * 1/4 available after 1 year, nothing before (cliff)
+    * remainder can be released continuously until all tokens are released after a total of 4 years (3 years past cliff)
+    * non-revocable, can be released by respective owner from their vesting contract (one contract per owner)
+* owner can allot tokens for presale investors manually, this still requires confirmation and settlement
+* allow token distribution to different address than sending Ether address via `buyTokens` - requires confirmation and settlement
 * Discounts:
-    1st 3 million    -  20% discount -  1 token = 8 CHF
-    2nd 3 million    -  10% discount -  1 token = 9 CHF
-    last 3.5 million -  0% discount  -  1 token = 10 CHF
-* Bank Frick can only call finalize()
+    * 1st 3 million    -  20% discount -  1 token = 8 CHF
+    * 2nd 3 million    -  10% discount -  1 token = 9 CHF
+    * last 3.5 million -  0% discount  -  1 token = 10 CHF
+* underwriter has to make tokens transferrable by calling `finalize`, if they do not, tokens will remain paused
+* owner of 
 * mintTeamTokens(uint256 amount) - mints up to 1.5 million tokens that are vested over 4 years
 * mintCompanyTokens - mints 2 million tokens that are vested over 4 years
+* owner is transferrable
 
 ## Token Features:
-
-TODO: finish & verify features
-TODO: include deployment to mainnet instructions
+* ERC20-compatible
+* pausable
+* paused until un-paused by `finalize` in crowdsale contract
+* featuring dividend:
+    * dividend coupled to token, unclaimed dividend transferred along when using token `transfer` or `transferFrom` functions
+    * dividend can be paid in once every 350 days by treasurer account
+    * dividend can be claimed up to 330 days after receiving the payment
+    * unclaimed dividend can be reclaimed by owner 330 days until last payment and until next payment is coming in
+* treasurer accounts set by owner
+* owner is transferrable
 
 ## Requirements
 The server side scripts requires NodeJS 8.

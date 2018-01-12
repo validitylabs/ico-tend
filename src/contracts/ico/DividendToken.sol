@@ -84,13 +84,7 @@ contract DividendToken is StandardToken, Ownable {
         updateDividend(from);
         updateDividend(to);
 
-        // @TODO: check if this is ok if dividend gets claimed in same block as payment
-        // (should allow new dividend to be claimed in same block but not before dividend money came in)
-
-        // @TODO: gas optimisation by storing unclaimedDividend[msg.sender] in local variable
-
         uint256 transAmount = unclaimedDividend[from].mul(value).div(balanceOf(from));
-        // @TODO: check if division by zero throws (it should)
 
         unclaimedDividend[from] = unclaimedDividend[from].sub(transAmount);
         unclaimedDividend[to] = unclaimedDividend[to].add(transAmount);

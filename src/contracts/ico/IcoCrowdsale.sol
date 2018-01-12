@@ -33,12 +33,9 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     address public underwriter;
 
-    // allow managers to whitelist and confirm contributions by manager accounts
+    // allow managers to blacklist and confirm contributions by manager accounts
     // (managers can be set and altered by owner, multiple manager accounts are possible
     mapping(address => bool) public isManager;
-
-    // true if address is allowed to invest
-    mapping(address => bool) public isWhitelisted;
 
     // true if addess is not allowed to invest
     mapping(address => bool) public isBlacklisted;
@@ -70,7 +67,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     Payment[] public investments;
 
-    event ChangedInvestorWhitelisting(address investor, bool whitelisted);
     event ChangedInvestorBlacklisting(address investor, bool blacklisted);
     event ChangedManager(address manager, bool active);
     event ChangedInvestmentConfirmation(uint256 investmentId, address investor, bool confirmed);
@@ -84,21 +80,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         require(isManager[msg.sender]);
         _;
     }
-
-     /*
-     tokenUnitsPerWei = 10 ** uint256(decimals) * tokenPerChf / weiPerChf
-
-     e.g.: 1ETH = 300 CHF -> 1e18 Wei = 300 CHF -> 1CHF = 3.3 e15 Wei
-     --> weiPerChf = 3.3 e15
-     --> tokenPerChf = 1
-
-     10 ** 18 * 1 / 3.3e15
-     = 303 tokens / wei
-
-     alternative example (200 CHF / ETH):
-     10 ** 18 * 1 / 5e15
-     = 200;
-     */
 
     /**
      * @dev Deploy capped ico crowdsale contract
@@ -139,45 +120,13 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     }
 
     /**
-     * @dev Set / alter manager / whitelister "account". This can be done from owner only
+     * @dev Set / alter manager / blacklister account. This can be done from owner only
      * @param manager address address of the manager to create/alter
      * @param active bool flag that shows if the manager account is active
      */
     function setManager(address manager, bool active) public onlyOwner {
         isManager[manager] = active;
         ChangedManager(manager, active);
-    }
-
-    /**
-     * @dev whitelist investors to allow the direct investment of this crowdsale
-     * @param investor address address of the investor to be whitelisted
-     */
-    function whiteListInvestor(address investor) public onlyManager {
-        isWhitelisted[investor] = true;
-        ChangedInvestorWhitelisting(investor, true);
-    }
-
-    /**
-     * @dev whitelist several investors via a batch method
-     * @param investors address[] array of addresses of the beneficiaries to receive tokens after they have been confirmed
-     */
-    function batchWhiteListInvestors(address[] investors) public onlyManager {
-        address investor;
-
-        for (uint256 c; c < investors.length; c = c.add(1)) {
-            investor = investors[c]; // gas optimization
-            isWhitelisted[investor] = true;
-            ChangedInvestorWhitelisting(investor, true);
-        }
-    }
-
-    /**
-     * @dev unwhitelist investor from participating in the crowdsale
-     * @param investor address address of the investor to disallowed participation
-     */
-    function unWhiteListInvestor(address investor) public onlyManager {
-        isWhitelisted[investor] = false;
-        ChangedInvestorWhitelisting(investor, false);
     }
 
     /**
@@ -200,13 +149,12 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     /**
      * @dev override (not extend! because we only issues tokens after final KYC confirm phase)
-     *      core functionality by whitelist check and registration of payment
+     *      core functionality by blacklist check and registration of payment
      * @param beneficiary address address of the beneficiary to receive tokens after they have been confirmed
      */
     function buyTokens(address beneficiary) public payable {
         require(beneficiary != 0x0);
         require(validPurchase());
-        require(isWhitelisted[msg.sender]);
         require(!isBlacklisted[msg.sender]);
 
         uint256 weiAmount = msg.value;
