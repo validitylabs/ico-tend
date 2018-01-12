@@ -38,8 +38,8 @@ contract('IcoCrowdsale', (accounts) => {
     const companyWallet = accounts[8];
     const underwriter   = accounts[9];
 
-    const coinbaseWallet = '0xFc2f61eda5777dE5626320416F117d10Aac149a0';
-    const coinbaseWallet2 = '0xfd7c5cb66af6Bf21023Aa559622a5a87B0ADE124';
+    const coinbaseWallet = '0xfc2f61eda5777de5626320416f117d10aac149a0';
+    const coinbaseWallet2 = '0xfd7c5cb66af6bf21023aa559622a5a87b0ade124';
 
     // Provide icoTokenInstance for every test case
     let icoCrowdsaleInstance;
@@ -223,27 +223,57 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(whitelisted3, 'inactiveInvestor1 should be unwhitelisted');
     });
 
-    // Blacklist tests
+    // Start Blacklist f(x) tests
+    it('should fail, because we try to blackListInvestor investor from unauthorized account', async () => {
+        await expectThrow(icoCrowdsaleInstance.blackListInvestor(coinbaseWallet, {from: activeInvestor2, gas: 1000000}));
+    });
+
+    it('should fail, because we try to run unBlackListInvestor with a non manager account', async () => {
+        await expectThrow(icoCrowdsaleInstance.unBlackListInvestor(coinbaseWallet, {from: activeInvestor2, gas: 1000000}));
+    });
+
     it('should blacklist investor accounts', async () => {
-        const tx1 = await icoCrowdsaleInstance.whiteListInvestor(coinbaseWallet, {from: owner, gas: 1000000});
-        const tx2 = await icoCrowdsaleInstance.whiteListInvestor(coinbaseWallet2, {from: activeManager, gas: 1000000});
+        const tx1 = await icoCrowdsaleInstance.blackListInvestor(coinbaseWallet, {from: owner, gas: 1000000});
+        const tx2 = await icoCrowdsaleInstance.blackListInvestor(coinbaseWallet2, {from: activeManager, gas: 1000000});
 
-        const whitelisted1 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor1);
-        const whitelisted2 = await icoCrowdsaleInstance.isWhitelisted(activeInvestor2);
+        const blacklisted1 = await icoCrowdsaleInstance.isBlacklisted(coinbaseWallet);
+        const blacklisted2 = await icoCrowdsaleInstance.isBlacklisted(coinbaseWallet2);
 
-        assert.isTrue(whitelisted1, 'Investor1 should be whitelisted');
-        assert.isTrue(whitelisted2, 'Investor2 should be whitelisted');
+        assert.isTrue(blacklisted1, 'coinbaseWallet should be blacklisted');
+        assert.isTrue(blacklisted2, 'coinbaseWallet2 should be blacklisted');
 
         // Testing events
-        const events1 = getEvents(tx1, 'ChangedInvestorWhitelisting');
-        const events2 = getEvents(tx2, 'ChangedInvestorWhitelisting');
+        const events1 = getEvents(tx1, 'ChangedInvestorBlacklisting');
+        const events2 = getEvents(tx2, 'ChangedInvestorBlacklisting');
 
-        assert.equal(events1[0].investor, activeInvestor1, 'Investor1 address doesn\'t match');
-        assert.isTrue(events1[0].whitelisted, 'Investor1 should be whitelisted');
+        assert.equal(events1[0].investor, coinbaseWallet, 'coinbaseWallet address doesn\'t match');
+        assert.isTrue(events1[0].blacklisted, 'coinbaseWallet should be blacklisted');
 
-        assert.equal(events2[0].investor, activeInvestor2, 'Investor2 address doesn\'t match');
-        assert.isTrue(events2[0].whitelisted, 'Investor2 should be whitelisted');
+        assert.equal(events2[0].investor, coinbaseWallet2, 'coinbaseWallet2 address doesn\'t match');
+        assert.isTrue(events2[0].blacklisted, 'coinbaseWallet2 should be blacklisted');
     });
+
+    it('should unblacklist investor account', async () => {
+        const tx            = await icoCrowdsaleInstance.unBlackListInvestor(coinbaseWallet2, {from: owner, gas: 1000000});
+        const blacklisted   = await icoCrowdsaleInstance.isBlacklisted(coinbaseWallet2);
+
+        assert.isFalse(blacklisted, 'coinbaseWallet2 should be unBlackListInvestor');
+
+        // Testing events
+        const events = getEvents(tx, 'ChangedInvestorBlacklisting');
+
+        assert.equal(events[0].investor, coinbaseWallet2, 'coinbaseWallet2 address doesn\'t match');
+        assert.isFalse(events[0].blacklisted, 'coinbaseWallet2 should be unBlackListInvestor');
+    });
+
+    it('should verify the investor account states succesfully', async () => {
+        const blacklisted1  = await icoCrowdsaleInstance.isBlacklisted(coinbaseWallet);
+        const blacklisted2  = await icoCrowdsaleInstance.isBlacklisted(coinbaseWallet2);
+
+        assert.isTrue(blacklisted1, 'coinbaseWallet should be blacklisted');
+        assert.isFalse(blacklisted2, 'coinbaseWallet2 should be not blacklisted');
+    });
+    // End Blacklist f(x) tests
 
     it('should fail, because we try to mint tokens for presale with a non owner account', async () => {
         await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1, {from: activeManager, gas: 1000000}));
@@ -384,7 +414,7 @@ contract('IcoCrowdsale', (accounts) => {
     /**
      * [ Contribution period ]
      */
-    
+
     it('should fail, because we try to trigger buyTokens as unwhitelisted investor', async () => {
         console.log('[ Contribution period ]'.yellow);
         await waitNDays(35);
@@ -591,7 +621,7 @@ contract('IcoCrowdsale', (accounts) => {
     /**
      * [ Confirmation period ]
      */
-    
+
     it('should fail, because we try to trigger mintTokenPreSale in Confirmation period', async () => {
         console.log('[ Confirmation period ]'.yellow);
         await waitNDays(10);
@@ -1182,11 +1212,11 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isTrue(investmentAfter[5]);                                      // AttemptedSettlement
     });
 
-    
+
     it('should release vested tokens after 1 year', async () => {
         await waitNDays(365);
         console.log('[1 year later (cliff)]'.yellow);
-        
+
         const numVestingWallets = await icoCrowdsaleInstance.getVestingWalletLength();
         assert.equal(numVestingWallets, 1);
 
@@ -1195,12 +1225,12 @@ contract('IcoCrowdsale', (accounts) => {
         const balanceVestingWallet0Before = await icoTokenInstance.balanceOf(vestingWallet0);
         const balanceCompanyWalletBefore = await icoTokenInstance.balanceOf(companyWallet);
 
-        
+
         await vestingInstance.release(icoTokenInstance.address);
-        
+
         const balanceVestingWallet0After = await icoTokenInstance.balanceOf(vestingWallet0);
         const balanceCompanyWalletAfter = await icoTokenInstance.balanceOf(companyWallet);
-        
+
         balanceVestingWallet0Before.should.be.bignumber.equal(20);
         balanceVestingWallet0Before.add(balanceCompanyWalletBefore).should.be.bignumber.equal(
             balanceVestingWallet0After.add(balanceCompanyWalletAfter)
