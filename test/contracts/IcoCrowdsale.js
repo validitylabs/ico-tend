@@ -384,12 +384,11 @@ contract('IcoCrowdsale', (accounts) => {
     /**
      * [ Contribution period ]
      */
-    it('should turn the time 35 days forward to contribution period', async () => {
+    
+    it('should fail, because we try to trigger buyTokens as unwhitelisted investor', async () => {
         console.log('[ Contribution period ]'.yellow);
         await waitNDays(35);
-    });
 
-    it('should fail, because we try to trigger buyTokens as unwhitelisted investor', async () => {
         await expectThrow(icoCrowdsaleInstance.buyTokens(activeInvestor1, {
             from: inactiveInvestor1,
             gas: 1000000,
@@ -592,12 +591,11 @@ contract('IcoCrowdsale', (accounts) => {
     /**
      * [ Confirmation period ]
      */
-    it('should turn the time 10 days forward to Confirmation period', async () => {
+    
+    it('should fail, because we try to trigger mintTokenPreSale in Confirmation period', async () => {
         console.log('[ Confirmation period ]'.yellow);
         await waitNDays(10);
-    });
 
-    it('should fail, because we try to trigger mintTokenPreSale in Confirmation period', async () => {
         await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3));
     });
 
@@ -1184,12 +1182,11 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isTrue(investmentAfter[5]);                                      // AttemptedSettlement
     });
 
+    
     it('should release vested tokens after 1 year', async () => {
         await waitNDays(365);
         console.log('[1 year later (cliff)]'.yellow);
-    });
-
-    it('should release vested tokens after 1 year', async () => {
+        
         const numVestingWallets = await icoCrowdsaleInstance.getVestingWalletLength();
         assert.equal(numVestingWallets, 1);
 

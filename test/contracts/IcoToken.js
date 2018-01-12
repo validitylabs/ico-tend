@@ -294,13 +294,11 @@ contract('IcoToken', (accounts) => {
     /**
      * [ Reclaim period ]
      */
-
-    it('should turn the time 330 days forward to reclaim period', async () => {
+    
+    it('should fail, because we try to call claimDividend() after the claim period is over', async () => {
         console.log('[ Reclaim period ]'.yellow);
         await waitNDays(330);
-    });
 
-    it('should fail, because we try to call claimDividend() after the claim period is over', async () => {
         await expectThrow(icoTokenInstance.claimDividend({from: tokenHolder1}));
     });
 
@@ -332,12 +330,10 @@ contract('IcoToken', (accounts) => {
      * [ First dividend cycle is over, second claim period is running ]
      */
 
-    it('should turn the time 20 days forward', async () => {
+    it('should start a second dividend round with a balance of 15 eth', async () => {
         console.log('[ First dividend cycle is over, second is started ]'.yellow);
         await waitNDays(20);
-    });
 
-    it('should start a second dividend round with a balance of 15 eth', async () => {
         const expectedBalance = web3.toWei(15, 'ether');
 
         // At this point, the contract should not have any ETH
