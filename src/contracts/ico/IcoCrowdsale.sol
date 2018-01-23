@@ -14,6 +14,7 @@ import "../../../node_modules/zeppelin-solidity/contracts/token/TokenVesting.sol
 import "./IcoToken.sol";
 
 contract IcoCrowdsale is Crowdsale, Ownable {
+    /*** CONSTANTS ***/
     // Different levels of caps per allotment
     uint256 public constant MAX_TOKEN_CAP = 13e6 * 1e18;        // 13 million * 1e18
 
@@ -30,7 +31,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public constant DISCOUNT_TOKEN_AMOUNT = 3e6 * 1e18; // 3 million * 1e18
 
     uint256 public weiPerChf;
-
     address public underwriter;
 
     // allow managers to blacklist and confirm contributions by manager accounts
@@ -46,7 +46,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     // Track tokens depending which stage that the ICO is in
     uint256 public tokensToMint;            // tokens to be minted after confirmation
     uint256 public tokensMinted;            // already minted tokens (maximally = cap)
-    uint256 public tokensBoughtWithEther;   // tokens bought with ether, not fiat
     uint256 public icoEnablersTokensMinted;
     uint256 public developmentTeamTokensMinted;
 
@@ -67,10 +66,12 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     Payment[] public investments;
 
+    /*** EVENTS ***/
     event ChangedInvestorBlacklisting(address investor, bool blacklisted);
     event ChangedManager(address manager, bool active);
     event ChangedInvestmentConfirmation(uint256 investmentId, address investor, bool confirmed);
 
+    /*** MODIFIERS ***/
     modifier onlyUnderwriter() {
         require(msg.sender == underwriter);
         _;
@@ -78,6 +79,23 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     modifier onlyManager() {
         require(isManager[msg.sender]);
+        _;
+    }
+
+    modifier onlyConfirmPayment() {
+        require(now > endTime && now <= endTime.add(confirmationPeriod));
+        require(!confirmationPeriodOver);
+        _;
+    }
+
+    modifier onlyNoneZero(address _to, uint256 _amount) { 
+        require(_to != address(0));
+        require(_amount > 0);
+        _;
+    }
+
+    modifier onlyConfirmationOver() {
+        require(confirmationPeriodOver || now > endTime.add(confirmationPeriod));
         _;
     }
 
@@ -89,8 +107,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      * @param _rateWeiPerChf uint256 exchange rate Wei per CHF
      * @param _wallet address Wallet address of the crowdsale
      * @param _confirmationPeriodDays uint256 Confirmation period in days
-     * @param _teamAddress address wallet for team tokens to be vested to
-     * @param _companyAddress address wallet for company tokens to be vested to
      * @param _underwriter address of the underwriter
      */
     function IcoCrowdsale(
@@ -100,16 +116,12 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         uint256 _rateWeiPerChf,
         address _wallet,
         uint256 _confirmationPeriodDays,
-        address _teamAddress,
-        address _companyAddress,
         address _underwriter
     )
-        public
+        public  // @TODO:FIXME: Fix rate and variable name
         Crowdsale(_startTime, _endTime, (10 ** uint256(18)).mul(_rateTokenPerChf).div(_rateWeiPerChf), _wallet)
     {
         require(MAX_TOKEN_CAP == ICO_ENABLERS_CAP.add(ICO_TOKEN_CAP).add(DEVELOPMENT_TEAM_CAP));
-        require(_teamAddress != address(0));
-        require(_companyAddress != address(0));
         require(_underwriter != address(0));
 
         setManager(msg.sender, true);
@@ -121,39 +133,39 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     /**
      * @dev Set / alter manager / blacklister account. This can be done from owner only
-     * @param manager address address of the manager to create/alter
-     * @param active bool flag that shows if the manager account is active
+     * @param _manager address address of the manager to create/alter
+     * @param _active bool flag that shows if the manager account is active
      */
-    function setManager(address manager, bool active) public onlyOwner {
-        isManager[manager] = active;
-        ChangedManager(manager, active);
+    function setManager(address _manager, bool _active) public onlyOwner {
+        isManager[_manager] = _active;
+        ChangedManager(_manager, _active);
     }
 
     /**
      * @dev blacklist investor from participating in the crowdsale
-     * @param investor address address of the investor to disallowed participation
+     * @param _investor address address of the investor to disallowed participation
      */
-    function blackListInvestor(address investor) public onlyManager {
-        isBlacklisted[investor] = true;
-        ChangedInvestorBlacklisting(investor, true);
+    function blackListInvestor(address _investor) public onlyManager {
+        isBlacklisted[_investor] = true;
+        ChangedInvestorBlacklisting(_investor, true);
     }
 
     /**
      * @dev unblacklist investor from participating in the crowdsale
-     * @param investor address address of the investor to disallowed participation
+     * @param _investor address address of the investor to disallowed participation
      */
-    function unBlackListInvestor(address investor) public onlyManager {
-        isBlacklisted[investor] = false;
-        ChangedInvestorBlacklisting(investor, false);
+    function unBlackListInvestor(address _investor) public onlyManager {
+        isBlacklisted[_investor] = false;
+        ChangedInvestorBlacklisting(_investor, false);
     }
 
     /**
      * @dev override (not extend! because we only issues tokens after final KYC confirm phase)
      *      core functionality by blacklist check and registration of payment
-     * @param beneficiary address address of the beneficiary to receive tokens after they have been confirmed
+     * @param _beneficiary address address of the beneficiary to receive tokens after they have been confirmed
      */
-    function buyTokens(address beneficiary) public payable {
-        require(beneficiary != 0x0);
+    function buyTokens(address _beneficiary) public payable {
+        require(_beneficiary != address(0));
         require(validPurchase());
         require(!isBlacklisted[msg.sender]);
 
@@ -162,6 +174,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         // regular rate - no discount
         uint256 tokenAmount = weiAmount.mul(rate);
 
+        // @TODO: FIXME: need to gracefully handle overflow of discounts into the other tiers
         // Need a better way if we want a strict stop at 3 million tokens. Which could mean 1 investors gets partial bonus(es) E.g. (20% and 10%) or (10% and 0%)
         // 20% discount - 1st 3 million tokens
         if (tokensToMint <= DISCOUNT_TOKEN_AMOUNT) {
@@ -174,37 +187,31 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         tokensToMint = tokensToMint.add(tokenAmount);
         weiRaised = weiRaised.add(weiAmount);
 
-        TokenPurchase(msg.sender, beneficiary, weiAmount, tokenAmount);
+        TokenPurchase(msg.sender, _beneficiary, weiAmount, tokenAmount);
 
         // register payment so that later on it can be confirmed (and tokens issued and Ether paid out)
-        Payment memory newPayment = Payment(msg.sender, beneficiary, weiAmount, tokenAmount, false, false, false);
+        Payment memory newPayment = Payment(msg.sender, _beneficiary, weiAmount, tokenAmount, false, false, false);
         investments.push(newPayment);
     }
 
     /**
      * @dev confirms payment
-     * @param investmentId uint256 uint256 of the investment id to confirm
+     * @param _investmentId uint256 uint256 of the investment id to confirm
      */
-    function confirmPayment(uint256 investmentId) public onlyManager {
-        require(now > endTime && now <= endTime.add(confirmationPeriod));
-        require(!confirmationPeriodOver);
-
-        investments[investmentId].confirmed = true;
-        ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, true);
+    function confirmPayment(uint256 _investmentId) public onlyManager onlyConfirmPayment {
+        investments[_investmentId].confirmed = true;
+        ChangedInvestmentConfirmation(_investmentId, investments[_investmentId].investor, true);
     }
 
     /**
      * @dev confirms payments via a batch method
-     * @param investmentIds uint256[] array of uint256 of the investment ids to confirm
+     * @param _investmentIds uint256[] array of uint256 of the investment ids to confirm
      */
-    function batchConfirmPayments(uint256[] investmentIds) public onlyManager {
-        require(now > endTime && now <= endTime.add(confirmationPeriod));
-        require(!confirmationPeriodOver);
-
+    function batchConfirmPayments(uint256[] _investmentIds) public onlyManager onlyConfirmPayment {
         uint256 investmentId;
 
-        for (uint256 c; c < investmentIds.length; c = c.add(1)) {
-            investmentId = investmentIds[c]; // gas optimization
+        for (uint256 c; c < _investmentIds.length; c = c.add(1)) {
+            investmentId = _investmentIds[c]; // gas optimization
             investments[investmentId].confirmed = true;
             ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, true);
         }
@@ -212,14 +219,11 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     /**
      * @dev unconfirms payment made via investment id
-     * @param investmentId uint256 uint256 of the investment to unconfirm
+     * @param _investmentId uint256 uint256 of the investment to unconfirm
      */
-    function unConfirmPayment(uint256 investmentId) public onlyManager {
-        require(now > endTime && now <= endTime.add(confirmationPeriod));
-        require(!confirmationPeriodOver);
-
-        investments[investmentId].confirmed = false;
-        ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, false);
+    function unConfirmPayment(uint256 _investmentId) public onlyManager onlyConfirmPayment {
+        investments[_investmentId].confirmed = false;
+        ChangedInvestmentConfirmation(_investmentId, investments[_investmentId].investor, false);
     }
 
     /**
@@ -244,28 +248,27 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     /**
      * @dev allows contract owner to mint tokens for ICO enablers (no vesting)
      * @param _to address for beneficiary
-     * @param _amount uint256 token amount to mint
+     * @param _tokens uint256 token amount to mint
      */
-    function mintIcoEnablersTokens(address _to, uint256 _amount) public onlyOwner {
-        require(_amount > 0);
-        require(icoEnablersTokensMinted.add(_amount) <= ICO_ENABLERS_CAP);
+    function mintIcoEnablersTokens(address _to, uint256 _tokens) public onlyOwner onlyNoneZero(_to, _tokens) {
+        require(icoEnablersTokensMinted.add(_tokens) <= ICO_ENABLERS_CAP);
 
-        token.mint(_to, _amount);
-        icoEnablersTokensMinted = icoEnablersTokensMinted.add(_amount);
+        token.mint(_to, _tokens);
+        icoEnablersTokensMinted = icoEnablersTokensMinted.add(_tokens);
     }
 
     /**
      * @dev allows contract owner to mint team tokens per ICO_ENABLERS_CAP and transfer to the team wallet
      * @param _to address for beneficiary
-     * @param _amount uint256 token amount to mint
+     * @param _tokens uint256 token amount to mint
      */
-    function mintDevelopmentTeamTokens(address _to, uint256 _amount) public onlyOwner {
-        require(_amount > 0);
-        require(developmentTeamTokensMinted.add(_amount) <= DEVELOPMENT_TEAM_CAP);
+    function mintDevelopmentTeamTokens(address _to, uint256 _tokens) public onlyOwner onlyNoneZero(_to, _tokens) {
+        require(developmentTeamTokensMinted.add(_tokens) <= DEVELOPMENT_TEAM_CAP);
 
+        developmentTeamTokensMinted = developmentTeamTokensMinted.add(_tokens);
         TokenVesting newVault = new TokenVesting(_to, now, VESTING_CLIFF, VESTING_DURATION, false);
         vestingWallets.push(address(newVault)); // for convenience we keep them in storage so that they are easily accessible via MEW or etherscan
-        token.mint(address(newVault), _amount);
+        token.mint(address(newVault), _tokens);
     }
 
     /**
@@ -284,13 +287,10 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     /**
      * @dev settlement of investment made via investment id
-     * @param investmentId uint256 uint256 being the investment id
+     * @param _investmentId uint256 uint256 being the investment id
      */
-    function settleInvestment(uint256 investmentId) public {
-        // only possible after confirmationPeriodOver has been manually set OR after time is over
-        require(confirmationPeriodOver || now > endTime.add(confirmationPeriod));
-
-        Payment storage p = investments[investmentId];
+    function settleInvestment(uint256 _investmentId) public onlyConfirmationOver {
+        Payment storage p = investments[_investmentId];
 
         // investment should not be settled already (prevent double token issueing or repayment)
         require(!p.completedSettlement);
@@ -298,12 +298,12 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         // investments have to be processed in right order
         // unless we're at first investment, the previous has needs to have undergone an attempted settlement
 
-        require(investmentId == 0 || investments[investmentId.sub(1)].attemptedSettlement);
+        require(_investmentId == 0 || investments[_investmentId.sub(1)].attemptedSettlement);
 
         p.attemptedSettlement = true;
 
         // just so that we can see which one we attempted last time and can continue with next
-        investmentIdLastAttemptedToSettle = investmentId;
+        investmentIdLastAttemptedToSettle = _investmentId;
 
         if (p.confirmed) {
             // if confirmed -> issue tokens, send ETH to wallet and complete settlement
@@ -321,7 +321,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             token.mint(p.beneficiary, tokens);
 
             // send Ether to project wallet throws if wallet throws
-            if (p.investor != address(0) && p.weiAmount > 0) {
+            if (p.weiAmount > 0) {
                 wallet.transfer(p.weiAmount);
             }
 
@@ -341,21 +341,18 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     /**
      * @dev allows the batch settlement of investments made
-     * @param investmentIds uint256[] array of uint256 of investment ids
+     * @param _investmentIds uint256[] array of uint256 of investment ids
      */
-    function batchSettleInvestments(uint256[] investmentIds) public {
-        for (uint256 c; c < investmentIds.length; c = c.add(1)) {
-            settleInvestment(investmentIds[c]);
+    function batchSettleInvestments(uint256[] _investmentIds) public {
+        for (uint256 c; c < _investmentIds.length; c = c.add(1)) {
+            settleInvestment(_investmentIds[c]);
         }
     }
 
     /**
      * @dev allows contract owner to finalize the ICO, unpause tokens, set treasurer, finish minting, and transfer ownship of the token contract
      */
-    function finalize() public onlyUnderwriter {
-        // only possible after confirmationPeriodOver has been manually set OR after time is over
-        require(confirmationPeriodOver || now > endTime.add(confirmationPeriod));
-
+    function finalize() public onlyUnderwriter onlyConfirmationOver {
         Pausable(token).unpause();
 
         // this crowdsale also should not be treasurer of the token anymore

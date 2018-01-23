@@ -97,7 +97,7 @@ contract DividendToken is StandardToken, Ownable {
     function updateDividend(address hodler) internal {
         // last update in previous period -> reset claimable dividend
         if (lastUpdate[hodler] < lastDividendIncreaseDate) {
-            unclaimedDividend[hodler] = (currentDividend.mul(balanceOf(hodler))).div(totalSupply);
+            unclaimedDividend[hodler] = calcDividend(hodler, totalSupply);
             lastUpdate[hodler] = now;
         }
     }
@@ -108,7 +108,7 @@ contract DividendToken is StandardToken, Ownable {
      */
     function getClaimableDividend(address hodler) public constant returns (uint256 claimableDividend) {
         if (lastUpdate[hodler] < lastDividendIncreaseDate) {
-            return (currentDividend.mul(balanceOf(hodler))).div(totalSupply);
+            return calcDividend(hodler, totalSupply);
         } else {
             return (unclaimedDividend[hodler]);
         }
@@ -190,5 +190,9 @@ contract DividendToken is StandardToken, Ownable {
         Payin(msg.sender, msg.value, endTime);
 
         lastDividendIncreaseDate = now;
+    }
+
+    function calcDividend(address hodler, uint256 totalSupply) public view returns(uint256) {
+        return (currentDividend.mul(balanceOf(hodler))).div(totalSupply);
     }
 }

@@ -12,6 +12,7 @@
   "scripts": {
     "start": "yarn run develop",
     "coverage": "solidity-coverage",
+    "compile": "truffle compile --all",
     "dev": "truffle develop",
     "clean": "rimraf dist build bin coverage coverage.json",
     "reset": "rimraf node_modules; npm run clean",
