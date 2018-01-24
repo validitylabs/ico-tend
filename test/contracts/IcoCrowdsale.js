@@ -15,11 +15,11 @@ const should = require('chai') // eslint-disable-line
     .use(require('chai-bignumber')(BigNumber))
     .should();
 
-const MAX_TOKEN_CAP         = new BigNumber(13e6 * 1e18);
+// const MAX_TOKEN_CAP         = new BigNumber(13e6 * 1e18);
 const TEAM_TOKEN_CAP        = new BigNumber(15e5 * 1e18);
 const DEVELOPMENT_TEAM_CAP  = new BigNumber(2e6 * 1e18);
-const ICO_TOKEN_CAP         = new BigNumber(95e5 * 1e18);
-const DISCOUNT_TOKEN_AMOUNT = new BigNumber(3e6 * 1e18);
+// const ICO_TOKEN_CAP         = new BigNumber(95e5 * 1e18);
+// const DISCOUNT_TOKEN_AMOUNT = new BigNumber(3e6 * 1e18);
 
 /**
  * IcoToken contract
@@ -291,7 +291,6 @@ contract('IcoCrowdsale', (accounts) => {
         const companyWalletBalance2 = await icoTokenInstance.balanceOf(companyWallet);
 
         companyWalletBalance1.should.be.bignumber.equal(companyWalletBalance2);
-
     });
 
     it('should mint tokens for presale', async () => {
@@ -332,7 +331,7 @@ contract('IcoCrowdsale', (accounts) => {
     /**
      * [ Contribution period ]
      */
-    
+
     it('should fail, because we try to trigger buyTokens with a too low investment', async () => {
         console.log('[ Contribution period ]'.yellow);
         await waitNDays(35);
@@ -412,7 +411,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment4[0], activeInvestor1);                      // Investor
         assert.equal(investment4[1], activeInvestor1);                      // Beneficiary
         investment4[2].should.be.bignumber.equal(web3.toWei(4, 'ether'));   // Wei Amount
-        //investment4[3].should.be.bignumber.equal(1.665e21);                // Token Amoun
+        // investment4[3].should.be.bignumber.equal(1.665e21);                // Token Amoun
         assert.isFalse(investment4[4]);                                     // Confirmed
         assert.isFalse(investment4[5]);                                     // AttemptedSettlement
         assert.isFalse(investment4[6]);                                     // CompletedSettlement
@@ -424,7 +423,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events2[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
 
         events2[0].value.should.be.bignumber.equal(web3.toWei(4, 'ether'));
-        //events2[0].amount.should.be.bignumber.equal(1.665e21);
+        // events2[0].amount.should.be.bignumber.equal(1.665e21);
 
         const tx3   = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor2,
@@ -1096,7 +1095,6 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isTrue(investmentAfter[5]);                                      // AttemptedSettlement
     });
 
-
     it('should release vested tokens after 1 year', async () => {
         await waitNDays(365);
         console.log('[1 year later (cliff)]'.yellow);
@@ -1109,16 +1107,12 @@ contract('IcoCrowdsale', (accounts) => {
         const balanceVestingWallet0Before = await icoTokenInstance.balanceOf(vestingWallet0);
         const balanceCompanyWalletBefore = await icoTokenInstance.balanceOf(companyWallet);
 
-
         await vestingInstance.release(icoTokenInstance.address);
 
         const balanceVestingWallet0After = await icoTokenInstance.balanceOf(vestingWallet0);
         const balanceCompanyWalletAfter = await icoTokenInstance.balanceOf(companyWallet);
 
         balanceVestingWallet0Before.should.be.bignumber.equal(20);
-        balanceVestingWallet0Before.add(balanceCompanyWalletBefore).should.be.bignumber.equal(
-            balanceVestingWallet0After.add(balanceCompanyWalletAfter)
-        );
-
+        balanceVestingWallet0Before.add(balanceCompanyWalletBefore).should.be.bignumber.equal(balanceVestingWallet0After.add(balanceCompanyWalletAfter));
     });
 });
