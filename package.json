@@ -14,6 +14,7 @@
     "coverage": "solidity-coverage",
     "compile": "truffle compile --all",
     "dev": "truffle develop",
+    "migrate-ropsten": "rimraf build; cross-env NODE_ENV=ropsten truffle migrate --reset --compile-all --network ropsten",
     "clean": "rimraf dist build bin coverage coverage.json",
     "reset": "rimraf node_modules; npm run clean",
     "upgrade": "yarn run reset; yarn upgrade",

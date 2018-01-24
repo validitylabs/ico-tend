@@ -8,8 +8,13 @@ const IcoToken      = artifacts.require('./ico/IcoToken.sol');
 const IcoCrowdsale  = artifacts.require('./ico/IcoCrowdsale.sol');
 
 module.exports = function (deployer, network, accounts) { // eslint-disable-line
-    const wallet        = accounts[6];
-    const underwriter   = accounts[9];
+    let wallet        = accounts[6];
+    let underwriter   = accounts[9];
+
+    if (process.env.NODE_ENV === 'ropsten') {
+        wallet        = '0x3707b30b3e7CCFc14f516DeBA2aFb7042BDC58EA';
+        underwriter   = '0x961b7AC7ff495207C261C4b5A9656a7032b1e5f0';
+    }
 
     deployer.deploy(IcoToken);
     deployer.deploy(IcoCrowdsale, cnf.startTime, cnf.endTime, cnf.rateTokenPerChf, cnf.rateWeiPerChf, wallet, cnf.confirmationPeriod, underwriter);
