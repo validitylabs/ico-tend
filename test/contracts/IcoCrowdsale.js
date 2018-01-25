@@ -151,22 +151,29 @@ contract('IcoCrowdsale', (accounts) => {
     it('should blacklist investor accounts', async () => {
         const tx1 = await icoCrowdsaleInstance.blackListInvestor(coinbaseWallet, {from: owner, gas: 1000000});
         const tx2 = await icoCrowdsaleInstance.blackListInvestor(coinbaseWallet2, {from: activeManager, gas: 1000000});
+        const tx3 = await icoCrowdsaleInstance.blackListInvestor(inactiveInvestor1, {from: activeManager, gas: 1000000});
 
         const blacklisted1 = await icoCrowdsaleInstance.isBlacklisted(coinbaseWallet);
         const blacklisted2 = await icoCrowdsaleInstance.isBlacklisted(coinbaseWallet2);
+        const blacklisted3 = await icoCrowdsaleInstance.isBlacklisted(inactiveInvestor1);
 
         assert.isTrue(blacklisted1, 'coinbaseWallet should be blacklisted');
         assert.isTrue(blacklisted2, 'coinbaseWallet2 should be blacklisted');
+        assert.isTrue(blacklisted3, 'coinbaseWallet2 should be blacklisted');
 
         // Testing events
         const events1 = getEvents(tx1, 'ChangedInvestorBlacklisting');
         const events2 = getEvents(tx2, 'ChangedInvestorBlacklisting');
+        const events3 = getEvents(tx3, 'ChangedInvestorBlacklisting');
 
         assert.equal(events1[0].investor, coinbaseWallet, 'coinbaseWallet address doesn\'t match');
         assert.isTrue(events1[0].blacklisted, 'coinbaseWallet should be blacklisted');
 
         assert.equal(events2[0].investor, coinbaseWallet2, 'coinbaseWallet2 address doesn\'t match');
         assert.isTrue(events2[0].blacklisted, 'coinbaseWallet2 should be blacklisted');
+
+        assert.equal(events3[0].investor, inactiveInvestor1, 'inactiveInvestor1 address doesn\'t match');
+        assert.isTrue(events3[0].blacklisted, 'inactiveInvestor1 should be blacklisted');
     });
 
     it('should unblacklist investor account', async () => {
@@ -200,6 +207,14 @@ contract('IcoCrowdsale', (accounts) => {
             activeManager,
             1,
             {from: activeManager, gas: 1000000}
+        ));
+    });
+
+    it('should fail, because we try to mint ICO enabler tokens with an invalid wallet', async () => {
+        await expectThrow(icoCrowdsaleInstance.mintIcoEnablersTokens(
+            0x0,
+            1,
+            {from: owner, gas: 1000000}
         ));
     });
 
@@ -344,6 +359,13 @@ contract('IcoCrowdsale', (accounts) => {
         await expectThrow(icoCrowdsaleInstance.buyTokens(
             '0x0',
             {from: activeInvestor1, gas: 1000000, value: web3.toWei(1, 'ether')}
+        ));
+    });
+
+    it('should fail, because we try to trigger buyTokens for a blacklisted wallet', async () => {
+        await expectThrow(icoCrowdsaleInstance.buyTokens(
+            inactiveInvestor1,
+            {from: inactiveInvestor1, gas: 1000000, value: web3.toWei(1, 'ether')}
         ));
     });
 
