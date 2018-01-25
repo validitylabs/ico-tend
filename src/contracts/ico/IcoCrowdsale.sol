@@ -231,11 +231,11 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         tokenAmount = tokenAmount.add(tier2BonusTokens).add(overflowTokens2);
 
         // this triggers when both tier 1 and tier 2 discounted tokens have be filled - but ONLY afterwards, not if the flags got set during the same tx
+        // aka this is tier 3
         if (tier2Reached && tier1Reached && tier2BonusTokens == 0) {
             tokenAmount = purchasedTokens;
         }
 
-      
         /*** Record & update state variables  ***/
         // Tracks purchased tokens for 2 tiers of discounts
         totalTokensPurchased = totalTokensPurchased.add(purchasedTokens);
