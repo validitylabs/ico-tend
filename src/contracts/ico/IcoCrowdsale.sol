@@ -174,21 +174,26 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         require(!isBlacklisted[msg.sender]);
 
         uint256 weiAmount = msg.value;
-
-        // regular rate - no discount
         uint256 tokenAmount = weiAmount.mul(tokenPerWei);
+        uint256 tempTokensToMint = tokensToMint.add(tokenAmount);
+
+        // 20% discount
         uint256 tier1Tokens;
+        // 10% discount
         uint256 tier2Tokens;
+        // regular rate - no discount
         uint256 tier3Tokens;
 
-        uint256 tempTokensToMint = tokensToMint.add(tokenAmount);
-        
         // tier 1 20% discount - 1st 3 million tokens
         if (tokensToMint <= DISCOUNT_TOKEN_AMOUNT_T1) {
             if (tempTokensToMint > DISCOUNT_TOKEN_AMOUNT_T1) {
                 tier2Tokens = tempTokensToMint.sub(DISCOUNT_TOKEN_AMOUNT_T1);
                 tier1Tokens = tokenAmount.sub(tier2Tokens);
-                tokensToMint = tokensToMint.add(tier1Tokens);
+                // apply discount
+                tier1Tokens = tier1Tokens.mul(10).div(8);
+                tokenAmount = tier2Tokens;
+            } else {
+                tokenAmount = tokenAmount.mul(10).div(8);
             }
         }
         
@@ -196,13 +201,16 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         if (tokensToMint > DISCOUNT_TOKEN_AMOUNT_T1 && tokensToMint <= DISCOUNT_TOKEN_AMOUNT_T2) {
             if (tempTokensToMint > DISCOUNT_TOKEN_AMOUNT_T2) {
                 tier3Tokens = tempTokensToMint.sub(DISCOUNT_TOKEN_AMOUNT_T2);
-                tier1Tokens = tier2Tokens.sub(tier3Tokens);
+                tier2Tokens = tokenAmount.sub(tier3Tokens);
+                // apply discount
+                tier2Tokens = tier2Tokens.mul(10).div(9);
+                tokenAmount = tier3Tokens;
+            } else {
+                tokenAmount = tokenAmount.mul(10).div(9);
             }
         }
 
-        tier1Tokens = tier1Tokens.mul(10).div(8);
-        tier2Tokens = tier2Tokens.mul(10).div(9);
-        tokenAmount = tokenAmount.add(tier1Tokens).add(tier2Tokens);
+        tokenAmount.add(tier1Tokens).add(tier2Tokens);
 
         tokensToMint = tokensToMint.add(tokenAmount);
         weiRaised = weiRaised.add(weiAmount);
