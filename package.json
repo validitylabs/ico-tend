@@ -11,7 +11,7 @@
   },
   "scripts": {
     "start": "yarn develop",
-    "coverage": "solidity-coverage",
+    "coverage": "shx rm -fr build; solidity-coverage",
     "compile": "truffle compile --all",
     "dev": "truffle develop",
     "migrate-ropsten": "shx rm -fr build; cross-env NODE_ENV=ropsten truffle migrate --reset --compile-all --network ropsten",
