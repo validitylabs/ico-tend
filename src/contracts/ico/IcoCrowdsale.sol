@@ -35,6 +35,11 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     uint256 public minContributionInWei;
     uint256 public tokenPerWei;
+    uint256 public totalTokensPurchased;
+    bool public capReached;
+    bool public tier1Reached;
+    bool public tier2Reached;
+
     address public underwriter;
 
     // allow managers to blacklist and confirm contributions by manager accounts
@@ -174,55 +179,69 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         require(!isBlacklisted[msg.sender]);
 
         uint256 weiAmount = msg.value;
-        uint256 tokenAmount = weiAmount.mul(tokenPerWei);
-        uint256 tempTokensToMint = tokensToMint.add(tokenAmount);
+        uint256 tokenAmount;
+        uint256 purchasedTokens = weiAmount.mul(tokenPerWei);
+        uint256 tempTotalTokensPurchased = tokensToMint.add(purchasedTokens);
+        uint256 overflowTokens;
+        uint256 overflowTokens2;
+        // 20% discount bonus amount
+        uint256 tier1BonusTokens;
+        // 10% discount bonus amount
+        uint256 tier2BonusTokens;
 
-        // 20% discount
-        uint256 tier1Tokens;
-        // 10% discount
-        uint256 tier2Tokens;
-        // regular rate - no discount
-        uint256 tier3Tokens;
-
-        // tier 1 20% discount - 1st 3 million tokens
-        if (tokensToMint <= DISCOUNT_TOKEN_AMOUNT_T1) {
-
-            // tx tokens overflowed into next tier 2 - 10%
-            if (tempTokensToMint > DISCOUNT_TOKEN_AMOUNT_T1) {
-                tier2Tokens = tempTokensToMint.sub(DISCOUNT_TOKEN_AMOUNT_T1);
-                tier1Tokens = tokenAmount.sub(tier2Tokens);
-                // apply discount for tier 1 tokens
-                tier1Tokens = tier1Tokens.mul(10).div(8);
-                tokenAmount = tier2Tokens;
-
-            // tx tokens did not overflow into next tier
+        // tier 1 20% discount - 1st 3 million tokens purchased
+        if (totalTokensPurchased < DISCOUNT_TOKEN_AMOUNT_T1) {
+            
+            // tx tokens overflowed into next tier 2 - 10% discount - mark tier1Reached! else all tokens are tier 1 discounted
+            if (tempTotalTokensPurchased > DISCOUNT_TOKEN_AMOUNT_T1) {
+                tier1Reached = true;
+                overflowTokens = tempTotalTokensPurchased.sub(DISCOUNT_TOKEN_AMOUNT_T1);
+                tier1BonusTokens = purchasedTokens.sub(overflowTokens);
+            // tx tokens did not overflow into next tier 2 (10% discount)
             } else {
-                // apply discount for tier 1 tokens
-                tokenAmount = tokenAmount.mul(10).div(8);
+                tier1BonusTokens = purchasedTokens;
             }
-        }
-        
-        // tier 2 10% discount - 2nd 3 million tokens
-        if (tokensToMint > DISCOUNT_TOKEN_AMOUNT_T1 && tokensToMint <= DISCOUNT_TOKEN_AMOUNT_T2) {
-
-            // tx tokens overflowed into next tier 3 - 0%
-            if (tempTokensToMint > DISCOUNT_TOKEN_AMOUNT_T2) {
-                tier3Tokens = tempTokensToMint.sub(DISCOUNT_TOKEN_AMOUNT_T2);
-                tier2Tokens = tokenAmount.sub(tier3Tokens);
-                // apply discount for tier 2 tokens
-                tier2Tokens = tier2Tokens.mul(10).div(9);
-                tokenAmount = tier3Tokens;
-
-            // tx tokens did not overflow into next tier
-            } else {
-                // apply discount for tier 2 tokens
-                tokenAmount = tokenAmount.mul(10).div(9);
-            }
+            //apply discount
+            tier1BonusTokens = tier1BonusTokens.mul(10).div(8);
         }
 
-        tokenAmount.add(tier1Tokens).add(tier2Tokens);
+        tokenAmount = tokenAmount.add(tier1BonusTokens);
 
+        // tier 2 10% discount - 2nd 3 million tokens purchased
+        if (tier1Reached && !tier2Reached) {
+
+            // tx tokens overflowed into next tier 3 - 0% - marked tier2Reached! else all tokens are tier 2 discounted
+            if (tempTotalTokensPurchased > DISCOUNT_TOKEN_AMOUNT_T2) {
+                tier2Reached = true;
+                overflowTokens2 = tempTotalTokensPurchased.sub(DISCOUNT_TOKEN_AMOUNT_T2);
+                tier2BonusTokens = purchasedTokens.sub(overflowTokens2);
+            // tx tokens did not overflow into next tier 3 (tier 3 == no discount)
+            } else {
+                // tokens overflowed from tier1 else this tx started in tier2
+                if (overflowTokens > 0) {
+                    tier2BonusTokens = overflowTokens;
+                } else { 
+                    tier2BonusTokens = purchasedTokens; 
+                }
+            }
+            // apply discount for tier 2 tokens
+            tier2BonusTokens = tier2BonusTokens.mul(10).div(9);
+        }
+
+        tokenAmount = tokenAmount.add(tier2BonusTokens).add(overflowTokens2);
+
+        // this triggers when both tier 1 and tier 2 discounted tokens have be filled - but ONLY afterwards, not if the flags got set during the same tx
+        // aka this is tier 3
+        if (tier2Reached && tier1Reached && tier2BonusTokens == 0) {
+            tokenAmount = purchasedTokens;
+        }
+
+        /*** Record & update state variables  ***/
+        // Tracks purchased tokens for 2 tiers of discounts
+        totalTokensPurchased = totalTokensPurchased.add(purchasedTokens);
+        // Tracks total tokens pending to be minted - this includes presale tokens
         tokensToMint = tokensToMint.add(tokenAmount);
+
         weiRaised = weiRaised.add(weiAmount);
 
         TokenPurchase(msg.sender, _beneficiary, weiAmount, tokenAmount);
@@ -349,8 +368,22 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             // calculate number of tokens to be issued to investor
             uint256 tokens = p.tokenAmount;
 
+            // check to see if this purchase sets it over the crowdsale token cap
+            // if so, calculate tokens to mint, then refund the remaining ether investment
+            uint256 tempMintedTokens = tokensMinted.add(tokens);
+            uint256 refundWeiAmount;
+            uint256 investedWeiAmount;
+            
+            if (tempMintedTokens > ICO_TOKEN_CAP) {
+                capReached = true;
+                uint256 overflowTokens = tempMintedTokens.sub(ICO_TOKEN_CAP);
+                tokens = tokens.sub(overflowTokens);
+                refundWeiAmount = overflowTokens.div(tokenPerWei);
+                investedWeiAmount = p.weiAmount.sub(refundWeiAmount);
+            }
+
             //Checks and balances to make sure tokensMinted == tokensToMint
-            require(tokensMinted.add(tokens) <= ICO_TOKEN_CAP);
+            // require(tokensMinted.add(tokens) <= ICO_TOKEN_CAP);
             require(tokensToMint.sub(tokens) >= 0);
             tokensToMint = tokensToMint.sub(tokens);
             tokensMinted = tokensMinted.add(tokens);
@@ -359,7 +392,12 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             token.mint(p.beneficiary, tokens);
 
             // send Ether to project wallet throws if wallet throws
-            if (p.weiAmount > 0) {
+            if (capReached && p.weiAmount > 0) {
+                wallet.transfer(investedWeiAmount);
+                if (p.investor.send(refundWeiAmount)) {
+                    // do nothing?
+                }
+            } else if (p.weiAmount > 0) {
                 wallet.transfer(p.weiAmount);
             }
 
@@ -371,7 +409,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             // otherwise we would block settlement process of all following investments)
             if (p.investor != address(0) && p.weiAmount > 0) {
                 if (p.investor.send(p.weiAmount)) {
-                p.completedSettlement = true;
+                    p.completedSettlement = true;
                 }
             }
         }
