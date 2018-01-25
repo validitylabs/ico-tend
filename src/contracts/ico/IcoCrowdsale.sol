@@ -30,7 +30,8 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public constant VESTING_DURATION = 3 years;
    
     // Amount of discounted tokens per discount stage (2 stages total; each being the same amount)
-    uint256 public constant DISCOUNT_TOKEN_AMOUNT = 3e6 * 1e18; // 3 million * 1e18
+    uint256 public constant DISCOUNT_TOKEN_AMOUNT_T1 = 3e6 * 1e18; // 3 million * 1e18
+    uint256 public constant DISCOUNT_TOKEN_AMOUNT_T2 = DISCOUNT_TOKEN_AMOUNT_T1 * 2;
 
     uint256 public minContributionInWei;
     uint256 public tokenPerWei;
@@ -176,16 +177,32 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
         // regular rate - no discount
         uint256 tokenAmount = weiAmount.mul(tokenPerWei);
+        uint256 tier1Tokens;
+        uint256 tier2Tokens;
+        uint256 tier3Tokens;
 
-        // @TODO: FIXME: need to gracefully handle overflow of discounts into the other tiers
-        // Need a better way if we want a strict stop at 3 million tokens. Which could mean 1 investors gets partial bonus(es) E.g. (20% and 10%) or (10% and 0%)
-        // 20% discount - 1st 3 million tokens
-        if (tokensToMint <= DISCOUNT_TOKEN_AMOUNT) {
-            tokenAmount = tokenAmount.mul(10).div(8);
-        // 10% discount - 2nd 3 million tokens
-        } else if (tokensToMint > DISCOUNT_TOKEN_AMOUNT && tokensToMint <= DISCOUNT_TOKEN_AMOUNT.mul(2)) {
-            tokenAmount = tokenAmount.mul(10).div(9);
+        uint256 tempTokensToMint = tokensToMint.add(tokenAmount);
+        
+        // tier 1 20% discount - 1st 3 million tokens
+        if (tokensToMint <= DISCOUNT_TOKEN_AMOUNT_T1) {
+            if (tempTokensToMint > DISCOUNT_TOKEN_AMOUNT_T1) {
+                tier2Tokens = tempTokensToMint.sub(DISCOUNT_TOKEN_AMOUNT_T1);
+                tier1Tokens = tokenAmount.sub(tier2Tokens);
+                tokensToMint = tokensToMint.add(tier1Tokens);
+            }
         }
+        
+        // tier 2 10% discount - 2nd 3 million tokens
+        if (tokensToMint > DISCOUNT_TOKEN_AMOUNT_T1 && tokensToMint <= DISCOUNT_TOKEN_AMOUNT_T2) {
+            if (tempTokensToMint > DISCOUNT_TOKEN_AMOUNT_T2) {
+                tier3Tokens = tempTokensToMint.sub(DISCOUNT_TOKEN_AMOUNT_T2);
+                tier1Tokens = tier2Tokens.sub(tier3Tokens);
+            }
+        }
+
+        tier1Tokens = tier1Tokens.mul(10).div(8);
+        tier2Tokens = tier2Tokens.mul(10).div(9);
+        tokenAmount = tokenAmount.add(tier1Tokens).add(tier2Tokens);
 
         tokensToMint = tokensToMint.add(tokenAmount);
         weiRaised = weiRaised.add(weiAmount);
@@ -230,7 +247,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     }
 
     /**
-     * @dev allows contract owner to mint team tokens per ICO_ENABLERS_CAP and transfer to the team wallet
+     * @dev allows contract owner to mint team tokens per ICO_TOKEN_CAP and transfer to the team wallet
      * @param _beneficiary address address of the beneficiary to receive tokens
      * @param _tokens uint256 uint256 of the token amount to mint
      */
@@ -249,7 +266,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     }
 
     /**
-     * @dev allows contract owner to mint tokens for ICO enablers (no vesting)
+     * @dev allows contract owner to mint tokens for ICO enablers respecting the ICO_ENABLERS_CAP (no vesting)
      * @param _to address for beneficiary
      * @param _tokens uint256 token amount to mint
      */
@@ -261,7 +278,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     }
 
     /**
-     * @dev allows contract owner to mint team tokens per ICO_ENABLERS_CAP and transfer to the team wallet
+     * @dev allows contract owner to mint team tokens per DEVELOPMENT_TEAM_CAP and transfer to the development team's wallet (yes vesting)
      * @param _to address for beneficiary
      * @param _tokens uint256 token amount to mint
      */

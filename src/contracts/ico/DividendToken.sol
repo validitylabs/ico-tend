@@ -13,7 +13,7 @@ import "../../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol"
 contract DividendToken is StandardToken, Ownable {
     using SafeMath for uint256;
 
-    // time before endTime during which dividend cannot be claimed by token holders
+    // time before dividendEndTime during which dividend cannot be claimed by token holders
     // instead the unclaimed dividend can be claimed by treasury in that time span
     uint256 public claimTimeout = 20 days;
 
@@ -34,7 +34,7 @@ contract DividendToken is StandardToken, Ownable {
     // multiple treasurer accounts are possible
     mapping(address => bool) public isTreasurer;
 
-    uint256 public endTime = 0;
+    uint256 public dividendEndTime = 0;
 
     event Payin(address _owner, uint256 _value, uint256 _endTime);
 
@@ -58,8 +58,8 @@ contract DividendToken is StandardToken, Ownable {
      * dividends that have not been claimed within 330 days expire and cannot be claimed anymore by the token holder.
      */
     function claimDividend() public returns (bool) {
-        // unclaimed dividend fractions should expire after 320 days and the owner can reclaim that fraction
-        require(endTime > 0 && endTime.sub(claimTimeout) > now);
+        // unclaimed dividend fractions should expire after 330 days and the owner can reclaim that fraction
+        require(dividendEndTime > 0 && dividendEndTime.sub(claimTimeout) > now);
 
         updateDividend(msg.sender);
 
@@ -76,41 +76,41 @@ contract DividendToken is StandardToken, Ownable {
 
     /**
      * @dev Transfer dividend (fraction) to new token holder
-     * @param from address The address of the old token holder
-     * @param to address The address of the new token holder
-     * @param value uint256 Number of tokens to transfer
+     * @param _from address The address of the old token holder
+     * @param _to address The address of the new token holder
+     * @param _value uint256 Number of tokens to transfer
      */
-    function transferDividend(address from, address to, uint256 value) internal {
-        updateDividend(from);
-        updateDividend(to);
+    function transferDividend(address _from, address _to, uint256 _value) internal {
+        updateDividend(_from);
+        updateDividend(_to);
 
-        uint256 transAmount = unclaimedDividend[from].mul(value).div(balanceOf(from));
+        uint256 transAmount = unclaimedDividend[_from].mul(_value).div(balanceOf(_from));
 
-        unclaimedDividend[from] = unclaimedDividend[from].sub(transAmount);
-        unclaimedDividend[to] = unclaimedDividend[to].add(transAmount);
+        unclaimedDividend[_from] = unclaimedDividend[_from].sub(transAmount);
+        unclaimedDividend[_to] = unclaimedDividend[_to].add(transAmount);
     }
 
     /**
      * @dev Update the dividend of hodler
-     * @param hodler address The Address of the hodler
+     * @param _hodler address The Address of the hodler
      */
-    function updateDividend(address hodler) internal {
+    function updateDividend(address _hodler) internal {
         // last update in previous period -> reset claimable dividend
-        if (lastUpdate[hodler] < lastDividendIncreaseDate) {
-            unclaimedDividend[hodler] = calcDividend(hodler, totalSupply_);
-            lastUpdate[hodler] = now;
+        if (lastUpdate[_hodler] < lastDividendIncreaseDate) {
+            unclaimedDividend[_hodler] = calcDividend(_hodler, totalSupply_);
+            lastUpdate[_hodler] = now;
         }
     }
 
     /**
      * @dev Get claimable dividend for the hodler
-     * @param hodler address The Address of the hodler
+     * @param _hodler address The Address of the hodler
      */
-    function getClaimableDividend(address hodler) public constant returns (uint256 claimableDividend) {
-        if (lastUpdate[hodler] < lastDividendIncreaseDate) {
-            return calcDividend(hodler, totalSupply_);
+    function getClaimableDividend(address _hodler) public constant returns (uint256 claimableDividend) {
+        if (lastUpdate[_hodler] < lastDividendIncreaseDate) {
+            return calcDividend(_hodler, totalSupply_);
         } else {
-            return (unclaimedDividend[hodler]);
+            return (unclaimedDividend[_hodler]);
         }
     }
 
@@ -143,12 +143,12 @@ contract DividendToken is StandardToken, Ownable {
 
     /**
      * @dev Set / alter treasurer "account". This can be done from owner only
-     * @param treasurer address Address of the treasurer to create/alter
-     * @param active bool Flag that shows if the treasurer account is active
+     * @param _treasurer address Address of the treasurer to create/alter
+     * @param _active bool Flag that shows if the treasurer account is active
      */
-    function setTreasurer(address treasurer, bool active) public onlyOwner {
-        isTreasurer[treasurer] = active;
-        ChangedTreasurer(treasurer, active);
+    function setTreasurer(address _treasurer, bool _active) public onlyOwner {
+        isTreasurer[_treasurer] = _active;
+        ChangedTreasurer(_treasurer, _active);
     }
 
     /**
@@ -158,11 +158,11 @@ contract DividendToken is StandardToken, Ownable {
      */
     function requestUnclaimed() public onlyOwner {
         // Send remaining ETH to beneficiary (back to owner) if dividend round is over
-        require(now >= endTime.sub(claimTimeout));
+        require(now >= dividendEndTime.sub(claimTimeout));
 
         msg.sender.transfer(this.balance);
 
-        Reclaimed(this.balance, endTime, now);
+        Reclaimed(this.balance, dividendEndTime, now);
     }
 
     /**
@@ -172,27 +172,32 @@ contract DividendToken is StandardToken, Ownable {
      */
     function() public payable {
         require(isTreasurer[msg.sender]);
-        require(endTime < now);
+        require(dividendEndTime < now);
 
         // pay back unclaimed dividend that might not have been claimed by owner yet
         if (this.balance > msg.value) {
             uint256 payout = this.balance.sub(msg.value);
             owner.transfer(payout);
-            Reclaimed(payout, endTime, now);
+            Reclaimed(payout, dividendEndTime, now);
         }
 
         currentDividend = this.balance;
 
         // No active dividend cycle found, initialize new round
-        endTime = now.add(dividendCycleTime);
+        dividendEndTime = now.add(dividendCycleTime);
 
         // Trigger payin event
-        Payin(msg.sender, msg.value, endTime);
+        Payin(msg.sender, msg.value, dividendEndTime);
 
         lastDividendIncreaseDate = now;
     }
 
-    function calcDividend(address hodler, uint256 totalSupply_) public view returns(uint256) {
-        return (currentDividend.mul(balanceOf(hodler))).div(totalSupply_);
+    /**
+     * @dev calculate teh dividend
+     * @param _hodler address
+     * @param _totalSupply uint256
+     */
+    function calcDividend(address _hodler, uint256 _totalSupply) public view returns(uint256) {
+        return (currentDividend.mul(balanceOf(_hodler))).div(_totalSupply);
     }
 }

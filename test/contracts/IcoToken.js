@@ -149,7 +149,7 @@ contract('IcoToken', (accounts) => {
         });
 
         const icoBalance    = await icoTokenInstance.currentDividend();
-        const endTime       = await icoTokenInstance.endTime();
+        const endTime       = await icoTokenInstance.dividendEndTime();
 
         icoBalance.should.be.bignumber.equal(expectedBalance);
         web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(expectedBalance);
@@ -294,7 +294,7 @@ contract('IcoToken', (accounts) => {
     /**
      * [ Reclaim period ]
      */
-    
+
     it('should fail, because we try to call claimDividend() after the claim period is over', async () => {
         console.log('[ Reclaim period ]'.yellow);
         await waitNDays(330);
@@ -347,7 +347,7 @@ contract('IcoToken', (accounts) => {
         });
 
         const icoBalance        = await icoTokenInstance.currentDividend();
-        const endTime           = await icoTokenInstance.endTime();
+        const endTime           = await icoTokenInstance.dividendEndTime();
 
         icoBalance.should.be.bignumber.equal(expectedBalance);
         web3.eth.getBalance(icoTokenInstance.address).should.be.bignumber.equal(expectedBalance);
@@ -409,7 +409,7 @@ contract('IcoToken', (accounts) => {
     });
 
     it('should increase the owner\'s balance, because token balance is not 0 while doing a Payin. Token balance should be the same as the Payin afterwards', async () => {
-        const endTime       = await icoTokenInstance.endTime();
+        const endTime       = await icoTokenInstance.dividendEndTime();
         const newTime       = endTime + 1;
         await increaseTimeTo(newTime);
         // Dividends were not claimed by the holders
