@@ -192,11 +192,12 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         // tier 1 20% discount - 1st 3 million tokens purchased
         if (totalTokensPurchased < DISCOUNT_TOKEN_AMOUNT_T1) {
             
-            // tx tokens overflowed into next tier 2 - 10%
+            // tx tokens overflowed into next tier 2 - 10% discount - mark tier1Reached! else all tokens are tier 1 discounted
             if (tempTotalTokensPurchased > DISCOUNT_TOKEN_AMOUNT_T1) {
                 tier1Reached = true;
                 overflowTokens = tempTotalTokensPurchased.sub(DISCOUNT_TOKEN_AMOUNT_T1);
                 tier1BonusTokens = purchasedTokens.sub(overflowTokens);
+            // tx tokens did not overflow into next tier 2 (10% discount)
             } else {
                 tier1BonusTokens = purchasedTokens;
             }
@@ -207,27 +208,40 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         tokenAmount = tokenAmount.add(tier1BonusTokens);
 
         // tier 2 10% discount - 2nd 3 million tokens purchased
-        if (totalTokensPurchased > DISCOUNT_TOKEN_AMOUNT_T1 && totalTokensPurchased <= DISCOUNT_TOKEN_AMOUNT_T2) {
+        if (tier1Reached && !tier2Reached) {
 
-            // tx tokens overflowed into next tier 3 - 0%
+            // tx tokens overflowed into next tier 3 - 0% - marked tier2Reached! else all tokens are tier 2 discounted
             if (tempTotalTokensPurchased > DISCOUNT_TOKEN_AMOUNT_T2) {
                 tier2Reached = true;
                 overflowTokens2 = tempTotalTokensPurchased.sub(DISCOUNT_TOKEN_AMOUNT_T2);
                 tier2BonusTokens = purchasedTokens.sub(overflowTokens2);
-            // tx tokens did not overflow into next tier
+            // tx tokens did not overflow into next tier 3 (tier 3 == no discount)
             } else {
-                tier2BonusTokens = purchasedTokens;
+                // tokens overflowed from tier1 else this tx started in tier2
+                if (overflowTokens > 0) {
+                    tier2BonusTokens = overflowTokens;
+                } else { 
+                    tier2BonusTokens = purchasedTokens; 
+                }
             }
             // apply discount for tier 2 tokens
             tier2BonusTokens = tier2BonusTokens.mul(10).div(9);
         }
 
-        tokenAmount = tokenAmount.add(tier2BonusTokens);
+        tokenAmount = tokenAmount.add(tier2BonusTokens).add(overflowTokens2);
+
+        // this triggers when both tier 1 and tier 2 discounted tokens have be filled - but ONLY afterwards, not if the flags got set during the same tx
+        if (tier2Reached && tier1Reached && tier2BonusTokens == 0) {
+            tokenAmount = purchasedTokens;
+        }
 
       
         /*** Record & update state variables  ***/
+        // Tracks purchased tokens for 2 tiers of discounts
         totalTokensPurchased = totalTokensPurchased.add(purchasedTokens);
+        // Tracks total tokens pending to be minted - this includes presale tokens
         tokensToMint = tokensToMint.add(tokenAmount);
+
         weiRaised = weiRaised.add(weiAmount);
 
         TokenPurchase(msg.sender, _beneficiary, weiAmount, tokenAmount);
