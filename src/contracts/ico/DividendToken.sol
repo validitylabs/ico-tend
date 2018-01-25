@@ -193,7 +193,7 @@ contract DividendToken is StandardToken, Ownable {
     }
 
     /**
-     * @dev calculate teh dividend
+     * @dev calculate the dividend
      * @param _hodler address
      * @param _totalSupply uint256
      */
