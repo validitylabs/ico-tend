@@ -10,26 +10,21 @@
     "node": "^8.x"
   },
   "scripts": {
-    "start": "yarn run develop",
+    "start": "yarn develop",
     "coverage": "solidity-coverage",
     "compile": "truffle compile --all",
     "dev": "truffle develop",
-    "migrate-ropsten": "rimraf build; cross-env NODE_ENV=ropsten truffle migrate --reset --compile-all --network ropsten",
-    "clean": "rimraf dist build bin coverage coverage.json",
-    "reset": "rimraf node_modules; npm run clean",
+    "migrate-ropsten": "shx rm -fr build; cross-env NODE_ENV=ropsten truffle migrate --reset --compile-all --network ropsten",
+    "clean": "shx rm -fr dist build bin coverage coverage.json",
+    "reset": "npm run clean; shx rm -fr node_modules",
     "upgrade": "yarn run reset; yarn upgrade",
     "postinstall": "node ./tools/hashChecker.js"
   },
   "dependencies": {
-    "chalk": "^2.3.0",
-    "moment": "^2.19.3",
-    "truffle-contract": "^3.0.1",
-    "web3": "^1.0.0-beta.26",
-    "winston": "^2.4.0",
+    "web3": "^1.0.0-beta.28",
     "zeppelin-solidity": "^1.6.0"
   },
   "devDependencies": {
-    "@validitylabs/js-utils": "^0.0.1",
     "babel-cli": "^6.26.0",
     "babel-eslint": "^8.0.3",
     "babel-polyfill": "^6.26.0",
@@ -42,16 +37,12 @@
     "eslint": "^4.12.1",
     "eslint-config-xo": "^0.19.0",
     "eslint-plugin-babel": "^4.1.2",
-    "ganache-core": "^2.0.2",
-    "jsdoc": "^3.5.5",
-    "keythereum": "^1.0.2",
     "shelljs": "^0.7.8",
     "shx": "^0.2.2",
     "solc": "0.4.18",
     "solidity-coverage": "git://github.com/validitylabs/solidity-coverage.git",
-    "superagent": "^3.8.1",
-    "tree-kill": "^1.2.0",
-    "truffle": "^4.0.1"
+    "truffle": "^4.0.1",
+    "web3-utils": "^1.0.0-beta.28"
   },
   "optionalDevDependencies": {
     "fsevents": "*"
