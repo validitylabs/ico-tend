@@ -18,7 +18,11 @@
     "clean": "shx rm -fr dist build bin coverage coverage.json",
     "reset": "npm run clean; shx rm -fr node_modules",
     "upgrade": "yarn run reset; yarn upgrade",
-    "postinstall": "node ./tools/hashChecker.js"
+    "postinstall": "node ./tools/hashChecker.js",
+    "test": "truffle test --network _development",
+    "migrate": "yarn migrate-dev",
+    "migrate-dev": "truffle migrate --reset --compile-all --network _development",
+    "testrpc": "truffle develop --log --gasLimit 0x44aa20 --mnemonic 'waste system voyage dentist fine donate purpose truly cactus chest coyote globe'"
   },
   "dependencies": {
     "chalk": "^2.3.0",

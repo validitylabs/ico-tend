@@ -26,6 +26,12 @@ module.exports = {
         }
     },
     networks: {
+        _development: {
+            host: 'localhost',
+            port: 9545,
+            network_id: 4447,
+            gas: cnf.network.ropsten.gas
+        },
         coverage: {
             host:       'localhost',
             network_id: 4447,

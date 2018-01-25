@@ -2,7 +2,7 @@
  * Migration script for the ICO
  */
 
- const cnf           = require('../../ico.cnf.json');
+const cnf           = require('../../ico.cnf.json');
 const IcoToken      = artifacts.require('./ico/IcoToken.sol');
 const IcoCrowdsale  = artifacts.require('./ico/IcoCrowdsale.sol');
 
