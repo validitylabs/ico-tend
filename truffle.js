@@ -1,6 +1,7 @@
 /**
  * Truffle configuration
  */
+
 require('babel-register');
 require('babel-polyfill');
 
@@ -38,8 +39,6 @@ module.exports = {
             network_id: 3,
             port:       8545,
             gas:        cnf.network.ropsten.gas
-            // ,        // 0x3d0900
-            // gasPrice:   cnf.network.ropsten.gasPrice    // 0xee6b2800
         }
     },
     build_directory:            buildDir,

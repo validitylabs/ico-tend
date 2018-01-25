@@ -19,8 +19,7 @@
             "wallet":       "0x3707b30b3e7CCFc14f516DeBA2aFb7042BDC58EA",
             "underwriter":  "0x961b7AC7ff495207C261C4b5A9656a7032b1e5f0",
             "host":         "165.227.144.105",
-            "gas":          "0x47c318",
-            "gasPrice":     "0x174876e800"
+            "gas":          "0x44aa20"
         }
     }
 }
