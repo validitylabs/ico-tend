@@ -186,26 +186,36 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
         // tier 1 20% discount - 1st 3 million tokens
         if (tokensToMint <= DISCOUNT_TOKEN_AMOUNT_T1) {
+
+            // tx tokens overflowed into next tier 2 - 10%
             if (tempTokensToMint > DISCOUNT_TOKEN_AMOUNT_T1) {
                 tier2Tokens = tempTokensToMint.sub(DISCOUNT_TOKEN_AMOUNT_T1);
                 tier1Tokens = tokenAmount.sub(tier2Tokens);
                 // apply discount
                 tier1Tokens = tier1Tokens.mul(10).div(8);
                 tokenAmount = tier2Tokens;
+
+            // tx tokens did not overflow into next tier
             } else {
+                // apply discount
                 tokenAmount = tokenAmount.mul(10).div(8);
             }
         }
         
         // tier 2 10% discount - 2nd 3 million tokens
         if (tokensToMint > DISCOUNT_TOKEN_AMOUNT_T1 && tokensToMint <= DISCOUNT_TOKEN_AMOUNT_T2) {
+
+            // tx tokens overflowed into next tier 3 - 0%
             if (tempTokensToMint > DISCOUNT_TOKEN_AMOUNT_T2) {
                 tier3Tokens = tempTokensToMint.sub(DISCOUNT_TOKEN_AMOUNT_T2);
                 tier2Tokens = tokenAmount.sub(tier3Tokens);
                 // apply discount
                 tier2Tokens = tier2Tokens.mul(10).div(9);
                 tokenAmount = tier3Tokens;
+
+            // tx tokens did not overflow into next tier
             } else {
+                // apply discount
                 tokenAmount = tokenAmount.mul(10).div(9);
             }
         }
