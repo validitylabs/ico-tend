@@ -12,5 +12,15 @@
     "comment confirmationPeriod":   "confirmation period in days",
     "confirmationPeriod":           30,
     "comment rateChfPerEth":        "CHF per ETH ratio",
-    "rateChfPerEth":                1200
+    "rateChfPerEth":                1200,
+    "network": {
+        "ropsten": {
+            "from":         "0xfc54a67ba6822bb64d402b1a2d996018d8c326fa",
+            "wallet":       "0x3707b30b3e7CCFc14f516DeBA2aFb7042BDC58EA",
+            "underwriter":  "0x961b7AC7ff495207C261C4b5A9656a7032b1e5f0",
+            "host":         "165.227.144.105",
+            "gas":          "0x927c0",
+            "gasPrice":     "0x1bf08eb000"
+        }
+    }
 }

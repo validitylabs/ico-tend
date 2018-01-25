@@ -14,12 +14,24 @@ module.exports = function (deployer, network, accounts) { // eslint-disable-line
     let endTime     = cnf.endTimeTesting;
 
     if (process.env.NODE_ENV === 'ropsten') {
-        wallet      = '0x3707b30b3e7CCFc14f516DeBA2aFb7042BDC58EA';
-        underwriter = '0x961b7AC7ff495207C261C4b5A9656a7032b1e5f0';
+        wallet      = cnf.network.ropsten.wallet;
+        underwriter = cnf.network.ropsten.underwriter;
         startTime   = cnf.startTime;
         endTime     = cnf.endTime;
-    }
 
-    deployer.deploy(IcoToken);
-    deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter);
+        deployer.deploy(IcoToken, {
+            from:       cnf.network.ropsten.from,
+            gas:        cnf.network.ropsten.gas, // web3.eth.getBlock('pending').gasLimit - 500
+            gasPrice:   cnf.network.ropsten.gasPrice
+        });
+
+        deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter, {
+            from:       cnf.network.ropsten.from,
+            gas:        cnf.network.ropsten.gas, // web3.eth.getBlock('pending').gasLimit - 500
+            gasPrice:   cnf.network.ropsten.gasPrice
+        });
+    } else {
+        deployer.deploy(IcoToken);
+        deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter);
+    }
 };

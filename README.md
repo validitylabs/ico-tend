@@ -18,7 +18,7 @@
     * 2nd 3 million    -  10% discount -  1 token = 9 CHF
     * last 3.5 million -  0% discount  -  1 token = 10 CHF
 * underwriter has to make tokens transferrable by calling `finalize`, if they do not, tokens will remain paused
-* owner of 
+* owner of
 * mintTeamTokens(uint256 amount) - mints up to 1.5 million tokens that are vested over 4 years
 * mintCompanyTokens - mints 2 million tokens that are vested over 4 years
 * owner is transferrable
@@ -102,3 +102,22 @@ source ./tools/initShell.sh
 yarn run coverage
 ```
 __The coverage test will automatically start it's own TestRPC server for you!__
+
+## Ropsten deployment
+Addresses used by our ropsten test node:
+```
+"from":         "0xfc54a67ba6822bb64d402b1a2d996018d8c326fa",
+"wallet":       "0x3707b30b3e7CCFc14f516DeBA2aFb7042BDC58EA",
+"underwriter":  "0x961b7AC7ff495207C261C4b5A9656a7032b1e5f0",
+```
+
+Connect to out ropsten test node by typing `ssh root@165.227.144.105`.
+Then change into the Geth console and unlock the account for deployment.
+```
+attach ipc://mnt/volume-fra1-02/geth/data/geth.ipc
+
+> personal.unlockAccount('0xfc54a67ba6822bb64d402b1a2d996018d8c326fa', "", 2700)
+
+```
+After exiting the console by `<STRG> + <D>`, simply run `yarn migrate-ropsten`.
+This may take several minutes to been finished.

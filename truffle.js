@@ -4,9 +4,10 @@
 require('babel-register');
 require('babel-polyfill');
 
-const path      = require('path');
-const basePath  = process.cwd();
+const cnf   = require('./ico.cnf.json');
+const path  = require('path');
 
+const basePath          = process.cwd();
 const buildDir          = path.join(basePath, 'build');
 const buildDirContracts = path.join(basePath, 'build/contracts');
 const srcDir            = path.join(basePath, 'src/contracts');
@@ -32,12 +33,12 @@ module.exports = {
             gas:        100000000
         },
         ropsten: {
-            host:       '165.227.144.105',
+            host:       cnf.network.ropsten.host,
+            from:       cnf.network.ropsten.from,
             network_id: 3,
             port:       8545,
-            from:       '0xfc54a67ba6822bb64d402b1a2d996018d8c326fa',
-            gas:        0x3d0900,
-            gasPrice:   0xee6b2800
+            gas:        cnf.network.ropsten.gas,        // 0x3d0900
+            gasPrice:   cnf.network.ropsten.gasPrice    // 0xee6b2800
         }
     },
     build_directory:            buildDir,
@@ -46,8 +47,3 @@ module.exports = {
     contracts_directory:        srcDir,
     test_directory:             testDir
 };
-
-// attach ipc://mnt/volume-fra1-02/geth/data/geth.ipc
-// personal.newAccount()
-// web3.fromWei(eth.getBalance('0xfc54a67ba6822bb64d402b1a2d996018d8c326fa'), "ether")
-// personal.unlockAccount('0xfc54a67ba6822bb64d402b1a2d996018d8c326fa', "")
