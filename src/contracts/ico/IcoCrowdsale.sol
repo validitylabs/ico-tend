@@ -10,7 +10,7 @@ pragma solidity ^0.4.18;
 import "../../../node_modules/zeppelin-solidity/contracts/crowdsale/Crowdsale.sol";
 import "../../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../../../node_modules/zeppelin-solidity/contracts/lifecycle/Pausable.sol";
-import "../../../node_modules/zeppelin-solidity/contracts/token/TokenVesting.sol";
+import "../../../node_modules/zeppelin-solidity/contracts/token/ERC20/TokenVesting.sol";
 import "./IcoToken.sol";
 
 contract IcoCrowdsale is Crowdsale, Ownable {
@@ -23,14 +23,17 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public constant DEVELOPMENT_TEAM_CAP = 2e6 * 1e18;  // 2 million * 1e18
     uint256 public constant ICO_TOKEN_CAP = 95e5 * 1e18;        // 9.5 million  * 1e18
 
+    uint256 public constant CHF_CENT_PER_TOKEN = 1000;          // standard CHF per token rate - in cents - 10 CHF => 1000 CHF cents
     uint256 public constant MIN_CONTRIBUTION_CHF = 500;
+
     uint256 public constant VESTING_CLIFF = 1 years;
     uint256 public constant VESTING_DURATION = 3 years;
-
+   
     // Amount of discounted tokens per discount stage (2 stages total; each being the same amount)
     uint256 public constant DISCOUNT_TOKEN_AMOUNT = 3e6 * 1e18; // 3 million * 1e18
 
-    uint256 public weiPerChf;
+    uint256 public minContributionInWei;
+    uint256 public tokenPerWei;
     address public underwriter;
 
     // allow managers to blacklist and confirm contributions by manager accounts
@@ -82,15 +85,15 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         _;
     }
 
-    modifier onlyConfirmPayment() {
-        require(now > endTime && now <= endTime.add(confirmationPeriod));
-        require(!confirmationPeriodOver);
-        _;
-    }
-
     modifier onlyNoneZero(address _to, uint256 _amount) {
         require(_to != address(0));
         require(_amount > 0);
+        _;
+    }
+
+    modifier onlyConfirmPayment() {
+        require(now > endTime && now <= endTime.add(confirmationPeriod));
+        require(!confirmationPeriodOver);
         _;
     }
 
@@ -103,8 +106,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      * @dev Deploy capped ico crowdsale contract
      * @param _startTime uint256 Start time of the crowdsale
      * @param _endTime uint256 End time of the crowdsale
-     * @param _rateTokenPerChfCent uint256 issueing rate tokens (not sub-units, we multiply with 1e18 in code) per CHF
-     * @param _rateWeiPerChf uint256 exchange rate Wei per CHF
+     * @param _rateChfPerEth uint256 CHF per ETH rate
      * @param _wallet address Wallet address of the crowdsale
      * @param _confirmationPeriodDays uint256 Confirmation period in days
      * @param _underwriter address of the underwriter
@@ -112,21 +114,22 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     function IcoCrowdsale(
         uint256 _startTime,
         uint256 _endTime,
-        uint256 _rateTokenPerChfCent,
-        uint256 _rateWeiPerChf,
+        uint256 _rateChfPerEth,
         address _wallet,
         uint256 _confirmationPeriodDays,
         address _underwriter
     )
-        public  // @TODO:FIXME: Fix rate and variable name
-        Crowdsale(_startTime, _endTime, (10 ** uint256(18)).mul(_rateTokenPerChfCent).div(_rateWeiPerChf), _wallet)
+        public
+        Crowdsale(_startTime, _endTime, _rateChfPerEth, _wallet)
     {
         require(MAX_TOKEN_CAP == ICO_ENABLERS_CAP.add(ICO_TOKEN_CAP).add(DEVELOPMENT_TEAM_CAP));
         require(_underwriter != address(0));
 
         setManager(msg.sender, true);
 
-        weiPerChf = _rateWeiPerChf;
+        tokenPerWei = (_rateChfPerEth.mul(1e2)).div(CHF_CENT_PER_TOKEN);
+        minContributionInWei = (MIN_CONTRIBUTION_CHF.mul(1e18)).div(_rateChfPerEth);
+
         confirmationPeriod = _confirmationPeriodDays * 1 days;
         underwriter = _underwriter;
     }
@@ -172,7 +175,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         uint256 weiAmount = msg.value;
 
         // regular rate - no discount
-        uint256 tokenAmount = weiAmount.mul(rate.div(10));
+        uint256 tokenAmount = weiAmount.mul(tokenPerWei);
 
         // @TODO: FIXME: need to gracefully handle overflow of discounts into the other tiers
         // Need a better way if we want a strict stop at 3 million tokens. Which could mean 1 investors gets partial bonus(es) E.g. (20% and 10%) or (10% and 0%)
@@ -379,8 +382,8 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      * @dev extend base functionality with min investment amount
      */
     function validPurchase() internal view returns (bool) {
-        // minimal investment: 500 CHF
-        require (msg.value.div(weiPerChf) >= MIN_CONTRIBUTION_CHF);
+        // minimal investment: 500 CHF (represented in wei)
+        require (msg.value >= minContributionInWei);
         return super.validPurchase();
     }
 }

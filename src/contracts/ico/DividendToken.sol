@@ -6,7 +6,7 @@
  */
 pragma solidity ^0.4.18;
 
-import "../../../node_modules/zeppelin-solidity/contracts/token/StandardToken.sol";
+import "../../../node_modules/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "../../../node_modules/zeppelin-solidity/contracts/math/SafeMath.sol";
 import "../../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol";
 
@@ -97,7 +97,7 @@ contract DividendToken is StandardToken, Ownable {
     function updateDividend(address hodler) internal {
         // last update in previous period -> reset claimable dividend
         if (lastUpdate[hodler] < lastDividendIncreaseDate) {
-            unclaimedDividend[hodler] = calcDividend(hodler, totalSupply);
+            unclaimedDividend[hodler] = calcDividend(hodler, totalSupply_);
             lastUpdate[hodler] = now;
         }
     }
@@ -108,7 +108,7 @@ contract DividendToken is StandardToken, Ownable {
      */
     function getClaimableDividend(address hodler) public constant returns (uint256 claimableDividend) {
         if (lastUpdate[hodler] < lastDividendIncreaseDate) {
-            return calcDividend(hodler, totalSupply);
+            return calcDividend(hodler, totalSupply_);
         } else {
             return (unclaimedDividend[hodler]);
         }
@@ -192,7 +192,7 @@ contract DividendToken is StandardToken, Ownable {
         lastDividendIncreaseDate = now;
     }
 
-    function calcDividend(address hodler, uint256 totalSupply) public view returns(uint256) {
-        return (currentDividend.mul(balanceOf(hodler))).div(totalSupply);
+    function calcDividend(address hodler, uint256 totalSupply_) public view returns(uint256) {
+        return (currentDividend.mul(balanceOf(hodler))).div(totalSupply_);
     }
 }

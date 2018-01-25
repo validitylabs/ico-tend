@@ -5,8 +5,8 @@
  */
 pragma solidity ^0.4.18;
 
-import "../../../node_modules/zeppelin-solidity/contracts/token/MintableToken.sol";
-import "../../../node_modules/zeppelin-solidity/contracts/token/PausableToken.sol";
+import "../../../node_modules/zeppelin-solidity/contracts/token/ERC20/MintableToken.sol";
+import "../../../node_modules/zeppelin-solidity/contracts/token/ERC20/PausableToken.sol";
 import "./DividendToken.sol";
 
 contract IcoToken is DividendToken, MintableToken, PausableToken {

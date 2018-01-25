@@ -1,6 +1,8 @@
 {
-    "comment startTimeTesting":     "2018-01-25T03:00:00Z",
-    "startTimeTesting":             1516849200,
+    "comment startTimeTesting":     "Thursday, February 15, 2018 7:00:00 AM",
+    "startTimeTesting":             1518678000,
+    "comment endTimeTesting":       "Sunday, February 25, 2018 3:00:00 AM",
+    "endTimeTesting":               1519527600,
     "comment startTime":            "2018-02-25T07:00:00Z",
     "startTime":                    1519542000,
     "comment endTime":              "2018-02-27T23:00:00Z",
@@ -8,9 +10,7 @@
     "comment cap":                  "Will be calculated to 95000000 * 10**18 in migration script",
     "cap":                          13000000,
     "comment confirmationPeriod":   "confirmation period in days",
-    "confirmationPeriod":           1,
-    "comment rateTokenPerChfCent":  "ratio tokens per CHF cents",
-    "rateTokenPerChfCent":          10,
-    "comment rateWeiPerChf":        "ratio wei per CHF",
-    "rateWeiPerChf":                3e15
+    "confirmationPeriod":           30,
+    "comment rateChfPerEth":        "CHF per ETH ratio",
+    "rateChfPerEth":                1200
 }

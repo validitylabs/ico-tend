@@ -6,28 +6,28 @@ const assert = require('assert');
 
 const contracts = {
     Crowdsale     : fs.readFileSync('node_modules/zeppelin-solidity/contracts/crowdsale/Crowdsale.sol'),
-    MintableToken : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/MintableToken.sol'),
-    PausableToken : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/PausableToken.sol'),
-    StandardToken : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/StandardToken.sol'),
+    MintableToken : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/MintableToken.sol'),
+    PausableToken : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/PausableToken.sol'),
+    StandardToken : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol'),
     Pausable      : fs.readFileSync('node_modules/zeppelin-solidity/contracts/lifecycle/Pausable.sol'),
     Ownable       : fs.readFileSync('node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol'),
-    ERC20         : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20.sol'),
-    BasicToken    : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/BasicToken.sol'),
-    ERC20Basic    : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20Basic.sol'),
+    ERC20         : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/ERC20.sol'),
+    BasicToken    : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/BasicToken.sol'),
+    ERC20Basic    : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol'),
     SafeMath      : fs.readFileSync('node_modules/zeppelin-solidity/contracts/math/SafeMath.sol')
 };
 
 const hashes = {
-    Crowdsale     : '0x28cb2854ac11de737339b5271d7e658df9f526fcf2af8c5f753ce453f291f4fc',
-    MintableToken : '0x203a748c796f14ce7651dc1acd10fbd3f4aee071e4050d2e694663731b09d567',
-    PausableToken : '0x6b5058991c4b32a84efeedf4c83c5942f01a9c6f6b444187a12d6d18a6a2b7a3',
-    StandardToken : '0xadeb69c89557f19128024e6fda37c12fdd8a7a9fb81a2b8447e53697d42fc018',
+    Crowdsale     : '0xb8321cb3ccf453f87282d7c53ea3cdc58e8b5c00b434da600ff12b974e3e3b96',
+    MintableToken : '0x07397a8011758b3be15dbf6923ed292e2facd777441995ba39f8e118f6c63682',
+    PausableToken : '0x1f91bb15f141c4488de987a008592cdb7fc5d56ec332e46eb2c2b0b165cc2608',
+    StandardToken : '0xd2b344a5259e19ec143074cfa65637a10c40b68395c59808c4af13bccbb2de55',
     Pausable      : '0x49d41cc2b80f7732cdb504d67cd9a84ebeee38f8ec7204c96c2bded71e295f6a',
-    Ownable       : '0x0648cb798def395f9ba28affc7e9757cfa3bdb492925270cc493d6f565275358',
-    ERC20         : '0xf1104e30218fcc107e27801b23ab2f48dac4b6e2ac624d572cc803faa3c2eae9',
-    BasicToken    : '0x9da9349ec5d64b0c516c8d241895ccd17e0c2e71b2af36690417d9dc7af5359b',
-    ERC20Basic    : '0x3f7bc70ddcbefcf5e16c8efea16f70598be7ecaf82531118dc5c3e630f242c17',
-    SafeMath      : '0x8be139f1ebd01ca958bd313b7ffb07253964815894104f36ad341e2924893af3'
+    Ownable       : '0x1ad4ec802268eb3e02e732ecf8b65c39bb00cdf448e7737aea27ecfa9fd10d6a',
+    ERC20         : '0xd0b7ada654221cc9e4cb4a97754b99d2e7c2fb824303f1ba5f1661f4e8086751',
+    BasicToken    : '0x948404468d61ff35ea4194650670408dabd65da7f905a1c16888ab84520bf39e',
+    ERC20Basic    : '0x1fd84910b5033c9d169995cd88bdd465d37d4a384ef2837b238b88cd26ef74e7',
+    SafeMath      : '0x532c638adef093d4c7c250bf4bb0afbf45ae35a15e06f90940930f5b8ce1a04d'
 };
 
 Object.keys(contracts).forEach((key) => {
