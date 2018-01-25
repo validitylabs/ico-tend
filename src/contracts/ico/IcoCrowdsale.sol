@@ -220,7 +220,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             }
         }
 
-        tokenAmount.add(tier1Tokens).add(tier2Tokens);
+        tokenAmount = tokenAmount.add(tier1Tokens).add(tier2Tokens);
 
         tokensToMint = tokensToMint.add(tokenAmount);
         weiRaised = weiRaised.add(weiAmount);
