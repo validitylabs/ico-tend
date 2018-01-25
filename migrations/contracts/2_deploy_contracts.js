@@ -21,14 +21,16 @@ module.exports = function (deployer, network, accounts) { // eslint-disable-line
 
         deployer.deploy(IcoToken, {
             from:       cnf.network.ropsten.from,
-            gas:        cnf.network.ropsten.gas, // web3.eth.getBlock('pending').gasLimit - 500
-            gasPrice:   cnf.network.ropsten.gasPrice
+            gas:        cnf.network.ropsten.gas
+            // , // web3.eth.getBlock('pending').gasLimit - 500
+            // gasPrice:   cnf.network.ropsten.gasPrice
         });
 
         deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter, {
             from:       cnf.network.ropsten.from,
-            gas:        cnf.network.ropsten.gas, // web3.eth.getBlock('pending').gasLimit - 500
-            gasPrice:   cnf.network.ropsten.gasPrice
+            gas:        cnf.network.ropsten.gas
+            // , // web3.eth.getBlock('pending').gasLimit - 500
+            // gasPrice:   cnf.network.ropsten.gasPrice
         });
     } else {
         deployer.deploy(IcoToken);

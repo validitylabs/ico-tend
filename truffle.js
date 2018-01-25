@@ -37,8 +37,9 @@ module.exports = {
             from:       cnf.network.ropsten.from,
             network_id: 3,
             port:       8545,
-            gas:        cnf.network.ropsten.gas,        // 0x3d0900
-            gasPrice:   cnf.network.ropsten.gasPrice    // 0xee6b2800
+            gas:        cnf.network.ropsten.gas
+            // ,        // 0x3d0900
+            // gasPrice:   cnf.network.ropsten.gasPrice    // 0xee6b2800
         }
     },
     build_directory:            buildDir,

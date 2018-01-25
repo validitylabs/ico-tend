@@ -116,7 +116,7 @@ Then change into the Geth console and unlock the account for deployment.
 ```
 attach ipc://mnt/volume-fra1-02/geth/data/geth.ipc
 
-> personal.unlockAccount('0xfc54a67ba6822bb64d402b1a2d996018d8c326fa', "", 2700)
+> personal.unlockAccount('0xbd0afd7d13586d931ab184248646e771d0946b2f', "", 2700)
 
 ```
 After exiting the console by `<STRG> + <D>`, simply run `yarn migrate-ropsten`.
