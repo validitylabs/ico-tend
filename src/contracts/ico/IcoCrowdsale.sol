@@ -361,7 +361,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         // just so that we can see which one we attempted last time and can continue with next
         investmentIdLastAttemptedToSettle = _investmentId;
 
-        if (p.confirmed) {
+        if (p.confirmed && !capReached) {
             // if confirmed -> issue tokens, send ETH to wallet and complete settlement
 
             // calculate number of tokens to be issued to investor
@@ -382,7 +382,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             }
 
             //Checks and balances to make sure tokensMinted == tokensToMint
-            // require(tokensMinted.add(tokens) <= ICO_TOKEN_CAP);
+            require(tokensMinted.add(tokens) <= ICO_TOKEN_CAP);
             require(tokensToMint.sub(tokens) >= 0);
             tokensToMint = tokensToMint.sub(tokens);
             tokensMinted = tokensMinted.add(tokens);
