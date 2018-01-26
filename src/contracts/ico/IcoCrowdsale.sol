@@ -269,8 +269,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
         for (uint256 c; c < _investmentIds.length; c = c.add(1)) {
             investmentId = _investmentIds[c]; // gas optimization
-            investments[investmentId].confirmed = true;
-            ChangedInvestmentConfirmation(investmentId, investments[investmentId].investor, true);
+            confirmPayment(investmentId);
         }
     }
 
