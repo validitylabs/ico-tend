@@ -2,6 +2,7 @@
  * Migration script for the ICO
  */
 const cnf           = require('../../ico.cnf.json');
+const IcoToken      = artifacts.require('./ico/IcoToken.sol');
 const IcoCrowdsale  = artifacts.require('./ico/IcoCrowdsale.sol');
 
 module.exports = function (deployer, network, accounts) { // eslint-disable-line
@@ -36,6 +37,7 @@ module.exports = function (deployer, network, accounts) { // eslint-disable-line
         startTime   = cnf.startTimeTesting;
         endTime     = cnf.endTimeTesting;
 
+        deployer.deploy(IcoToken);
         deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter);
     }
 };
