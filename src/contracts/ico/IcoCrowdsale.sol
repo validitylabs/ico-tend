@@ -21,7 +21,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     // // Bottom three should add to above
     uint256 public constant ICO_ENABLERS_CAP = 15e5 * 1e18;     // 1.5 million * 1e18
     uint256 public constant DEVELOPMENT_TEAM_CAP = 2e6 * 1e18;  // 2 million * 1e18
-    uint256 public constant ICO_TOKEN_CAP = 95e5 * 1e18;        // 9.5 million  * 1e18
+    uint256 public constant ICO_TOKEN_CAP = 9.5e6 * 1e18;        // 9.5 million  * 1e18
 
     uint256 public constant CHF_CENT_PER_TOKEN = 1000;          // standard CHF per token rate - in cents - 10 CHF => 1000 CHF cents
     uint256 public constant MIN_CONTRIBUTION_CHF = 500;
@@ -32,6 +32,12 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     // Amount of discounted tokens per discount stage (2 stages total; each being the same amount)
     uint256 public constant DISCOUNT_TOKEN_AMOUNT_T1 = 3e6 * 1e18; // 3 million * 1e18
     uint256 public constant DISCOUNT_TOKEN_AMOUNT_T2 = DISCOUNT_TOKEN_AMOUNT_T1 * 2;
+
+    // Track tokens depending which stage that the ICO is in
+    uint256 public tokensToMint;            // tokens to be minted after confirmation
+    uint256 public tokensMinted;            // already minted tokens (maximally = cap)
+    uint256 public icoEnablersTokensMinted;
+    uint256 public developmentTeamTokensMinted;
 
     uint256 public minContributionInWei;
     uint256 public tokenPerWei;
@@ -51,12 +57,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     uint256 public confirmationPeriod;
     bool public confirmationPeriodOver;     // can be set by owner to finish confirmation in under 30 days
-
-    // Track tokens depending which stage that the ICO is in
-    uint256 public tokensToMint;            // tokens to be minted after confirmation
-    uint256 public tokensMinted;            // already minted tokens (maximally = cap)
-    uint256 public icoEnablersTokensMinted;
-    uint256 public developmentTeamTokensMinted;
 
     // for convenience we store vesting wallets
     address[] public vestingWallets;
@@ -172,7 +172,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         uint256 weiAmount = msg.value;
         uint256 tokenAmount;
         uint256 purchasedTokens = weiAmount.mul(tokenPerWei);
-        uint256 tempTotalTokensPurchased = tokensToMint.add(purchasedTokens);
+        uint256 tempTotalTokensPurchased = totalTokensPurchased.add(purchasedTokens);
         uint256 overflowTokens;
         uint256 overflowTokens2;
         // 20% discount bonus amount
@@ -397,6 +397,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             // otherwise we would block settlement process of all following investments)
             if (p.investor != address(0) && p.weiAmount > 0) {
                 if (p.investor.send(p.weiAmount)) {
+                    tokensToMint = tokensToMint.sub(p.tokenAmount);
                     p.completedSettlement = true;
                 }
             }
