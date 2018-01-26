@@ -107,6 +107,11 @@ __The coverage test will automatically start it's own TestRPC server for you!__
 For the Rinkeby deployment, you need a Geth installation on your machine.
 Follow the [installation instructions](https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum) for your OS.
 
+Rinkeby location for IcoCrowdsale:
+```
+https://rinkeby.etherscan.io/address/0x6111c7abe39a9001bf23211b326cbd931821d12f
+```
+
 Rinkeby test addresses:
 ```
 "from":         "0x0fadbcc6baf38842493ea527759ce7ce1644d0cc",
