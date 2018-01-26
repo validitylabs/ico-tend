@@ -190,7 +190,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         uint256 tier2BonusTokens;
 
         // tier 1 20% discount - 1st 3 million tokens purchased
-        if (totalTokensPurchased < DISCOUNT_TOKEN_AMOUNT_T1) {
+        if (!tier1Reached) {
             
             // tx tokens overflowed into next tier 2 - 10% discount - mark tier1Reached! else all tokens are tier 1 discounted
             if (tempTotalTokensPurchased > DISCOUNT_TOKEN_AMOUNT_T1) {
@@ -203,9 +203,8 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             }
             //apply discount
             tier1BonusTokens = tier1BonusTokens.mul(10).div(8);
+            tokenAmount = tokenAmount.add(tier1BonusTokens);
         }
-
-        tokenAmount = tokenAmount.add(tier1BonusTokens);
 
         // tier 2 10% discount - 2nd 3 million tokens purchased
         if (tier1Reached && !tier2Reached) {
@@ -226,9 +225,8 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             }
             // apply discount for tier 2 tokens
             tier2BonusTokens = tier2BonusTokens.mul(10).div(9);
+            tokenAmount = tokenAmount.add(tier2BonusTokens).add(overflowTokens2);
         }
-
-        tokenAmount = tokenAmount.add(tier2BonusTokens).add(overflowTokens2);
 
         // this triggers when both tier 1 and tier 2 discounted tokens have be filled - but ONLY afterwards, not if the flags got set during the same tx
         // aka this is tier 3
@@ -394,7 +392,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             if (capReached && p.weiAmount > 0) {
                 wallet.transfer(investedWeiAmount);
                 if (p.investor.send(refundWeiAmount)) {
-                    // do nothing?
+                    // do nothing
                 }
             } else if (p.weiAmount > 0) {
                 wallet.transfer(p.weiAmount);
