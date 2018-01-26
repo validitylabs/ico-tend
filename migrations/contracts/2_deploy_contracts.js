@@ -1,9 +1,7 @@
 /**
  * Migration script for the ICO
  */
-
 const cnf           = require('../../ico.cnf.json');
-// const IcoToken      = artifacts.require('./ico/IcoToken.sol');
 const IcoCrowdsale  = artifacts.require('./ico/IcoCrowdsale.sol');
 
 module.exports = function (deployer, network, accounts) { // eslint-disable-line
@@ -18,14 +16,19 @@ module.exports = function (deployer, network, accounts) { // eslint-disable-line
         startTime   = cnf.startTime;
         endTime     = cnf.endTime;
 
-        // deployer.deploy(IcoToken, {
-        //     from:       cnf.network.rinkeby.from,
-        //     gas:        cnf.network.rinkeby.gas
-        // });
+        deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter, {
+            from:   cnf.network.rinkeby.from,
+            gas:    cnf.network.rinkeby.gas
+        });
+    } else if (process.env.NODE_ENV === 'mainnet') {
+        wallet      = cnf.network.mainnet.wallet;
+        underwriter = cnf.network.mainnet.underwriter;
+        startTime   = cnf.startTime;
+        endTime     = cnf.endTime;
 
         deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter, {
-            from:       cnf.network.rinkeby.from,
-            gas:        cnf.network.rinkeby.gas
+            from:   cnf.network.mainnet.from,
+            gas:    cnf.network.mainnet.gas
         });
     } else {
         wallet      = accounts[6];
@@ -33,7 +36,6 @@ module.exports = function (deployer, network, accounts) { // eslint-disable-line
         startTime   = cnf.startTimeTesting;
         endTime     = cnf.endTimeTesting;
 
-        // deployer.deploy(IcoToken);
         deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter);
     }
 };

@@ -20,6 +20,13 @@
             "underwriter":  "0x2018FF438C45d5a2bBF0Ef511eACF0345eC1E1D1",
             "host":         "127.0.0.1",
             "gas":          "0x632ea0"
+        },
+        "mainnet": {
+            "from":         "0x01588185c045848d927d572041aac9a64b1cb8e4",
+            "wallet":       "",
+            "underwriter":  "",
+            "host":         "127.0.0.1",
+            "gas":          "0x632ea0"
         }
     }
 }

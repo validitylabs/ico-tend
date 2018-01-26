@@ -45,6 +45,13 @@ module.exports = {
             network_id: 4,
             port:       8545,
             gas:        cnf.network.rinkeby.gas
+        },
+        mainnet: {
+            host:       cnf.network.mainnet.host,
+            from:       cnf.network.mainnet.from,
+            network_id: 1,
+            port:       8545,
+            gas:        cnf.network.mainnet.gas
         }
     },
     build_directory:            buildDir,

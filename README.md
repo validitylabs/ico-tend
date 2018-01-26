@@ -138,3 +138,6 @@ Connect to your rinkeby Geth console and unlock the account for deployment.
 ```
 After exiting the console by `<STRG> + <D>`, simply run `yarn migrate-ropsten`.
 This may take several minutes to finish.
+
+## Mainnet deployment
+@TODO: document this
