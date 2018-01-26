@@ -141,17 +141,17 @@ contract('IcoCrowdsale', (accounts) => {
 
     // Start Blacklist f(x) tests
     it('should fail, because we try to blackListInvestor investor from unauthorized account', async () => {
-        await expectThrow(icoCrowdsaleInstance.blackListInvestor(coinbaseWallet, {from: activeInvestor2, gas: 1000000}));
+        await expectThrow(icoCrowdsaleInstance.blackListInvestor(coinbaseWallet, true, {from: activeInvestor2, gas: 1000000}));
     });
 
     it('should fail, because we try to run unBlackListInvestor with a non manager account', async () => {
-        await expectThrow(icoCrowdsaleInstance.unBlackListInvestor(coinbaseWallet, {from: activeInvestor2, gas: 1000000}));
+        await expectThrow(icoCrowdsaleInstance.blackListInvestor(coinbaseWallet, false, {from: activeInvestor2, gas: 1000000}));
     });
 
     it('should blacklist investor accounts', async () => {
-        const tx1 = await icoCrowdsaleInstance.blackListInvestor(coinbaseWallet, {from: owner, gas: 1000000});
-        const tx2 = await icoCrowdsaleInstance.blackListInvestor(coinbaseWallet2, {from: activeManager, gas: 1000000});
-        const tx3 = await icoCrowdsaleInstance.blackListInvestor(inactiveInvestor1, {from: activeManager, gas: 1000000});
+        const tx1 = await icoCrowdsaleInstance.blackListInvestor(coinbaseWallet, true, {from: owner, gas: 1000000});
+        const tx2 = await icoCrowdsaleInstance.blackListInvestor(coinbaseWallet2, true, {from: activeManager, gas: 1000000});
+        const tx3 = await icoCrowdsaleInstance.blackListInvestor(inactiveInvestor1, true, {from: activeManager, gas: 1000000});
 
         const blacklisted1 = await icoCrowdsaleInstance.isBlacklisted(coinbaseWallet);
         const blacklisted2 = await icoCrowdsaleInstance.isBlacklisted(coinbaseWallet2);
@@ -177,7 +177,7 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should unblacklist investor account', async () => {
-        const tx            = await icoCrowdsaleInstance.unBlackListInvestor(coinbaseWallet2, {from: owner, gas: 1000000});
+        const tx            = await icoCrowdsaleInstance.blackListInvestor(coinbaseWallet2, false, {from: owner, gas: 1000000});
         const blacklisted   = await icoCrowdsaleInstance.isBlacklisted(coinbaseWallet2);
 
         assert.isFalse(blacklisted, 'coinbaseWallet2 should be unBlackListInvestor');

@@ -154,18 +154,9 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      * @dev blacklist investor from participating in the crowdsale
      * @param _investor address address of the investor to disallowed participation
      */
-    function blackListInvestor(address _investor) public onlyManager {
-        isBlacklisted[_investor] = true;
-        ChangedInvestorBlacklisting(_investor, true);
-    }
-
-    /**
-     * @dev unblacklist investor from participating in the crowdsale
-     * @param _investor address address of the investor to disallowed participation
-     */
-    function unBlackListInvestor(address _investor) public onlyManager {
-        isBlacklisted[_investor] = false;
-        ChangedInvestorBlacklisting(_investor, false);
+    function blackListInvestor(address _investor, bool _active) public onlyManager {
+        isBlacklisted[_investor] = _active;
+        ChangedInvestorBlacklisting(_investor, _active);
     }
 
     /**
@@ -335,7 +326,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     /**
      * @dev set final the confirmation period
      */
-    function finalizeConfirmationPeriod() public onlyOwner {
+    function finalizeConfirmationPeriod() public onlyOwner onlyConfirmPayment {
         confirmationPeriodOver = true;
     }
 
