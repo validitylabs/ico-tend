@@ -14,12 +14,12 @@
     "comment rateChfPerEth":        "CHF per ETH ratio",
     "rateChfPerEth":                1200,
     "network": {
-        "ropsten": {
-            "from":         "0xbd0afd7d13586d931ab184248646e771d0946b2f",
-            "wallet":       "0x3707b30b3e7CCFc14f516DeBA2aFb7042BDC58EA",
-            "underwriter":  "0x961b7AC7ff495207C261C4b5A9656a7032b1e5f0",
-            "host":         "165.227.144.105",
-            "gas":          "0x44aa20"
+        "rinkeby": {
+            "from":         "0x0fadbcc6baf38842493ea527759ce7ce1644d0cc",
+            "wallet":       "0x0E8FF89069012133ea67c5a1bAC2Ff426EE28391",
+            "underwriter":  "0x2018FF438C45d5a2bBF0Ef511eACF0345eC1E1D1",
+            "host":         "127.0.0.1",
+            "gas":          "0x632ea0"
         }
     }
 }

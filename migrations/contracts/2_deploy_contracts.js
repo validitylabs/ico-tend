@@ -3,32 +3,37 @@
  */
 
 const cnf           = require('../../ico.cnf.json');
-const IcoToken      = artifacts.require('./ico/IcoToken.sol');
+// const IcoToken      = artifacts.require('./ico/IcoToken.sol');
 const IcoCrowdsale  = artifacts.require('./ico/IcoCrowdsale.sol');
 
 module.exports = function (deployer, network, accounts) { // eslint-disable-line
-    let wallet      = accounts[6];
-    let underwriter = accounts[9];
-    let startTime   = cnf.startTimeTesting;
-    let endTime     = cnf.endTimeTesting;
+    let wallet      = null;
+    let underwriter = null;
+    let startTime   = null;
+    let endTime     = null;
 
-    if (process.env.NODE_ENV === 'ropsten') {
-        wallet      = cnf.network.ropsten.wallet;
-        underwriter = cnf.network.ropsten.underwriter;
+    if (process.env.NODE_ENV === 'rinkeby') {
+        wallet      = cnf.network.rinkeby.wallet;
+        underwriter = cnf.network.rinkeby.underwriter;
         startTime   = cnf.startTime;
         endTime     = cnf.endTime;
 
-        deployer.deploy(IcoToken, {
-            from:       cnf.network.ropsten.from,
-            gas:        cnf.network.ropsten.gas
-        });
+        // deployer.deploy(IcoToken, {
+        //     from:       cnf.network.rinkeby.from,
+        //     gas:        cnf.network.rinkeby.gas
+        // });
 
         deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter, {
-            from:       cnf.network.ropsten.from,
-            gas:        cnf.network.ropsten.gas
+            from:       cnf.network.rinkeby.from,
+            gas:        cnf.network.rinkeby.gas
         });
     } else {
-        deployer.deploy(IcoToken);
+        wallet      = accounts[6];
+        underwriter = accounts[9];
+        startTime   = cnf.startTimeTesting;
+        endTime     = cnf.endTimeTesting;
+
+        // deployer.deploy(IcoToken);
         deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter);
     }
 };

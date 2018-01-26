@@ -103,21 +103,33 @@ yarn run coverage
 ```
 __The coverage test will automatically start it's own TestRPC server for you!__
 
-## Ropsten deployment
-Addresses used by our ropsten test node:
+## Rinkeby deployment
+For the Rinkeby deployment, you need a Geth installation on your machine.
+Follow the [installation instructions](https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum) for your OS.
+
+Rinkeby test addresses:
 ```
-"from":         "0xfc54a67ba6822bb64d402b1a2d996018d8c326fa",
-"wallet":       "0x3707b30b3e7CCFc14f516DeBA2aFb7042BDC58EA",
-"underwriter":  "0x961b7AC7ff495207C261C4b5A9656a7032b1e5f0",
+"from":         "0x0fadbcc6baf38842493ea527759ce7ce1644d0cc",
+"wallet":       "0x0E8FF89069012133ea67c5a1bAC2Ff426EE28391",
+"underwriter":  "0x2018FF438C45d5a2bBF0Ef511eACF0345eC1E1D1",
 ```
 
-Connect to out ropsten test node by typing `ssh root@165.227.144.105`.
-Then change into the Geth console and unlock the account for deployment.
+Start local Rinkeby test node:
 ```
-attach ipc://mnt/volume-fra1-02/geth/data/geth.ipc
+geth --syncmode "fast" --rinkeby --rpc --rpcapi "eth,net,web3,personal" --rpccorsdomain '*' --rpcaddr "0.0.0.0"
+```
 
-> personal.unlockAccount('0xbd0afd7d13586d931ab184248646e771d0946b2f', "", 2700)
+Connect to local Geth console:
+```
+geth attach ipc://<PATH>/<TO>/Library/Ethereum/rinkeby/geth.ipc
 
+# e.g.
+# geth attach ipc://Users/patrice/Library/Ethereum/rinkeby/geth.ipc
+```
+
+Connect to your rinkeby Geth console and unlock the account for deployment.
+```
+> personal.unlockAccount('0x0fadbcc6baf38842493ea527759ce7ce1644d0cc', "", 2700)
 ```
 After exiting the console by `<STRG> + <D>`, simply run `yarn migrate-ropsten`.
-This may take several minutes to been finished.
+This may take several minutes to finish.
