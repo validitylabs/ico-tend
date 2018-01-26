@@ -5,6 +5,7 @@
  */
 
 import {expectThrow, waitNDays, getEvents, BigNumber, cnf, increaseTimeTo} from './helpers/tools';
+import {logger as log} from '../../tools/logger';
 
 const IcoCrowdsale  = artifacts.require('./IcoCrowdsale');
 const IcoToken      = artifacts.require('./IcoToken');
@@ -309,13 +310,13 @@ contract('IcoCrowdsale', (accounts) => {
     it('should mint tokens for presale', async () => {
         const activeInvestor1Balance1   = await icoTokenInstance.balanceOf(activeInvestor1);
         const activeInvestor2Balance1   = await icoTokenInstance.balanceOf(activeInvestor2);
-        const tenB                       = new BigNumber(10);
+        const tenB                       = new BigNumber(9.49933 * 1e18 * 1e6);
         const fiveB                      = new BigNumber(5);
 
         activeInvestor1Balance1.should.be.bignumber.equal(new BigNumber(0));
         activeInvestor2Balance1.should.be.bignumber.equal(new BigNumber(0));
 
-        const tx1 = await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 10);
+        const tx1 = await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 9.49933 * 1e18 * 1e6);
         const tx2 = await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor2, 5);
 
         const activeInvestor1Balance2 = await icoTokenInstance.balanceOf(activeInvestor1);
@@ -339,6 +340,8 @@ contract('IcoCrowdsale', (accounts) => {
 
         events2[0].value.should.be.bignumber.equal(new BigNumber(0));
         events2[0].amount.should.be.bignumber.equal(fiveB);
+
+        log.info('Tokens to Mint for presale activeInvestor1: ' + events1[0].amount.toNumber());
     });
 
     /**
@@ -576,7 +579,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment0[0], 0x0000000000000000000000000000000000000000);   // Investor
         assert.equal(investment0[1], activeInvestor1);                              // Beneficiary
         investment0[2].should.be.bignumber.equal(web3.toWei(0, 'ether'));           // Wei Amount
-        investment0[3].should.be.bignumber.equal(10);                               // Token Amount
+        investment0[3].should.be.bignumber.equal(9.49933 * 1e18 * 1e6);                               // Token Amount
         assert.isTrue(investment0[4]);                                              // Confirmed
         assert.isFalse(investment0[5]);                                             // AttemptedSettlement
         assert.isFalse(investment0[6]);                                             // CompletedSettlement
@@ -704,7 +707,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment0[0], 0x0000000000000000000000000000000000000000);   // Investor
         assert.equal(investment0[1], activeInvestor1);                              // Beneficiary
         investment0[2].should.be.bignumber.equal(web3.toWei(0, 'ether'));           // Wei Amount
-        investment0[3].should.be.bignumber.equal(10);                               // Token Amount
+        investment0[3].should.be.bignumber.equal(9.49933 * 1e18 * 1e6);                               // Token Amount
         assert.isTrue(investment0[4]);                                              // Confirmed
         assert.isFalse(investment0[5]);                                             // AttemptedSettlement
         assert.isFalse(investment0[6]);                                             // CompletedSettlement
@@ -836,7 +839,7 @@ contract('IcoCrowdsale', (accounts) => {
 
         // is presale
         investment0[2].should.be.bignumber.equal(web3.toWei(0, 'ether'));   // Wei Amount
-        investment0[3].should.be.bignumber.equal(10);                       // Token Amount
+        investment0[3].should.be.bignumber.equal(9.49933 * 1e18 * 1e6);                       // Token Amount
         assert.isTrue(investment0[4]);                                      // Confirmed
         assert.isFalse(investment0[5]);                                     // AttemptedSettlement
         assert.isFalse(investment0[6]);                                     // CompletedSettlement
@@ -879,7 +882,17 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(investment6[5]);                                     // AttemptedSettlement
         assert.isFalse(investment6[6]);                                     // CompletedSettlement
 
+        let tokensMinted = await icoCrowdsaleInstance.tokensMinted();
+        let tokensToMint = await icoCrowdsaleInstance.tokensToMint();
+        log.info('Tokens to mint: ' + tokensToMint.toNumber());
+        log.info('Tokens minted: ' + tokensMinted.toNumber());
+
         await icoCrowdsaleInstance.settleInvestment(0, {from: inactiveInvestor1, gas: 1000000});
+
+        tokensMinted = await icoCrowdsaleInstance.tokensMinted();
+        tokensToMint = await icoCrowdsaleInstance.tokensToMint();
+        log.info('Tokens to mint: ' + tokensToMint.toNumber());
+        log.info('Tokens minted: ' + tokensMinted.toNumber());
 
         const investmentAfter0   = await icoCrowdsaleInstance.investments(0);
         const investmentAfter1   = await icoCrowdsaleInstance.investments(1);
@@ -891,7 +904,7 @@ contract('IcoCrowdsale', (accounts) => {
 
         // is presale
         investmentAfter0[2].should.be.bignumber.equal(web3.toWei(0, 'ether'));  // Wei Amount
-        investmentAfter0[3].should.be.bignumber.equal(10);                      // Token Amount
+        investmentAfter0[3].should.be.bignumber.equal(9.49933 * 1e18 * 1e6);                      // Token Amount
         assert.isTrue(investmentAfter0[4]);                                     // Confirmed
         assert.isTrue(investmentAfter0[5]);                                     // AttemptedSettlement
         assert.isTrue(investmentAfter0[6]);                                     // CompletedSettlement
@@ -949,7 +962,7 @@ contract('IcoCrowdsale', (accounts) => {
 
         // is presale
         investment0[2].should.be.bignumber.equal(web3.toWei(0, 'ether'));   // Wei Amount
-        investment0[3].should.be.bignumber.equal(10);                       // Token Amount
+        investment0[3].should.be.bignumber.equal(9.49933 * 1e18 * 1e6);                       // Token Amount
         assert.isTrue(investment0[4]);                                      // Confirmed
         assert.isTrue(investment0[5]);                                      // AttemptedSettlement
         assert.isTrue(investment0[6]);                                      // CompletedSettlement
@@ -992,7 +1005,17 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(investment6[5]);                                     // AttemptedSettlement
         assert.isFalse(investment6[6]);                                     // CompletedSettlement
 
+        let tokensMinted = await icoCrowdsaleInstance.tokensMinted();
+        let tokensToMint = await icoCrowdsaleInstance.tokensToMint();
+        log.info('Tokens to mint: ' + tokensToMint.toNumber());
+        log.info('Tokens minted: ' + tokensMinted.toNumber());
+
         await icoCrowdsaleInstance.batchSettleInvestments([1, 2, 3, 4]);
+
+        tokensMinted = await icoCrowdsaleInstance.tokensMinted();
+        tokensToMint = await icoCrowdsaleInstance.tokensToMint();
+        log.info('Tokens to mint: ' + tokensToMint.toNumber());
+        log.info('Tokens minted: ' + tokensMinted.toNumber());
 
         const investmentAfter0   = await icoCrowdsaleInstance.investments(0);
         const investmentAfter1   = await icoCrowdsaleInstance.investments(1);
@@ -1004,7 +1027,7 @@ contract('IcoCrowdsale', (accounts) => {
 
         // is presale
         investmentAfter0[2].should.be.bignumber.equal(web3.toWei(0, 'ether'));  // Wei Amount
-        investmentAfter0[3].should.be.bignumber.equal(10);                      // Token Amount
+        investmentAfter0[3].should.be.bignumber.equal(9.49933 * 1e18 * 1e6);                      // Token Amount
         assert.isTrue(investmentAfter0[4]);                                     // Confirmed
         assert.isTrue(investmentAfter0[5]);                                     // AttemptedSettlement
         assert.isTrue(investmentAfter0[6]);                                     // CompletedSettlement
@@ -1064,7 +1087,17 @@ contract('IcoCrowdsale', (accounts) => {
         const etherInvestorBefore     = await web3.eth.getBalance(activeInvestor2);
         const tokenInvestor3Before    = await icoTokenInstance.balanceOf(activeInvestor2);
 
+        let tokensMinted = await icoCrowdsaleInstance.tokensMinted();
+        let tokensToMint = await icoCrowdsaleInstance.tokensToMint();
+        log.info('Tokens to mint: ' + tokensToMint.toNumber());
+        log.info('Tokens minted: ' + tokensMinted.toNumber());
+
         await icoCrowdsaleInstance.settleInvestment(5, {from: inactiveInvestor1, gas: 1000000});
+
+        tokensMinted = await icoCrowdsaleInstance.tokensMinted();
+        tokensToMint = await icoCrowdsaleInstance.tokensToMint();
+        log.info('Tokens to mint: ' + tokensToMint.toNumber());
+        log.info('Tokens minted: ' + tokensMinted.toNumber());
 
         const etherContractAfter      = await web3.eth.getBalance(icoCrowdsaleInstance.address);
         const etherWalletAfter        = await web3.eth.getBalance(wallet);
@@ -1078,6 +1111,39 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should call finalize successfully', async () => {
+        const tokensMinted = await icoCrowdsaleInstance.tokensMinted();
+        const tokensPurchased = await icoCrowdsaleInstance.totalTokensPurchased();
+        const tokensToMint = await icoCrowdsaleInstance.tokensToMint();
+        log.info('Tokens to mint: ' + tokensToMint.toNumber());
+        log.info('Tokens minted: ' + tokensMinted.toNumber());
+        log.info('Tokens purchased: ' + tokensPurchased.toNumber());
+
+        const ownerBalance = await icoTokenInstance.balanceOf(owner);
+        const activeManagerBalance = await icoTokenInstance.balanceOf(activeManager);
+        const inactiveManagerBalance = await icoTokenInstance.balanceOf(inactiveManager);
+        const activeInvestor1Balance = await icoTokenInstance.balanceOf(activeInvestor1);
+        const activeInvestor2Balance = await icoTokenInstance.balanceOf(activeInvestor2);
+        const inactiveInvestor1Balance = await icoTokenInstance.balanceOf(inactiveInvestor1);
+        const walletBalance = await icoTokenInstance.balanceOf(wallet);
+        const teamWalletBalance = await icoTokenInstance.balanceOf(teamWallet);
+        const companyWalletBalance = await icoTokenInstance.balanceOf(companyWallet);
+        const underwriterBalance = await icoTokenInstance.balanceOf(underwriter);
+
+        log.info('Balance of ownerBalance:' + ownerBalance.toNumber());
+        log.info('Balance of activeManagerBalance:' + activeManagerBalance.toNumber());
+        log.info('Balance of inactiveManagerBalance:' + inactiveManagerBalance.toNumber());
+        log.info('Balance of activeInvestor1Balance:' + activeInvestor1Balance.toNumber());
+        log.info('Balance of activeInvestor2Balance:' + activeInvestor2Balance.toNumber());
+        log.info('Balance of inactiveInvestor1Balance:' + inactiveInvestor1Balance.toNumber());
+        log.info('Balance of walletBalance:' + walletBalance.toNumber());
+        log.info('Balance of teamWalletBalance:' + teamWalletBalance.toNumber());
+        log.info('Balance of companyWallet:' + companyWalletBalance.toNumber());
+        log.info('Balance of underwriter:' + underwriterBalance.toNumber());
+
+        log.info(inactiveManagerBalance.toNumber() + activeInvestor1Balance.toNumber() + activeInvestor2Balance.toNumber() + inactiveInvestor1Balance.toNumber());
+        log.info(underwriterBalance.toNumber() + companyWalletBalance.toNumber() +
+                 teamWalletBalance.toNumber() + walletBalance.toNumber() + ownerBalance.toNumber() + activeManagerBalance.toNumber());
+
         await icoCrowdsaleInstance.token();
 
         let paused = await icoTokenInstance.paused();
