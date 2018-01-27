@@ -1144,24 +1144,36 @@ contract('IcoCrowdsale', (accounts) => {
         log.info(underwriterBalance.toNumber() + companyWalletBalance.toNumber() +
                  teamWalletBalance.toNumber() + walletBalance.toNumber() + ownerBalance.toNumber() + activeManagerBalance.toNumber());
 
-        await icoCrowdsaleInstance.token();
-
         let paused = await icoTokenInstance.paused();
-        await icoTokenInstance.owner();
         const isTreasurerBefore = await icoTokenInstance.isTreasurer(icoCrowdsaleInstance.address);
-
         assert.isTrue(isTreasurerBefore);
         assert.isTrue(paused);
 
         await icoCrowdsaleInstance.finalize({from: underwriter, gas: 1000000});
 
+        const ownerNow = await icoTokenInstance.owner();
+        assert.equal(ownerNow, owner);
+
         paused = await icoTokenInstance.paused();
         assert.isFalse(paused);
 
         const isTreasurerAfter = await icoTokenInstance.isTreasurer(icoCrowdsaleInstance.address);
-        await icoTokenInstance.owner();
-
         assert.isFalse(isTreasurerAfter);
+    });
+
+    it('should transfer ownership to activeInvestor1 and back to owner', async () => {
+        const ownerBefore = await icoTokenInstance.owner();
+        assert.equal(ownerBefore, owner);
+
+        await icoTokenInstance.transferOwnership(activeInvestor1, {from: owner});
+
+        let ownerAfter = await icoTokenInstance.owner();
+        assert.equal(ownerAfter, activeInvestor1);
+
+        await icoTokenInstance.transferOwnership(owner, {from: activeInvestor1});
+
+        ownerAfter = await icoTokenInstance.owner();
+        assert.equal(ownerAfter, owner);
     });
 
     it('should not mint more tokens after finalize()', async () => {

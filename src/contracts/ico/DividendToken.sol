@@ -28,8 +28,6 @@ contract DividendToken is StandardToken, Ownable {
 
     uint256 public lastDividendIncreaseDate;
 
-    address public owner;
-
     // allow payment of dividend only by special treasury account (treasury can be set and altered by owner,
     // multiple treasurer accounts are possible
     mapping(address => bool) public isTreasurer;
@@ -46,10 +44,8 @@ contract DividendToken is StandardToken, Ownable {
 
     /**
      * @dev Deploy the DividendToken contract and set the owner of the contract
-     * @param _owner address owner / beneficiary of the DividendToken
      */
-    function DividendToken(address _owner) public {
-        owner = _owner;
+    function DividendToken() public {
         isTreasurer[owner] = true;
     }
 
