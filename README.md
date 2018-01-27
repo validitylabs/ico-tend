@@ -139,9 +139,9 @@ Connect to your rinkeby Geth console and unlock the account for deployment.
 
 Change the deployer (`from`), `wallet` and `underwriter` accounts in ico.cnf.json:
 ```
-"from":         "0x0fadbcc6baf38842493ea527759ce7ce1644d0cc",
-"wallet":       "0x0E8FF89069012133ea67c5a1bAC2Ff426EE28391",
-"underwriter":  "0x2018FF438C45d5a2bBF0Ef511eACF0345eC1E1D1",
+"from":         "0x461fcadb2530d10f7b7d4931a7c7864f755aa675",
+"wallet":       "0x4e6fF5fCe21DCF91ad966DDC3aE9D8A1843Ce42A",
+"underwriter":  "0xF49aC64dbFfD7AE4342ca7A0C5DBbcb95f7513e7",
 ```
 `from` has to be the address that is used for deployment (`web3.eth.accounts[0]`), `wallet` and `underwriter` can be some other addresses (e.g. from MetaMask).
 
