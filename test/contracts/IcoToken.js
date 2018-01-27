@@ -429,4 +429,16 @@ contract('IcoToken', (accounts) => {
         const newTokenBalance = await web3.eth.getBalance(icoTokenInstance.address);
         newTokenBalance.should.be.bignumber.equal(payIn);
     });
+    it('should transfer ownership to tokenHolder1', async () => {
+        const ownerBefore = await icoTokenInstance.owner();
+        assert.equal(ownerBefore, accounts[0]);
+
+        await icoTokenInstance.transferOwnership(accounts[1], { from: accounts[0] });
+        const ownerAfter = await icoTokenInstance.owner();    
+        assert.equal(ownerAfter, accounts[1]);
+
+        await icoTokenInstance.transferOwnership(accounts[2], { from: accounts[1] });
+        const ownerAfter2 = await icoTokenInstance.owner();    
+        assert.equal(ownerAfter2, accounts[2]);
+    });
 });
