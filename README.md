@@ -107,21 +107,9 @@ __The coverage test will automatically start it's own TestRPC server for you!__
 For the Rinkeby deployment, you need a Geth installation on your machine.
 Follow the [installation instructions](https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum) for your OS.
 
-Rinkeby location for IcoCrowdsale:
-```
-https://rinkeby.etherscan.io/address/0x6111c7abe39a9001bf23211b326cbd931821d12f
-```
-
-Rinkeby test addresses:
-```
-"from":         "0x0fadbcc6baf38842493ea527759ce7ce1644d0cc",
-"wallet":       "0x0E8FF89069012133ea67c5a1bAC2Ff426EE28391",
-"underwriter":  "0x2018FF438C45d5a2bBF0Ef511eACF0345eC1E1D1",
-```
-
 Start local Rinkeby test node:
 ```
-geth --syncmode "fast" --rinkeby --rpc --rpcapi "eth,net,web3,personal" --rpccorsdomain '*' --rpcaddr "0.0.0.0"
+geth --syncmode "fast" --rinkeby --rpc --rpcapi "eth,net,web3,personal"
 ```
 
 Connect to local Geth console:
@@ -132,11 +120,32 @@ geth attach ipc://<PATH>/<TO>/Library/Ethereum/rinkeby/geth.ipc
 # geth attach ipc://Users/patrice/Library/Ethereum/rinkeby/geth.ipc
 ```
 
+Upon setup the node does not contain any private keys and associated accounts. Create an account in the web3 Geth console:
+```
+web3.personal.newAccount()
+```
+Press [Enter] twice to skip the password (or set one but then later it has to be provided for unlocking the account).
+
+Read the address and send some Rinkeby Ether to pay for deployment and management transaction fees:
+```
+web3.eth.accounts
+```
+(You can obtain Rinkeby testnet Ether from the faucet by pasting your address in social media and pasting the link: https://www.rinkeby.io/#faucet)
+
 Connect to your rinkeby Geth console and unlock the account for deployment.
 ```
-> personal.unlockAccount('0x0fadbcc6baf38842493ea527759ce7ce1644d0cc', "", 2700)
+> personal.unlockAccount(web3.eth.accounts[0], "", 2700)
 ```
-After exiting the console by `<STRG> + <D>`, simply run `yarn migrate-ropsten`.
+
+Change the deployer (`from`), `wallet` and `underwriter` accounts in ico.cnf.json:
+```
+"from":         "0x0fadbcc6baf38842493ea527759ce7ce1644d0cc",
+"wallet":       "0x0E8FF89069012133ea67c5a1bAC2Ff426EE28391",
+"underwriter":  "0x2018FF438C45d5a2bBF0Ef511eACF0345eC1E1D1",
+```
+`from` has to be the address that is used for deployment (`web3.eth.accounts[0]`), `wallet` and `underwriter` can be some other addresses (e.g. from MetaMask).
+
+After exiting the console by `<STRG> + <D>`, simply run `yarn migrate-rinkeby`.
 This may take several minutes to finish.
 
 ## Mainnet deployment
