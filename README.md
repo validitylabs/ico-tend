@@ -139,5 +139,10 @@ Connect to your rinkeby Geth console and unlock the account for deployment.
 After exiting the console by `<STRG> + <D>`, simply run `yarn migrate-ropsten`.
 This may take several minutes to finish.
 
+https://rinkeby.etherscan.io/address/0xf2863aad4ac99048c556aa5f4698a67c9f915a7f
+
 ## Mainnet deployment
-@TODO: document this
+@TODO: document this:
+- update ico.cnf.json with latest startTime, endTime, cap, confirmation period, rateChfPerEth
+- unlock account
+- truffle migrate-mainnet
