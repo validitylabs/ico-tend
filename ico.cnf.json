@@ -3,10 +3,10 @@
     "startTimeTesting":             1518678000,
     "comment endTimeTesting":       "Sunday, February 25, 2018 3:00:00 AM",
     "endTimeTesting":               1519527600,
-    "comment startTime":            "2018-01-28T00:20:00Z",
-    "startTime":                    1517098800,
-    "comment endTime":              "2018-01-28T00:25:00Z",
-    "endTime":                      1517099100,
+    "comment startTime":            "2018-02-01T16:00:00+01:00",
+    "startTime":                    1517497200,
+    "comment endTime":              "2018-02-01T16:15:00+01:00",
+    "endTime":                      1517498100,
     "comment cap":                  "Will be calculated to 95000000 * 10**18 in migration script",
     "cap":                          13000000,
     "comment confirmationPeriod":   "confirmation period in days",
@@ -15,10 +15,11 @@
     "rateChfPerEth":                1200,
     "network": {
         "rinkeby": {
-            "from":         "0x461fcadb2530d10f7b7d4931a7c7864f755aa675",
+            "from":         "0x0fadbcc6baf38842493ea527759ce7ce1644d0cc",
             "wallet":       "0x4e6fF5fCe21DCF91ad966DDC3aE9D8A1843Ce42A",
             "underwriter":  "0xF49aC64dbFfD7AE4342ca7A0C5DBbcb95f7513e7",
             "host":         "127.0.0.1",
+            "port":         8545,
             "gas":          "0x632ea0",
             "gasPrice":     "0x174876e800"
         },
@@ -27,8 +28,9 @@
             "wallet":       "",
             "underwriter":  "",
             "host":         "127.0.0.1",
+            "port":         8545,
             "gas":          "0x632ea0",
-            "gasPrice":     "0x174876e800"
+            "gasPrice":     "0x4a817c800"
         }
     }
 }

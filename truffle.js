@@ -43,7 +43,7 @@ module.exports = {
             host:       cnf.network.rinkeby.host,
             from:       cnf.network.rinkeby.from,
             network_id: 4, // eslint-disable-line
-            port:       8545,
+            port:       cnf.network.rinkeby.port,
             gasPrice:   cnf.network.rinkeby.gasPrice,
             gas:        cnf.network.rinkeby.gas
         },
@@ -51,7 +51,7 @@ module.exports = {
             host:       cnf.network.mainnet.host,
             from:       cnf.network.mainnet.from,
             network_id: 1, // eslint-disable-line
-            port:       8545,
+            port:       cnf.network.mainnet.port,
             gasPrice:   cnf.network.mainnet.gasPrice,
             gas:        cnf.network.mainnet.gas
         }

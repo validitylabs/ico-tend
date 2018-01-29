@@ -18,8 +18,9 @@ module.exports = function (deployer, network, accounts) { // eslint-disable-line
         endTime     = cnf.endTime;
 
         deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter, {
-            from:   cnf.network.rinkeby.from,
-            gas:    cnf.network.rinkeby.gas
+            from:       cnf.network.rinkeby.from,
+            gas:        cnf.network.rinkeby.gas,
+            gasPrice:   cnf.network.rinkeby.gasPrice
         });
     } else if (process.env.NODE_ENV === 'mainnet') {
         wallet      = cnf.network.mainnet.wallet;
@@ -28,8 +29,9 @@ module.exports = function (deployer, network, accounts) { // eslint-disable-line
         endTime     = cnf.endTime;
 
         deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter, {
-            from:   cnf.network.mainnet.from,
-            gas:    cnf.network.mainnet.gas
+            from:       cnf.network.mainnet.from,
+            gas:        cnf.network.mainnet.gas,
+            gasPrice:   cnf.network.mainnet.gasPrice
         });
     } else {
         wallet      = accounts[6];
