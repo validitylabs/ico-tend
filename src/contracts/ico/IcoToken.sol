@@ -9,7 +9,7 @@ import "../../../node_modules/zeppelin-solidity/contracts/token/ERC20/MintableTo
 import "../../../node_modules/zeppelin-solidity/contracts/token/ERC20/PausableToken.sol";
 import "./DividendToken.sol";
 
-contract IcoToken is DividendToken, MintableToken, PausableToken {
+contract IcoToken is MintableToken, PausableToken, DividendToken {
     string public constant name = "Tend Token";
     string public constant symbol = "TND";
     uint8 public constant decimals = 18;
@@ -17,7 +17,7 @@ contract IcoToken is DividendToken, MintableToken, PausableToken {
     /**
      * @dev Constructor of IcoToken that instantiate a new DividendToken
      */
-    function IcoToken() public DividendToken(msg.sender) {
+    function IcoToken() public DividendToken() {
         // token should not be transferrable until after all tokens have been issued
         paused = true;
     }
