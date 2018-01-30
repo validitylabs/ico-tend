@@ -30,7 +30,7 @@ async function deploy() {
     const rateChfPerEth         = cnf.rateChfPerEth;
     const confirmationPeriod    = cnf.confirmationPeriod;
 
-    log.info(`[ Deploying on ${network} ]`);
+    log.info(`[ ${network} ]`);
 
     from        = cnf.network[network].from;
     wallet      = cnf.network[network].wallet;
@@ -63,29 +63,14 @@ async function deploy() {
         gas:        cnf.network[network].gas,
         gasPrice:   cnf.network[network].gasPrice,
         from: from
-    }).on('error', (error) => {
-        log.error('Error occured:');
-        log.error(error);
-    }).on('transactionHash', (transactionHash) => {
-        log.info(`Your contract is being deployed in transaction at http://${subEsDom}etherscan.io/tx/${transactionHash}`);
-    }).then((newContractInstance) => {
-        log.info(`Smart contract address on Etherscan is https://${subEsDom}etherscan.io/address/${newContractInstance.options.address}`);
     }).catch((error) => {
         log.error('Exception thrown:');
         log.error(error);
     });
 
-    // Debug:
-    // icoCrowdsaleInstance.on('receipt', (receipt) => {
-    //     log.info('Contract receipt (contains the new contract address)');
-    //     log.info(receipt.contractAddress);
-    // }).on('confirmation', (confirmationNumber, receipt) => {
-    //     log.info(`confirmationNumber: ${confirmationNumber}`);
-    //     log.info('receipt:');
-    //     log.info(receipt);
-    // });
-
     icoCrowdsaleContract.options.address = icoCrowdsaleInstance.options.address;
+    log.info(`Finished deployment on ${subEsDom} :)`);
+    log.info(`IcoCrowdsale: https://${subEsDom}etherscan.io/address/${icoCrowdsaleContract.options.address}`);
 }
 
 /**
