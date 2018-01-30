@@ -5,8 +5,7 @@
 require('babel-register');
 require('babel-polyfill');
 
-const cnf   = require('./ico.cnf.json');
-const path  = require('path');
+const path = require('path');
 
 const basePath          = process.cwd();
 const buildDir          = path.join(basePath, 'build');
