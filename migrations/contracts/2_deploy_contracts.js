@@ -5,39 +5,18 @@ const cnf           = require('../../ico.cnf.json');
 const IcoToken      = artifacts.require('./ico/IcoToken.sol');
 const IcoCrowdsale  = artifacts.require('./ico/IcoCrowdsale.sol');
 
-module.exports = function (deployer, network, accounts) { // eslint-disable-line
-    let wallet      = null;
-    let underwriter = null;
-    let startTime   = null;
-    let endTime     = null;
-
-    if (process.env.NODE_ENV === 'rinkeby') {
-        wallet      = cnf.network.rinkeby.wallet;
-        underwriter = cnf.network.rinkeby.underwriter;
-        startTime   = cnf.startTime;
-        endTime     = cnf.endTime;
-
-        deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter, {
-            from:   cnf.network.rinkeby.from,
-            gas:    cnf.network.rinkeby.gas
-        });
-    } else if (process.env.NODE_ENV === 'mainnet') {
-        wallet      = cnf.network.mainnet.wallet;
-        underwriter = cnf.network.mainnet.underwriter;
-        startTime   = cnf.startTime;
-        endTime     = cnf.endTime;
-
-        deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter, {
-            from:   cnf.network.mainnet.from,
-            gas:    cnf.network.mainnet.gas
-        });
-    } else {
-        wallet      = accounts[6];
-        underwriter = accounts[9];
-        startTime   = cnf.startTimeTesting;
-        endTime     = cnf.endTimeTesting;
-
-        deployer.deploy(IcoToken);
-        deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter);
+module.exports = function (deployer, network, accounts) {
+    if (network === 'rinkeby' || network === 'mainnet') {
+        console.log('Truffle migration is for local dev environment only!');
+        console.log('For TestNet / MeinNet deployment, please use the provided NPM run scripts');
+        process.exit(1);
     }
+
+    const wallet      = accounts[6];
+    const underwriter = accounts[9];
+    const startTime   = cnf.startTimeTesting;
+    const endTime     = cnf.endTimeTesting;
+
+    deployer.deploy(IcoToken);
+    deployer.deploy(IcoCrowdsale, startTime, endTime, cnf.rateChfPerEth, wallet, cnf.confirmationPeriod, underwriter);
 };

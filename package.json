@@ -10,20 +10,16 @@
     "node": "^8.x"
   },
   "scripts": {
-    "start": "yarn develop",
-    "coverage": "shx rm -fr build; solidity-coverage",
-    "compile": "truffle compile --all",
+    "start": "yarn dev",
     "dev": "truffle develop",
-    "migrate-rinkeby": "shx rm -fr build; cross-env NODE_ENV=rinkeby truffle migrate --reset --compile-all --network rinkeby",
-    "migrate-mainnet": "shx rm -fr build; cross-env NODE_ENV=mainnet truffle migrate --reset --compile-all --network mainnet",
+    "coverage": "shx rm -fr build; solidity-coverage",
+    "bundle": "shx rm -fr build; shx mkdir build; shx mkdir build/bundle; solcpiler --config-file .solcpiler.json",
+    "migrate-rinkeby": "yarn bundle; cross-env NODE_ENV=rinkeby babel-node ./tools/deploy.js",
+    "migrate-mainnet": "yarn bundle; cross-env NODE_ENV=mainnet babel-node ./tools/deploy.js",
     "clean": "shx rm -fr dist build bin coverage coverage.json",
-    "reset": "npm run clean; shx rm -fr node_modules",
-    "upgrade": "yarn run reset; yarn upgrade",
-    "postinstall": "node ./tools/hashChecker.js",
-    "test": "truffle test --network _development",
-    "migrate": "yarn migrate-dev",
-    "migrate-dev": "truffle migrate --reset --compile-all --network _development",
-    "testrpc": "truffle develop --log --gasLimit 0x44aa20 --mnemonic 'waste system voyage dentist fine donate purpose truly cactus chest coyote globe'"
+    "reset": "yarn clean; shx rm -fr node_modules",
+    "upgrade": "yarn reset; yarn upgrade",
+    "postinstall": "node ./tools/hashChecker.js"
   },
   "dependencies": {
     "chalk": "^2.3.0",
@@ -53,6 +49,7 @@
     "shelljs": "^0.7.8",
     "shx": "^0.2.2",
     "solc": "0.4.18",
+    "solcpiler": "^0.0.11",
     "solidity-coverage": "git://github.com/validitylabs/solidity-coverage.git",
     "superagent": "^3.8.1",
     "tree-kill": "^1.2.0",

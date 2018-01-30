@@ -15,18 +15,22 @@
     "rateChfPerEth":                1042,
     "network": {
         "rinkeby": {
-            "from":         "0x461fcadb2530d10f7b7d4931a7c7864f755aa675",
+            "from":         "0x0fadbcc6baf38842493ea527759ce7ce1644d0cc",
             "wallet":       "0x4e6fF5fCe21DCF91ad966DDC3aE9D8A1843Ce42A",
             "underwriter":  "0xF49aC64dbFfD7AE4342ca7A0C5DBbcb95f7513e7",
             "host":         "127.0.0.1",
-            "gas":          "0x632ea0"
+            "port":         8545,
+            "gas":          6500000,
+            "gasPrice":     100000000000
         },
         "mainnet": {
             "from":         "0x01588185c045848d927d572041aac9a64b1cb8e4",
             "wallet":       "0xafEaEAEAFc742E884159f98aD837A60073372633",
             "underwriter":  "0x01D0b0c6A8F9a24591C0300Eb13463bCA40b2De8",
             "host":         "127.0.0.1",
-            "gas":          "0x632ea0"
+            "port":         8545,
+            "gas":          6500000,
+            "gasPrice":     20000000000
         }
     }
 }
