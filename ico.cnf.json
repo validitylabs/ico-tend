@@ -20,17 +20,17 @@
             "underwriter":  "0xF49aC64dbFfD7AE4342ca7A0C5DBbcb95f7513e7",
             "host":         "127.0.0.1",
             "port":         8545,
-            "gas":          "0x632ea0",
-            "gasPrice":     "0x174876e800"
+            "gas":          6500000,
+            "gasPrice":     100000000000
         },
         "mainnet": {
-            "from":         "0x01588185c045848d927d572041aac9a64b1cb8e4",
-            "wallet":       "",
-            "underwriter":  "",
+            "from":         "<REAL_ADDRESS_HERE> 0x01588185c045848d927d572041aac9a64b1cb8e4",
+            "wallet":       "<REAL_ADDRESS_HERE>",
+            "underwriter":  "<REAL_ADDRESS_HERE>",
             "host":         "127.0.0.1",
-            "port":         8545,
-            "gas":          "0x632ea0",
-            "gasPrice":     "0x4a817c800"
+            "port":         8546,
+            "gas":          6500000,
+            "gasPrice":     20000000000
         }
     }
 }
