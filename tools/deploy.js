@@ -15,28 +15,21 @@ import * as icoCrowdsaleModule from '../build/bundle/IcoCrowdsale.sol.js';
  * @returns {void}
  */
 async function deploy() {
-    const network   = process.env.NODE_ENV;
-    const subEsDom  = network === 'rinkeby' ? 'rinkeby.' : '';
-    const provider  = `http://${cnf.network[network].host}:${cnf.network[network].port}`;
-    const web3      = new Web3(new Web3.providers.HttpProvider(provider));
-    const abi       = icoCrowdsaleModule.IcoCrowdsaleAbi;
-    const bin       = icoCrowdsaleModule.IcoCrowdsaleByteCode;
-    let from        = null;
-    let wallet      = null;
-    let underwriter = null;
-    let startTime   = null;
-    let endTime     = null;
-
+    const network               = process.env.NODE_ENV;
+    const subEsDom              = network === 'rinkeby' ? 'rinkeby.' : '';
+    const provider              = `http://${cnf.network[network].host}:${cnf.network[network].port}`;
+    const web3                  = new Web3(new Web3.providers.HttpProvider(provider));
+    const abi                   = icoCrowdsaleModule.IcoCrowdsaleAbi;
+    const bin                   = icoCrowdsaleModule.IcoCrowdsaleByteCode;
+    const from                  = cnf.network[network].from;
+    const wallet                = cnf.network[network].wallet;
+    const underwriter           = cnf.network[network].underwriter;
+    const startTime             = cnf.startTime;
+    const endTime               = cnf.endTime;
     const rateChfPerEth         = cnf.rateChfPerEth;
     const confirmationPeriod    = cnf.confirmationPeriod;
 
     log.info(`[ ${network} ]`);
-
-    from        = cnf.network[network].from;
-    wallet      = cnf.network[network].wallet;
-    underwriter = cnf.network[network].underwriter;
-    startTime   = cnf.startTime;
-    endTime     = cnf.endTime;
 
     const icoCrowdsaleContract  = new web3.eth.Contract(
         abi,
