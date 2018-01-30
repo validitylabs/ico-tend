@@ -24,7 +24,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
     uint256 public constant ICO_TOKEN_CAP = 9.5e6 * 1e18;        // 9.5 million  * 1e18
 
     uint256 public constant CHF_CENT_PER_TOKEN = 1000;          // standard CHF per token rate - in cents - 10 CHF => 1000 CHF cents
-    uint256 public constant MIN_CONTRIBUTION_CHF = 500;
+    uint256 public constant MIN_CONTRIBUTION_CHF = 250;
 
     uint256 public constant VESTING_CLIFF = 1 years;
     uint256 public constant VESTING_DURATION = 3 years;
@@ -271,23 +271,33 @@ contract IcoCrowdsale is Crowdsale, Ownable {
         ChangedInvestmentConfirmation(_investmentId, investments[_investmentId].investor, false);
     }
 
+   /**
+    * @dev allows contract owner to mint tokens for presale or non-ETH contributions in batches
+     * @param _toList address[] array of the beneficiaries to receive tokens
+     * @param _tokenList uint256[] array of the token amounts to mint for the corresponding users
+    */
+    function batchMintTokenDirect(address[] _toList, uint256[] _tokenList) public onlyOwner {
+        require(_toList.length == _tokenList.length);
+
+        for (uint256 i; i < _toList.length; i = i.add(1)) {
+            mintTokenDirect(_toList[i], _tokenList[i]);
+        }
+    }
+
     /**
-     * @dev allows contract owner to mint team tokens per ICO_TOKEN_CAP and transfer to the team wallet
-     * @param _beneficiary address address of the beneficiary to receive tokens
-     * @param _tokens uint256 uint256 of the token amount to mint
+     * @dev allows contract owner to mint tokens for presale or non-ETH contributions
+     * @param _to address of the beneficiary to receive tokens
+     * @param _tokens uint256 of the token amount to mint
      */
-    function mintTokenPreSale(address _beneficiary, uint256 _tokens) public onlyOwner {
-        // during pre-sale we can issue tokens for fiat or other contributions
-        // pre-sale ends with start of public sales round (accepting Ether)
-        require(now < startTime);
+    function mintTokenDirect(address _to, uint256 _tokens) public onlyOwner {
         require(tokensToMint.add(_tokens) <= ICO_TOKEN_CAP);
 
         tokensToMint = tokensToMint.add(_tokens);
 
         // register payment so that later on it can be confirmed (and tokens issued and Ether paid out)
-        Payment memory newPayment = Payment(address(0), _beneficiary, 0, _tokens, false, false, false);
+        Payment memory newPayment = Payment(address(0), _to, 0, _tokens, false, false, false);
         investments.push(newPayment);
-        TokenPurchase(msg.sender, _beneficiary, 0, _tokens);
+        TokenPurchase(msg.sender, _to, 0, _tokens);
     }
 
     /**
@@ -444,7 +454,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
      * @dev extend base functionality with min investment amount
      */
     function validPurchase() internal view returns (bool) {
-        // minimal investment: 500 CHF (represented in wei)
+        // minimal investment: 250 CHF (represented in wei)
         require (msg.value >= minContributionInWei);
         return super.validPurchase();
     }
