@@ -170,6 +170,9 @@ geth attach ipc://<PATH>/<TO>/Library/Ethereum/geth.ipc
 # geth attach ipc://Users/patrice/Library/Ethereum/geth.ipc
 ```
 
+While syncing the blockchain, you can monitor the progress by typing `web3.eth.syncing`.
+This shows you the highest available block and the current block you are on.
+
 Upon setup the node does not contain any private keys and associated accounts. Create an account in the web3 Geth console.
 ```
 web3.personal.newAccount()
