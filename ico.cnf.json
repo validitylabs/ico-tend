@@ -28,7 +28,7 @@
             "wallet":       "<REAL_ADDRESS_HERE>",
             "underwriter":  "<REAL_ADDRESS_HERE>",
             "host":         "127.0.0.1",
-            "port":         8546,
+            "port":         8545,
             "gas":          6500000,
             "gasPrice":     20000000000
         }
