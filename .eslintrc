@@ -23,6 +23,7 @@
     "no-undef": 0,
     "no-case-declarations": 0,
     "no-constant-condition": 0,
+    "object-shorthand": 0,
     "valid-jsdoc": 2,
     "indent": ["error", 4, {"SwitchCase": 1}],
     "arrow-parens": ["error", "always"],
