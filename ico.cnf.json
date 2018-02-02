@@ -12,7 +12,7 @@
     "comment confirmationPeriod":   "confirmation period in days",
     "confirmationPeriod":           30,
     "comment rateChfPerEth":        "CHF per ETH ratio",
-    "rateChfPerEth":                1016,
+    "rateChfPerEth":                1020,
     "network": {
         "rinkeby": {
             "from":         "0x0fadbcc6baf38842493ea527759ce7ce1644d0cc",

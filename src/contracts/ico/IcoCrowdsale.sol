@@ -367,36 +367,22 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             uint256 tokens = p.tokenAmount;
 
             // check to see if this purchase sets it over the crowdsale token cap
-            // if so, calculate tokens to mint, then refund the remaining ether investment
-            uint256 tempMintedTokens = tokensMinted.add(tokens);
-            uint256 refundWeiAmount;
-            uint256 investedWeiAmount;
-
-            if (tempMintedTokens > ICO_TOKEN_CAP) {
+            // if so, refund
+            if (tokensMinted.add(tokens) > ICO_TOKEN_CAP) {
                 capReached = true;
-                uint256 overflowTokens = tempMintedTokens.sub(ICO_TOKEN_CAP);
-                tokens = tokens.sub(overflowTokens);
-                refundWeiAmount = overflowTokens.div(tokenPerWei);
-                investedWeiAmount = p.weiAmount.sub(refundWeiAmount);
-            }
-
-            //Checks and balances to make sure tokensMinted == tokensToMint
-            require(tokensMinted.add(tokens) <= ICO_TOKEN_CAP);
-            require(tokensToMint.sub(tokens) >= 0);
-            tokensToMint = tokensToMint.sub(tokens);
-            tokensMinted = tokensMinted.add(tokens);
-
-            // mint tokens for beneficiary
-            token.mint(p.beneficiary, tokens);
-
-            // send Ether to project wallet throws if wallet throws
-            if (capReached && p.weiAmount > 0) {
-                wallet.transfer(investedWeiAmount);
-                if (p.investor.send(refundWeiAmount)) {
-                    // do nothing
+                if (p.weiAmount > 0) {
+                    p.investor.send(p.weiAmount); // does not throw (otherwise we'd block all further settlements)
                 }
-            } else if (p.weiAmount > 0) {
-                wallet.transfer(p.weiAmount);
+            } else {
+                tokensToMint = tokensToMint.sub(tokens);
+                tokensMinted = tokensMinted.add(tokens);
+
+                // mint tokens for beneficiary
+                token.mint(p.beneficiary, tokens);
+                if (p.weiAmount > 0) {
+                    // send Ether to project wallet (throws if wallet throws)
+                    wallet.transfer(p.weiAmount);
+                }
             }
 
             p.completedSettlement = true;
@@ -407,7 +393,6 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             // otherwise we would block settlement process of all following investments)
             if (p.investor != address(0) && p.weiAmount > 0) {
                 if (p.investor.send(p.weiAmount)) {
-                    tokensToMint = tokensToMint.sub(p.tokenAmount);
                     p.completedSettlement = true;
                 }
             }
