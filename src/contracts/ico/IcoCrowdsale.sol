@@ -28,7 +28,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
     uint256 public constant VESTING_CLIFF = 1 years;
     uint256 public constant VESTING_DURATION = 3 years;
-   
+
     // Amount of discounted tokens per discount stage (2 stages total; each being the same amount)
     uint256 public constant DISCOUNT_TOKEN_AMOUNT_T1 = 3e6 * 1e18; // 3 million * 1e18
     uint256 public constant DISCOUNT_TOKEN_AMOUNT_T2 = DISCOUNT_TOKEN_AMOUNT_T1 * 2;
@@ -182,7 +182,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
 
         // tier 1 20% discount - 1st 3 million tokens purchased
         if (!tier1Reached) {
-            
+
             // tx tokens overflowed into next tier 2 - 10% discount - mark tier1Reached! else all tokens are tier 1 discounted
             if (tempTotalTokensPurchased > DISCOUNT_TOKEN_AMOUNT_T1) {
                 tier1Reached = true;
@@ -210,8 +210,8 @@ contract IcoCrowdsale is Crowdsale, Ownable {
                 // tokens overflowed from tier1 else this tx started in tier2
                 if (overflowTokens > 0) {
                     tier2BonusTokens = overflowTokens;
-                } else { 
-                    tier2BonusTokens = purchasedTokens; 
+                } else {
+                    tier2BonusTokens = purchasedTokens;
                 }
             }
             // apply discount for tier 2 tokens
@@ -371,7 +371,7 @@ contract IcoCrowdsale is Crowdsale, Ownable {
             uint256 tempMintedTokens = tokensMinted.add(tokens);
             uint256 refundWeiAmount;
             uint256 investedWeiAmount;
-            
+
             if (tempMintedTokens > ICO_TOKEN_CAP) {
                 capReached = true;
                 uint256 overflowTokens = tempMintedTokens.sub(ICO_TOKEN_CAP);

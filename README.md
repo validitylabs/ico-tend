@@ -103,13 +103,13 @@ yarn run coverage
 ```
 __The coverage test will automatically start it's own TestRPC server for you!__
 
-## Rinkeby deployment
+## Rinkeby testnet deployment
 For the Rinkeby deployment, you need a Geth installation on your machine.
 Follow the [installation instructions](https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum) for your OS.
 
 Start local Rinkeby test node in a separate terminal window and wait for the sync is finished.
 ```
-geth --syncmode "fast" --rinkeby --rpc --rpcapi "eth,net,web3,personal"
+geth --syncmode "fast" --rinkeby --rpc
 ```
 
 Now you can connect to your local Rinkeby Geth console.
@@ -140,26 +140,26 @@ Connect to your rinkeby Geth console and unlock the account for deployment (2700
 Change the `from` (deployer), `wallet` and `underwriter` accounts in ico.cnf.json:
 ```
 "from":         "0x0fadbcc6baf38842493ea527759ce7ce1644d0cc",
-"wallet":       "0x4e6fF5fCe21DCF91ad966DDC3aE9D8A1843Ce42A",
-"underwriter":  "0xF49aC64dbFfD7AE4342ca7A0C5DBbcb95f7513e7",
+"wallet":       "0xCCb50efc315614dF57f2C774391A3410B02F06EF",
+"underwriter":  "0x7BeFB6B4eD33db5D7158988Ee69464d7aA35C0e6",
 ```
 `from` has to be the address that is used for deployment (`web3.eth.accounts[0]`), `wallet` and `underwriter` can be some other addresses (e.g. from MetaMask).
 
 After exiting the console by `<STRG> + <D>`, simply run `yarn migrate-rinkeby`.
 This may take several minutes to finish.
 
-https://rinkeby.etherscan.io/address/0x0fadbcc6baf38842493ea527759ce7ce1644d0cc
+https://rinkeby.etherscan.io/address/<YOUR_RINKEBY_ADDRESS>
 
 ## MainNet deployment
 __This is the production deployment, so please doublecheck all properties in ico.cnf.json!__
-- update ico.cnf.json with latest startTime, endTime, cap, confirmation period, rateChfPerEth
+- update ico.cnf.json with latest startTime, endTime, cap, confirmationPeriod, rateChfPerEth
 
 For the MainNet deployment, you need a Geth installation on your machine.
 Follow the [installation instructions](https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum) for your OS.
 
 Start local MainNet Ethereum node in a separate terminal window and wait for the sync is finished.
 ```
-geth --syncmode "fast" --rpc --rpcapi "eth,net,web3,personal"
+geth --syncmode "fast" --rpc
 ```
 
 Now you can connect to your local MainNet Geth console.
@@ -175,18 +175,18 @@ This shows you the highest available block and the current block you are on.
 
 Upon setup the node does not contain any private keys and associated accounts. Create an account in the web3 Geth console.
 ```
-web3.personal.newAccount()
+web3.personal.newAccount("<YOUR_SECURE_PASSWORD>")
 ```
-Press [Enter] twice to skip the password (or set one but then later it has to be provided for unlocking the account).
+Enter <YOUR_SECURE_PASSWORD> and Press [Enter] to finish the account creation.
 
 Read the address and send some real Ether to pay for deployment and management transaction fees.
 ```
 web3.eth.accounts
 ```
 
-Connect to your MainNet Geth console and unlock the account for deployment (2700 seconds = 45 minutes).
+Connect to your MainNet Geth console and unlock the account for deployment (240 seconds = 4 minutes).
 ```
-> personal.unlockAccount(web3.eth.accounts[0], "", 2700)
+personal.unlockAccount(web3.eth.accounts[0], "<YOUR_SECURE_PASSWORD>", 240)
 ```
 
 Change the `from` (deployer), `wallet` and `underwriter` accounts in ico.cnf.json:
@@ -203,6 +203,9 @@ This may take several minutes to finish.
 Now, your smart contract can be found on etherscan:
 https://etherscan.io/address/<REAL_ADDRESS_HERE>
 
+### Generate Contructor ABI
+Simply run `yarn abi` and copy the encoded output for usage in contract verification. Please select the suitable network for verification, because verification can be done on testnet as well as on mainnet.
+
 ### Contract Verification
 The final step for the MainNet deployment is the contract verificationSmart contract verification.
 
@@ -217,23 +220,10 @@ Contract Name:          IcoCrowdsale
 Compiler:               v0.4.18+commit.9cf6e910
 Optimization:           YES
 Solidity Contract Code: <Copy & Paste from ./build/bundle/IcoCrowdsale_all.sol>
-Constructor Arguments:  <ABI from sonnguyen.ws>
+Constructor Arguments:  <ABI from abiEncode.js>
 ```
-
-- paste the result from [ABI generator](https://abi.sonnguyen.ws/) into `Constructor Arguments ABI-encoded`
+- paste the result from __contract verification__ into `Constructor Arguments ABI-encoded`
 - Confirm you are not a robot
 - Hit `verify and publish` button
 
 Now your smart contract is verified.
-
-#### Generate Contructor ABI
-Go to this [ABI generator](https://abi.sonnguyen.ws/) and fill in the following properties from ico.cnf.json.
-```
-uint256 <startTime>,
-uint256 <endTime>,
-uint256 <rateChfPerEth>,
-address <wallet>,
-uint256 <confirmationPeriodDays>,
-address <underwriter>
-```
-Hit `generate ABI` and `copy`.

@@ -200,7 +200,7 @@ contract('IcoCrowdsale', (accounts) => {
     // End Blacklist f(x) tests
 
     it('should fail, because we try to mint tokens for presale with a non owner account', async () => {
-        await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1, {from: activeManager, gas: 1000000}));
+        await expectThrow(icoCrowdsaleInstance.mintTokenDirect(activeInvestor1, 1, {from: activeManager, gas: 1000000}));
     });
 
     it('should fail, because we try to mint ICO enabler tokens with non owner account', async () => {
@@ -253,7 +253,7 @@ contract('IcoCrowdsale', (accounts) => {
 
     it('should fail, because we try to mint tokens more as cap limit allows', async () => {
         const big = new BigNumber(95000000 * 1e18);
-        await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, (cnf.cap + big.add(1))));
+        await expectThrow(icoCrowdsaleInstance.mintTokenDirect(activeInvestor1, (cnf.cap + big.add(1))));
     });
 
     it('should fail, because we try to trigger buyTokens in before contribution time is started', async () => {
@@ -316,8 +316,8 @@ contract('IcoCrowdsale', (accounts) => {
         activeInvestor1Balance1.should.be.bignumber.equal(new BigNumber(0));
         activeInvestor2Balance1.should.be.bignumber.equal(new BigNumber(0));
 
-        const tx1 = await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 9.49933 * 1e18 * 1e6);
-        const tx2 = await icoCrowdsaleInstance.mintTokenPreSale(activeInvestor2, 5);
+        const tx1 = await icoCrowdsaleInstance.mintTokenDirect(activeInvestor1, 9.49933 * 1e18 * 1e6);
+        const tx2 = await icoCrowdsaleInstance.mintTokenDirect(activeInvestor2, 5);
 
         const activeInvestor1Balance2 = await icoTokenInstance.balanceOf(activeInvestor1);
         const activeInvestor2Balance2 = await icoTokenInstance.balanceOf(activeInvestor2);
@@ -383,7 +383,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment2[0], activeInvestor2, 'activeInvestor2 does not match purchaser');  // Investor
         assert.equal(investment2[1], activeInvestor1, 'activeInvestor1 does not match beneficiary');// Beneficiary
         investment2[2].should.be.bignumber.equal(web3.toWei(2, 'ether'));   // Wei Amount
-        investment2[3].should.be.bignumber.equal(3 * 1e20);                 // Token Amount
+        investment2[3].should.be.bignumber.equal(2525e17);                  // Token Amount
         assert.isFalse(investment2[4]);                                     // Confirmed
         assert.isFalse(investment2[5]);                                     // AttemptedSettlement
         assert.isFalse(investment2[6]);                                     // CompletedSettlement
@@ -394,7 +394,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events[0].purchaser, activeInvestor2, 'activeInvestor2 does not match purchaser');
         assert.equal(events[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
         events[0].value.should.be.bignumber.equal(web3.toWei(2, 'ether'));
-        events[0].amount.should.be.bignumber.equal(3 * 1e20);
+        events[0].amount.should.be.bignumber.equal(2525e17);
     });
 
     it('should call the fallback function successfully', async () => {
@@ -409,7 +409,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment3[0], activeInvestor1);                      // Investor
         assert.equal(investment3[1], activeInvestor1);                      // Beneficiary
         investment3[2].should.be.bignumber.equal(web3.toWei(3, 'ether'));   // Wei Amount
-        investment3[3].should.be.bignumber.equal(4.5e20);                // Token Amount
+        investment3[3].should.be.bignumber.equal(37875e16);                 // Token Amount
         assert.isFalse(investment3[4]);                                     // Confirmed
         assert.isFalse(investment3[5]);                                     // AttemptedSettlement
         assert.isFalse(investment3[6]);                                     // CompletedSettlement
@@ -421,7 +421,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events1[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
 
         events1[0].value.should.be.bignumber.equal(web3.toWei(3, 'ether'));
-        events1[0].amount.should.be.bignumber.equal(4.5e20);
+        events1[0].amount.should.be.bignumber.equal(37875e16);
 
         const tx2   = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor1,
@@ -434,7 +434,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment4[0], activeInvestor1);                      // Investor
         assert.equal(investment4[1], activeInvestor1);                      // Beneficiary
         investment4[2].should.be.bignumber.equal(web3.toWei(4, 'ether'));   // Wei Amount
-        investment4[3].should.be.bignumber.equal(6e20);                // Token Amoun
+        investment4[3].should.be.bignumber.equal(505e18);                   // Token Amoun
         assert.isFalse(investment4[4]);                                     // Confirmed
         assert.isFalse(investment4[5]);                                     // AttemptedSettlement
         assert.isFalse(investment4[6]);                                     // CompletedSettlement
@@ -446,7 +446,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events2[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
 
         events2[0].value.should.be.bignumber.equal(web3.toWei(4, 'ether'));
-        events2[0].amount.should.be.bignumber.equal(6e20);
+        events2[0].amount.should.be.bignumber.equal(505e18);
 
         const tx3   = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor2,
@@ -459,7 +459,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment5[0], activeInvestor2);                      // Investor
         assert.equal(investment5[1], activeInvestor2);                      // Beneficiary
         investment5[2].should.be.bignumber.equal(web3.toWei(5, 'ether'));   // Wei Amount
-        investment5[3].should.be.bignumber.equal(7.5e20);                 // Token Amount
+        investment5[3].should.be.bignumber.equal(63125e16);                 // Token Amount
         assert.isFalse(investment5[4]);                                     // Confirmed
         assert.isFalse(investment5[5]);                                     // AttemptedSettlement
         assert.isFalse(investment5[6]);                                     // CompletedSettlement
@@ -471,7 +471,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events3[0].beneficiary, activeInvestor2, 'activeInvestor2 does not match beneficiary');
 
         events3[0].value.should.be.bignumber.equal(web3.toWei(5, 'ether'));
-        events3[0].amount.should.be.bignumber.equal(7.5e20);
+        events3[0].amount.should.be.bignumber.equal(63125e16);
 
         const tx4   = await icoCrowdsaleInstance.sendTransaction({
             from:   activeInvestor1,
@@ -484,7 +484,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment6[0], activeInvestor1);                      // Investor
         assert.equal(investment6[1], activeInvestor1);                      // Beneficiary
         investment6[2].should.be.bignumber.equal(web3.toWei(6, 'ether'));   // Wei Amount
-        investment6[3].should.be.bignumber.equal(9e20);                // Token Amount
+        investment6[3].should.be.bignumber.equal(7575e17);                 // Token Amount
         assert.isFalse(investment6[4]);                                     // Confirmed
         assert.isFalse(investment6[5]);                                     // AttemptedSettlement
         assert.isFalse(investment6[6]);                                     // CompletedSettlement
@@ -496,7 +496,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(events4[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
 
         events4[0].value.should.be.bignumber.equal(web3.toWei(6, 'ether'));
-        events4[0].amount.should.be.bignumber.equal(9e20);
+        events4[0].amount.should.be.bignumber.equal(7575e17);
     });
 
     it('should buyTokens (for token contract) properly', async () => {
@@ -512,14 +512,14 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment7[0], activeInvestor2);                      // Investor
         assert.equal(investment7[1], tokenAddress);                         // Beneficiary
         investment7[2].should.be.bignumber.equal(web3.toWei(7, 'ether'));   // Wei Amount
-        investment7[3].should.be.bignumber.equal(1.05e+21);                // Token Amount
+        investment7[3].should.be.bignumber.equal(88375e16);                 // Token Amount
         assert.isFalse(investment7[4]);                                     // Confirmed
         assert.isFalse(investment7[5]);                                     // AttemptedSettlement
         assert.isFalse(investment7[6]);                                     // CompletedSettlement
     });
 
-    it('should fail, because we try to trigger mintTokenPreSale in contribution period', async () => {
-        await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3));
+    it('should fail, because we try to trigger mintTokenDirect in contribution period', async () => {
+        await expectThrow(icoCrowdsaleInstance.mintTokenDirect(activeInvestor1, 3));
     });
 
     it('should fail, because we try to trigger confirmPayment with non manager account', async () => {
@@ -554,11 +554,11 @@ contract('IcoCrowdsale', (accounts) => {
      * [ Confirmation period ]
      */
 
-    it('should fail, because we try to trigger mintTokenPreSale in Confirmation period', async () => {
+    it('should fail, because we try to trigger mintTokenDirect in Confirmation period', async () => {
         console.log('[ Confirmation period ]'.yellow);
         await waitNDays(10);
 
-        await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 3));
+        await expectThrow(icoCrowdsaleInstance.mintTokenDirect(activeInvestor1, 3));
     });
 
     it('should trigger confirmPayment successfully', async () => {
@@ -597,7 +597,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment2[0], activeInvestor2);                      // Investor
         assert.equal(investment2[1], activeInvestor1);                      // Beneficiary
         investment2[2].should.be.bignumber.equal(web3.toWei(2, 'ether'));   // Wei Amount
-        investment2[3].should.be.bignumber.equal(3e20);                  // Token Amount
+        investment2[3].should.be.bignumber.equal(2525e17);                  // Token Amount
         assert.isTrue(investment2[4]);                                      // Confirmed
         assert.isFalse(investment2[5]);                                     // AttemptedSettlement
         assert.isFalse(investment2[6]);                                     // CompletedSettlement
@@ -605,7 +605,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment3[0], activeInvestor1);                      // Investor
         assert.equal(investment3[1], activeInvestor1);                      // Beneficiary
         investment3[2].should.be.bignumber.equal(web3.toWei(3, 'ether'));   // Wei Amount
-        investment3[3].should.be.bignumber.equal(4.5e20);                // Token Amount
+        investment3[3].should.be.bignumber.equal(37875e16);                 // Token Amount
         assert.isFalse(investment3[4]);                                     // Confirmed
         assert.isFalse(investment3[5]);                                     // AttemptedSettlement
         assert.isFalse(investment3[6]);                                     // CompletedSettlement
@@ -613,7 +613,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment4[0], activeInvestor1);                      // Investor
         assert.equal(investment4[1], activeInvestor1);                      // Beneficiary
         investment4[2].should.be.bignumber.equal(web3.toWei(4, 'ether'));   // Wei Amount
-        investment4[3].should.be.bignumber.equal(6e20);                // Token Amount
+        investment4[3].should.be.bignumber.equal(505e18);                   // Token Amount
         assert.isFalse(investment4[4]);                                     // Confirmed
         assert.isFalse(investment4[5]);                                     // AttemptedSettlement
         assert.isFalse(investment4[6]);                                     // CompletedSettlement
@@ -621,7 +621,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment5[0], activeInvestor2);                      // Investor
         assert.equal(investment5[1], activeInvestor2);                      // Beneficiary
         investment5[2].should.be.bignumber.equal(web3.toWei(5, 'ether'));   // Wei Amount
-        investment5[3].should.be.bignumber.equal(7.5e20);                 // Token Amount
+        investment5[3].should.be.bignumber.equal(63125e16);                 // Token Amount
         assert.isFalse(investment5[4]);                                     // Confirmed
         assert.isFalse(investment5[5]);                                     // AttemptedSettlement
         assert.isFalse(investment5[6]);                                     // CompletedSettlement
@@ -629,7 +629,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment6[0], activeInvestor1);                      // Investor
         assert.equal(investment6[1], activeInvestor1);                      // Beneficiary
         investment6[2].should.be.bignumber.equal(web3.toWei(6, 'ether'));   // Wei Amount
-        investment6[3].should.be.bignumber.equal(9e20);                // Token Amount
+        investment6[3].should.be.bignumber.equal(7575e17);                  // Token Amount
         assert.isFalse(investment6[4]);                                     // Confirmed
         assert.isFalse(investment6[5]);                                     // AttemptedSettlement
         assert.isFalse(investment6[6]);                                     // CompletedSettlement
@@ -655,7 +655,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment6[0], activeInvestor1);                      // Investor
         assert.equal(investment6[1], activeInvestor1);                      // Beneficiary
         investment6[2].should.be.bignumber.equal(web3.toWei(6, 'ether'));   // Wei Amount
-        investment6[3].should.be.bignumber.equal(9e20);                // Token Amount
+        investment6[3].should.be.bignumber.equal(7575e17);                // Token Amount
         assert.isFalse(investment6[4]);                                     // Confirmed
         assert.isFalse(investment6[5]);                                     // AttemptedSettlement
         assert.isFalse(investment6[6]);                                     // CompletedSettlement
@@ -725,7 +725,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment2[0], activeInvestor2);                      // Investor
         assert.equal(investment2[1], activeInvestor1);                      // Beneficiary
         investment2[2].should.be.bignumber.equal(web3.toWei(2, 'ether'));   // Wei Amount
-        investment2[3].should.be.bignumber.equal(3e20);                  // Token Amount
+        investment2[3].should.be.bignumber.equal(2525e17);                  // Token Amount
         assert.isTrue(investment2[4]);                                      // Confirmed
         assert.isFalse(investment2[5]);                                     // AttemptedSettlement
         assert.isFalse(investment2[6]);                                     // CompletedSettlement
@@ -733,7 +733,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment3[0], activeInvestor1);                      // Investor
         assert.equal(investment3[1], activeInvestor1);                      // Beneficiary
         investment3[2].should.be.bignumber.equal(web3.toWei(3, 'ether'));   // Wei Amount
-        investment3[3].should.be.bignumber.equal(4.5e20);                // Token Amount
+        investment3[3].should.be.bignumber.equal(37875e16);                 // Token Amount
         assert.isTrue(investment3[4]);                                      // Confirmed
         assert.isFalse(investment3[5]);                                     // AttemptedSettlement
         assert.isFalse(investment3[6]);                                     // CompletedSettlement
@@ -741,7 +741,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment4[0], activeInvestor1);                      // Investor
         assert.equal(investment4[1], activeInvestor1);                      // Beneficiary
         investment4[2].should.be.bignumber.equal(web3.toWei(4, 'ether'));   // Wei Amount
-        investment4[3].should.be.bignumber.equal(6e20);                // Token Amount
+        investment4[3].should.be.bignumber.equal(505e18);                   // Token Amount
         assert.isTrue(investment4[4]);                                      // Confirmed
         assert.isFalse(investment4[5]);                                     // AttemptedSettlement
         assert.isFalse(investment4[6]);                                     // CompletedSettlement
@@ -749,7 +749,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment5[0], activeInvestor2);                      // Investor
         assert.equal(investment5[1], activeInvestor2);                      // Beneficiary
         investment5[2].should.be.bignumber.equal(web3.toWei(5, 'ether'));   // Wei Amount
-        investment5[3].should.be.bignumber.equal(7.5e20);                 // Token Amount
+        investment5[3].should.be.bignumber.equal(63125e16);                 // Token Amount
         assert.isFalse(investment5[4]);                                     // Confirmed
         assert.isFalse(investment5[5]);                                     // AttemptedSettlement
         assert.isFalse(investment5[6]);                                     // CompletedSettlement
@@ -757,7 +757,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment6[0], activeInvestor1);                      // Investor
         assert.equal(investment6[1], activeInvestor1);                      // Beneficiary
         investment6[2].should.be.bignumber.equal(web3.toWei(6, 'ether'));   // Wei Amount
-        investment6[3].should.be.bignumber.equal(9e20);                // Token Amount
+        investment6[3].should.be.bignumber.equal(7575e17);                  // Token Amount
         assert.isFalse(investment6[4]);                                     // Confirmed
         assert.isFalse(investment6[5]);                                     // AttemptedSettlement
         assert.isFalse(investment6[6]);                                     // CompletedSettlement
@@ -802,7 +802,7 @@ contract('IcoCrowdsale', (accounts) => {
     });
 
     it('should fail, because we try to mint tokens for presale after Confirmation period is over', async () => {
-        await expectThrow(icoCrowdsaleInstance.mintTokenPreSale(activeInvestor1, 1));
+        await expectThrow(icoCrowdsaleInstance.mintTokenDirect(activeInvestor1, 1));
     });
 
     it('should fail, because we try to trigger confirmPayment after Confirmation period is over', async () => {
@@ -853,31 +853,31 @@ contract('IcoCrowdsale', (accounts) => {
 
         // is crowdsales
         investment2[2].should.be.bignumber.equal(web3.toWei(2, 'ether'));   // Wei Amount
-        investment2[3].should.be.bignumber.equal(3e20);                  // Token Amount
+        investment2[3].should.be.bignumber.equal(2525e17);                  // Token Amount
         assert.isTrue(investment2[4]);                                      // Confirmed
         assert.isFalse(investment2[5]);                                     // AttemptedSettlement
         assert.isFalse(investment2[6]);                                     // CompletedSettlement
 
         investment3[2].should.be.bignumber.equal(web3.toWei(3, 'ether'));   // Wei Amount
-        investment3[3].should.be.bignumber.equal(4.5e20);                // Token Amount
+        investment3[3].should.be.bignumber.equal(37875e16);                 // Token Amount
         assert.isTrue(investment3[4]);                                      // Confirmed
         assert.isFalse(investment3[5]);                                     // AttemptedSettlement
         assert.isFalse(investment3[6]);                                     // CompletedSettlement
 
         investment4[2].should.be.bignumber.equal(web3.toWei(4, 'ether'));   // Wei Amount
-        investment4[3].should.be.bignumber.equal(6e20);                // Token Amount
+        investment4[3].should.be.bignumber.equal(505e18);                   // Token Amount
         assert.isTrue(investment4[4]);                                      // Confirmed
         assert.isFalse(investment4[5]);                                     // AttemptedSettlement
         assert.isFalse(investment4[6]);                                     // CompletedSettlement
 
         investment5[2].should.be.bignumber.equal(web3.toWei(5, 'ether'));   // Wei Amount
-        investment5[3].should.be.bignumber.equal(7.5e20);                 // Token Amount
+        investment5[3].should.be.bignumber.equal(63125e16);                 // Token Amount
         assert.isFalse(investment5[4]);                                     // Confirmed
         assert.isFalse(investment5[5]);                                     // AttemptedSettlement
         assert.isFalse(investment5[6]);                                     // CompletedSettlement
 
         investment6[2].should.be.bignumber.equal(web3.toWei(6, 'ether'));   // Wei Amount
-        investment6[3].should.be.bignumber.equal(9e20);                // Token Amount
+        investment6[3].should.be.bignumber.equal(7575e17);                  // Token Amount
         assert.isFalse(investment6[4]);                                     // Confirmed
         assert.isFalse(investment6[5]);                                     // AttemptedSettlement
         assert.isFalse(investment6[6]);                                     // CompletedSettlement
@@ -917,31 +917,31 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isFalse(investmentAfter1[6]);                                    // CompletedSettlement
 
         investmentAfter2[2].should.be.bignumber.equal(web3.toWei(2, 'ether'));  // Wei Amount
-        investmentAfter2[3].should.be.bignumber.equal(3e20);                 // Token Amount
+        investmentAfter2[3].should.be.bignumber.equal(2525e17);                 // Token Amount
         assert.isTrue(investmentAfter2[4]);                                     // Confirmed
         assert.isFalse(investmentAfter2[5]);                                    // AttemptedSettlement
         assert.isFalse(investmentAfter2[6]);                                    // CompletedSettlement
 
         investmentAfter3[2].should.be.bignumber.equal(web3.toWei(3, 'ether'));  // Wei Amount
-        investmentAfter3[3].should.be.bignumber.equal(4.5e20);               // Token Amount
+        investmentAfter3[3].should.be.bignumber.equal(37875e16);                // Token Amount
         assert.isTrue(investmentAfter3[4]);                                     // Confirmed
         assert.isFalse(investmentAfter3[5]);                                    // AttemptedSettlement
         assert.isFalse(investmentAfter3[6]);                                    // CompletedSettlement
 
         investmentAfter4[2].should.be.bignumber.equal(web3.toWei(4, 'ether'));  // Wei Amount
-        investmentAfter4[3].should.be.bignumber.equal(6e20);               // Token Amount
+        investmentAfter4[3].should.be.bignumber.equal(505e18);                  // Token Amount
         assert.isTrue(investmentAfter4[4]);                                     // Confirmed
         assert.isFalse(investmentAfter4[5]);                                    // AttemptedSettlement
         assert.isFalse(investmentAfter4[6]);                                    // CompletedSettlement
 
         investmentAfter5[2].should.be.bignumber.equal(web3.toWei(5, 'ether'));  // Wei Amount
-        investmentAfter5[3].should.be.bignumber.equal(7.5e20);                // Token Amount
+        investmentAfter5[3].should.be.bignumber.equal(63125e16);                // Token Amount
         assert.isFalse(investmentAfter5[4]);                                    // Confirmed
         assert.isFalse(investmentAfter5[5]);                                    // AttemptedSettlement
         assert.isFalse(investmentAfter5[6]);                                    // CompletedSettlement
 
         investmentAfter6[2].should.be.bignumber.equal(web3.toWei(6, 'ether'));  // Wei Amount
-        investmentAfter6[3].should.be.bignumber.equal(9e20);               // Token Amount
+        investmentAfter6[3].should.be.bignumber.equal(7575e17);                 // Token Amount
         assert.isFalse(investmentAfter6[4]);                                    // Confirmed
         assert.isFalse(investmentAfter6[5]);                                    // AttemptedSettlement
         assert.isFalse(investmentAfter6[6]);                                    // CompletedSettlement
@@ -951,7 +951,7 @@ contract('IcoCrowdsale', (accounts) => {
         await expectThrow(icoCrowdsaleInstance.settleInvestment(0, {from: activeInvestor2, gas: 1000000}));
     });
 
-    it('should run settleBatchInvestment successfully', async () => {
+    it('should run batchSettleInvestments successfully', async () => {
         const investment0   = await icoCrowdsaleInstance.investments(0);
         const investment1   = await icoCrowdsaleInstance.investments(1);
         const investment2   = await icoCrowdsaleInstance.investments(2);
@@ -976,31 +976,31 @@ contract('IcoCrowdsale', (accounts) => {
 
         // is crowdfundings
         investment2[2].should.be.bignumber.equal(web3.toWei(2, 'ether'));   // Wei Amount
-        investment2[3].should.be.bignumber.equal(3e20);                  // Token Amount
+        investment2[3].should.be.bignumber.equal(2525e17);                  // Token Amount
         assert.isTrue(investment2[4]);                                      // Confirmed
         assert.isFalse(investment2[5]);                                     // AttemptedSettlement
         assert.isFalse(investment2[6]);                                     // CompletedSettlement
 
         investment3[2].should.be.bignumber.equal(web3.toWei(3, 'ether'));   // Wei Amount
-        investment3[3].should.be.bignumber.equal(4.5e20);                // Token Amount
+        investment3[3].should.be.bignumber.equal(37875e16);                 // Token Amount
         assert.isTrue(investment3[4]);                                      // Confirmed
         assert.isFalse(investment3[5]);                                     // AttemptedSettlement
         assert.isFalse(investment3[6]);                                     // CompletedSettlement
 
         investment4[2].should.be.bignumber.equal(web3.toWei(4, 'ether'));   // Wei Amount
-        investment4[3].should.be.bignumber.equal(6e20);                // Token Amount
+        investment4[3].should.be.bignumber.equal(505e18);                   // Token Amount
         assert.isTrue(investment4[4]);                                      // Confirmed
         assert.isFalse(investment4[5]);                                     // AttemptedSettlement
         assert.isFalse(investment4[6]);                                     // CompletedSettlement
 
         investment5[2].should.be.bignumber.equal(web3.toWei(5, 'ether'));   // Wei Amount
-        investment5[3].should.be.bignumber.equal(7.5e20);                 // Token Amount
+        investment5[3].should.be.bignumber.equal(63125e16);                 // Token Amount
         assert.isFalse(investment5[4]);                                     // Confirmed
         assert.isFalse(investment5[5]);                                     // AttemptedSettlement
         assert.isFalse(investment5[6]);                                     // CompletedSettlement
 
         investment6[2].should.be.bignumber.equal(web3.toWei(6, 'ether'));   // Wei Amount
-        investment6[3].should.be.bignumber.equal(9e20);                // Token Amount
+        investment6[3].should.be.bignumber.equal(7575e17);                  // Token Amount
         assert.isFalse(investment6[4]);                                     // Confirmed
         assert.isFalse(investment6[5]);                                     // AttemptedSettlement
         assert.isFalse(investment6[6]);                                     // CompletedSettlement
@@ -1010,7 +1010,19 @@ contract('IcoCrowdsale', (accounts) => {
         log.info('Tokens to mint: ' + tokensToMint.toNumber());
         log.info('Tokens minted: ' + tokensMinted.toNumber());
 
-        await icoCrowdsaleInstance.batchSettleInvestments([1, 2, 3, 4]);
+        // bool confirmed;
+        // bool attemptedSettlement;
+        // bool completedSettlement;
+
+        log.warn(await icoCrowdsaleInstance.investments(0)); // 1 1 1
+        log.warn(await icoCrowdsaleInstance.investments(1)); // 0 0 0
+        log.warn(await icoCrowdsaleInstance.investments(2)); // 1 0 0
+        log.warn(await icoCrowdsaleInstance.investments(3)); // 1 0 0
+        log.warn(await icoCrowdsaleInstance.investments(4)); // 1 0 0
+
+        log.warn(await icoCrowdsaleInstance.confirmationPeriodOver());
+
+        await icoCrowdsaleInstance.batchSettleInvestments([1, 2, 3, 4], {from: activeInvestor2, gas: 1000000});
 
         tokensMinted = await icoCrowdsaleInstance.tokensMinted();
         tokensToMint = await icoCrowdsaleInstance.tokensToMint();
@@ -1053,7 +1065,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.isTrue(investmentAfter3[6]);                                     // CompletedSettlement
 
         investmentAfter4[2].should.be.bignumber.equal(web3.toWei(4, 'ether'));  // Wei Amount
-        investmentAfter4[3].should.be.bignumber.equal(6e20);                // Token Amount
+        investmentAfter4[3].should.be.bignumber.equal(505e18);                  // Token Amount
         assert.isTrue(investmentAfter4[4]);                                     // Confirmed
         assert.isTrue(investmentAfter4[5]);                                     // AttemptedSettlement
         assert.isTrue(investmentAfter4[6]);                                     // CompletedSettlement
@@ -1077,7 +1089,7 @@ contract('IcoCrowdsale', (accounts) => {
         assert.equal(investment5[0], activeInvestor2);                      // Investor
         assert.equal(investment5[1], activeInvestor2);                      // Beneficiary
         investment5[2].should.be.bignumber.equal(web3.toWei(5, 'ether'));   // Wei Amount
-        investment5[3].should.be.bignumber.equal(7.5e20);               // Token Amount
+        investment5[3].should.be.bignumber.equal(63125e16);                 // Token Amount
         assert.isFalse(investment5[4]);                                     // Confirmed
         assert.isFalse(investment5[5]);                                     // AttemptedSettlement
         assert.isFalse(investment5[6]);                                     // CompletedSettlement
