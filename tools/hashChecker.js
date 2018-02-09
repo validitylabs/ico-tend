@@ -1,20 +1,21 @@
-const sha3 = require('web3-utils').sha3;
-const fs = require('fs');
-const assert = require('assert');
+const sha3      = require('web3-utils').sha3;
+const fs        = require('fs');
+const assert    = require('assert');
 
 // Valid hashes using Keccak-256
 
 const contracts = {
-    Crowdsale     : fs.readFileSync('node_modules/zeppelin-solidity/contracts/crowdsale/Crowdsale.sol'),
-    MintableToken : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/MintableToken.sol'),
-    PausableToken : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/PausableToken.sol'),
-    StandardToken : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol'),
-    Pausable      : fs.readFileSync('node_modules/zeppelin-solidity/contracts/lifecycle/Pausable.sol'),
-    Ownable       : fs.readFileSync('node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol'),
-    ERC20         : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/ERC20.sol'),
-    BasicToken    : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/BasicToken.sol'),
-    ERC20Basic    : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol'),
-    SafeMath      : fs.readFileSync('node_modules/zeppelin-solidity/contracts/math/SafeMath.sol')
+    Crowdsale       : fs.readFileSync('node_modules/zeppelin-solidity/contracts/crowdsale/Crowdsale.sol'),
+    MintableToken   : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/MintableToken.sol'),
+    PausableToken   : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/PausableToken.sol'),
+    StandardToken   : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol'),
+    Pausable        : fs.readFileSync('node_modules/zeppelin-solidity/contracts/lifecycle/Pausable.sol'),
+    Ownable         : fs.readFileSync('node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol'),
+    ERC20           : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/ERC20.sol'),
+    BasicToken      : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/BasicToken.sol'),
+    ERC20Basic      : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol'),
+    SafeMath        : fs.readFileSync('node_modules/zeppelin-solidity/contracts/math/SafeMath.sol'),
+    TokenVesting    : fs.readFileSync('node_modules/zeppelin-solidity/contracts/token/ERC20/TokenVesting.sol')
 };
 
 const hashes = {
@@ -27,7 +28,8 @@ const hashes = {
     ERC20         : '0xd0b7ada654221cc9e4cb4a97754b99d2e7c2fb824303f1ba5f1661f4e8086751',
     BasicToken    : '0x948404468d61ff35ea4194650670408dabd65da7f905a1c16888ab84520bf39e',
     ERC20Basic    : '0x1fd84910b5033c9d169995cd88bdd465d37d4a384ef2837b238b88cd26ef74e7',
-    SafeMath      : '0x532c638adef093d4c7c250bf4bb0afbf45ae35a15e06f90940930f5b8ce1a04d'
+    SafeMath      : '0x532c638adef093d4c7c250bf4bb0afbf45ae35a15e06f90940930f5b8ce1a04d',
+    TokenVesting  : '0xdcbd9c21e47959f6f45d34d8f956c682a552b607bca487f2dc60e8d811671d21'
 };
 
 Object.keys(contracts).forEach((key) => {
@@ -35,6 +37,6 @@ Object.keys(contracts).forEach((key) => {
         assert.equal(sha3(contracts[key]), hashes[key], 'Hash mismatch: ' + key);
     } catch (error) {
         console.log(error.message + ' - Zeppelin Framework');
-        console.log('New Hash: ' + sha3(contracts[key]));
+        console.log(key + ': ' + sha3(contracts[key]));
     }
 });

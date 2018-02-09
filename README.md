@@ -1,58 +1,85 @@
-# ICO for TEND
+# Snowflake Solidity
+__Beware of the failing tests!__
+This behaviour is equal to the tend and medical ico tests.
 
-## Crowdsale Features:
-* 13 million total token cap
-    * 9.5 million presale & crowdsale cap
-    * 1.5 million ICO enablers cap - not vested
-    * 2 million development team cap - vested
-* Vested tokens
-    * vesting period starts at the time that the admin allocates the tokens
-    * each beneficiary has their own vesting contract that locks up their tokens until they can be released by beneficiary themselves
-    * 1/4 available after 1 year, nothing before (cliff)
-    * remainder can be released continuously until all tokens are released after a total of 4 years (3 years past cliff)
-    * non-revocable, can be released by respective owner from their vesting contract (one contract per owner)
-* owner can allot tokens for presale investors manually, this still requires confirmation and settlement
-* allow token distribution to different address than sending Ether address via `buyTokens` - requires confirmation and settlement
-* Discounts:
-    * 1st 3 million    -  20% discount -  1 token = 8 CHF
-    * 2nd 3 million    -  10% discount -  1 token = 9 CHF
-    * last 3.5 million -  0% discount  -  1 token = 10 CHF
-* underwriter has to make tokens transferrable by calling `finalize`, if they do not, tokens will remain paused
-* owner of
-* mintTeamTokens(uint256 amount) - mints up to 1.5 million tokens that are vested over 4 years
-* mintCompanyTokens - mints 2 million tokens that are vested over 4 years
-* owner is transferrable
+## TODO
+@TODO: setup solcpiler (from ico-tend)
 
-## Token Features:
-* ERC20-compatible
-* pausable
-* paused until un-paused by `finalize` in crowdsale contract
-* featuring dividend:
-    * dividend coupled to token, unclaimed dividend transferred along when using token `transfer` or `transferFrom` functions
-    * dividend can be paid in once every 350 days by treasurer account
-    * dividend can be claimed up to 330 days after receiving the payment
-    * unclaimed dividend can be reclaimed by owner 330 days until last payment and until next payment is coming in
-* treasurer accounts set by owner
-* owner is transferrable
+__ATTENTION!!! audit the zeppelin code to verify the SHA hashes__
+
+@see https://github.com/duaraghav8/Solium
+@see https://medium.com/giveth/the-minime-token-open-sourced-by-giveth-2710c0210787
+
+@see https://github.com/trufflesuite/truffle/releases
+@see https://github.com/trufflesuite/truffle-contract
+@see http://web3js.readthedocs.io/en/1.0/
+@see https://github.com/trufflesuite/ganache-core
+
+Modum Token (with Dividend (called Airdrop)):
+@see https://github.com/modum-io/tokenapp-smartcontract/blob/master/contracts/ModumToken.sol
+
+https://epicenter.tv/episode/200/
+
+### Features
+@TODO: Implement `voteProposal` -> (proposal + voting)
+@TODO: Implement `votePayout` -> voting for payout of ICO (limit ETH payout for proposal)
+@TODO: Check geth run script in package.json (if it's running, update readme.md with instructions)
+@TODO replace usage of `colors` by `chalk` and remove NPM package `colors` from package.json
+
+```
+web3.version.getNetwork((err, netId) => {
+    switch (netId) {
+        case "1":
+            console.log('This is mainnet')
+            break
+        case "2":
+            console.log('This is the deprecated Morden test network.')
+            break
+        case "3":
+            console.log('This is the ropsten test network.')
+            break
+        case "1337":
+            console.log('This is the local test network.')
+            break
+        default:
+            console.log('This is an unknown network.')
+    }
+});
+```
 
 ## Requirements
-The server side scripts requires NodeJS 8.
+The server side scripts requires NodeJS 8 to work properly.
 Go to [NVM](https://github.com/creationix/nvm) and follow the installation description.
 By running `source ./tools/initShell.sh`, the correct NodeJs version will be activated for the current shell.
+
+NVM supports both Linux and OS X, but that’s not to say that Windows users have to miss out. There is a second project named [nvm-windows](https://github.com/coreybutler/nvm-windows) which offers Windows users the possibility of easily managing Node environments.
+
+__nvmrc support for windows users is not given, please make sure you are using the right Node version (as defined in .nvmrc) for this project!__
 
 Yarn is required to be installed globally to minimize the risk of dependency issues.
 Go to [Yarn](https://yarnpkg.com/en/docs/install) and choose the right installer for your system.
 
+For the Rinkeby and MainNet deployment, you need Geth on your machine.
+Follow the [installation instructions](https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum) for your OS.
+
 Depending on your system the following components might be already available or have to be provided manually:
-* Python 2.7
+* [Python](https://www.python.org/downloads/windows/) 2.7 Version only! Windows users should put python into the PATH by cheking the mark in installation process. The windows build tools contain python, so you don't have to install this manually.
+* GIT, should already installed on *nix systems. Windows users have to install [GIT](http://git-scm.com/download/win) manually.
+* On Windows systems, PowerShell is mandatory
+* On Windows systems, windows build tools are required (already installed via package.json)
 * make (on Ubuntu this is part of the commonly installed `sudo apt-get install build-essential`)
 * On OSX the build tools included in XCode are required
 
 ## General
-Before running the provided scripts, you have to initialize your current terminal via `source ./tools/initShell.sh` for every terminal in use. This will add the current directory to the system PATH variables and must be repeated for time you start a new terminal window from project base directory.
+Before running the provided scripts, you have to initialize your current terminal via `source ./tools/initShell.sh` for every terminal in use. This will add the current directory to the system PATH variables and must be repeated for time you start a new terminal window from project base directory. Windows users with installed PoserShell should use the script `. .\tools\initShell.ps1` instead.
 ```
+# *nix
 cd <project base directory>
 source ./tools/initShell.sh
+
+# Win
+cd <project base directory>
+. .\tools\initShell.ps1
 ```
 
 __Every command must be executed from within the projects base directory!__
@@ -60,56 +87,42 @@ __Every command must be executed from within the projects base directory!__
 ## Setup
 Open your terminal and change into your project base directory. From here, install all needed dependencies.
 ```
-cd <project base directory>
-source ./tools/initShell.sh
 yarn install
 ```
 This will install all required dependecies in the directory _node_modules_.
 
-## NVM
-You can load the configured lts/carbon NodeJS version (8.x LTS) for this project by running `nvm use` in project root directory.
-
-## Compile, migrate and run unit tests
-To deploy the ICO smart contracts, go into the projects root directory, and change into the truffle development console.
-```
-cd <project base directory>
-source ./tools/initShell.sh
-yarn run dev
-```
-
-Now you can compile, migrate and run tests.
+## Compile, migrate, test and coverage
+To compile, deploy and test the smart contracts, go into the projects root directory and use the task runner accordingly.
 ```
 # Compile contract
-compile
+yarn compile
 
 # Migrate contract
-migrate
+yarn migrate
 
 # Test the contract
-test
-```
-To leave the development console, simply press <CTRL + D>.
+yarn test
 
-__The development console will automatically start it's own TestRPC server for you!__
-
-__Because the test consumes a lot of ETH, please restart the development console between each test run!__
-
-## Run the coverage test
-To run the coverage tests, go into the projects root directory and run the coverage test.
+# Run coverage tests
+yarn coverage
 ```
-cd <project base directory>
-source ./tools/initShell.sh
-yarn run coverage
+
+## Infura Testnet Deployment - Ropsten, Rinkeby, & Kovan
+create a `.secrets.json` file in the config directory of this project and insert the following with your Infura API key and mnemonic. Double check and make sure that file name is included in the `.gitignore` file list.
+__Never commit and push your mnemonics!__
 ```
-__The coverage test will automatically start it's own TestRPC server for you!__
+{
+    "rinkeby": {
+        "host": "https://rinkeby.infura.io/<APIKEY>",
+        "mnemonic": "<MNEMONIC>"
+    }
+}
+```
 
 ## Rinkeby testnet deployment
-For the Rinkeby deployment, you need a Geth installation on your machine.
-Follow the [installation instructions](https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum) for your OS.
-
 Start local Rinkeby test node in a separate terminal window and wait for the sync is finished.
 ```
-geth --syncmode "fast" --rinkeby --rpc
+yarn geth-rinkeby
 ```
 
 Now you can connect to your local Rinkeby Geth console.
@@ -137,22 +150,18 @@ Connect to your rinkeby Geth console and unlock the account for deployment (2700
 > personal.unlockAccount(web3.eth.accounts[0], "", 2700)
 ```
 
-Change the `from` (deployer), `wallet` and `underwriter` accounts in ico.cnf.json:
-```
-"from":         "0x0fadbcc6baf38842493ea527759ce7ce1644d0cc",
-"wallet":       "0xCCb50efc315614dF57f2C774391A3410B02F06EF",
-"underwriter":  "0x7BeFB6B4eD33db5D7158988Ee69464d7aA35C0e6",
-```
-`from` has to be the address that is used for deployment (`web3.eth.accounts[0]`), `wallet` and `underwriter` can be some other addresses (e.g. from MetaMask).
+Ensure, all config files below `./config/` folder is setup properly. The `from` address will be used for the deployment, usually accounts[0].
 
 After exiting the console by `<STRG> + <D>`, simply run `yarn migrate-rinkeby`.
 This may take several minutes to finish.
 
-https://rinkeby.etherscan.io/address/<YOUR_RINKEBY_ADDRESS>
+You can monitor the deployment live via [Rinkeby](https://rinkeby.etherscan.io/address/<YOUR_RINKEBY_ADDRESS>)
+
+After all, your smart contract can be found on etherscan:
+https://rinkeby.etherscan.io/address/<REAL_CONTRACT_ADDRESS_HERE>
 
 ## MainNet deployment
-__This is the production deployment, so please doublecheck all properties in ico.cnf.json!__
-- update ico.cnf.json with latest startTime, endTime, cap, confirmationPeriod, rateChfPerEth
+__This is the production deployment, so please doublecheck all properties in the config files below `config` folder!__
 
 For the MainNet deployment, you need a Geth installation on your machine.
 Follow the [installation instructions](https://github.com/ethereum/go-ethereum/wiki/Building-Ethereum) for your OS.
@@ -171,7 +180,7 @@ geth attach ipc://<PATH>/<TO>/Library/Ethereum/geth.ipc
 ```
 
 While syncing the blockchain, you can monitor the progress by typing `web3.eth.syncing`.
-This shows you the highest available block and the current block you are on.
+This shows you the highest available block and the current block you are on. If syncing is done, false will be returned. In this case, you can `web3.eth.blockNumber` and compare with the latest BlockNumber on Etherscan.
 
 Upon setup the node does not contain any private keys and associated accounts. Create an account in the web3 Geth console.
 ```
@@ -189,40 +198,34 @@ Connect to your MainNet Geth console and unlock the account for deployment (240 
 personal.unlockAccount(web3.eth.accounts[0], "<YOUR_SECURE_PASSWORD>", 240)
 ```
 
-Change the `from` (deployer), `wallet` and `underwriter` accounts in ico.cnf.json:
-```
-"from":         "<REAL_ADDRESS_HERE>",
-"wallet":       "<REAL_ADDRESS_HERE>",
-"underwriter":  "<REAL_ADDRESS_HERE>",
-```
-`from` has to be the address that is used for deployment (`web3.eth.accounts[0]`), `wallet` and `underwriter` can be some other addresses (e.g. from MetaMask).
+Ensure, all config files below `./config/` folder is setup properly. The `from` address will be used for the deployment, usually accounts[0].
 
 After exiting the console by `<STRG> + <D>`, simply run `yarn migrate-mainnet`.
 This may take several minutes to finish.
 
-Now, your smart contract can be found on etherscan:
-https://etherscan.io/address/<REAL_ADDRESS_HERE>
+You can monitor the deployment live via [Etherscan](https://etherscan.io/address/<YOUR_RINKEBY_ADDRESS>)
 
-### Generate Contructor ABI
-Simply run `yarn abi` and copy the encoded output for usage in contract verification. Please select the suitable network for verification, because verification can be done on testnet as well as on mainnet.
+After all, your smart contract can be found on etherscan:
+https://etherscan.io/address/<REAL_CONTRACT_ADDRESS_HERE>
 
 ### Contract Verification
-The final step for the MainNet deployment is the contract verificationSmart contract verification.
+The final step for the Rinkeby / MainNet deployment is the contract verificationSmart contract verification.
 
-This can be dome on [Etherscan](https://etherscan.io/address/<REAL_ADDRESS_HERE>).
+This can be dome on [Etherscan](https://etherscan.io/address/<REAL_ADDRESS_HERE>) or [Rinkeby Etherscan](https://rinkeby.etherscan.io/address/<REAL_ADDRESS_HERE>).
 - Click on the `Contract Creation` link in the `to` column
 - Click on the `Contract Code` link
 
 Fill in the following data.
 ```
-Contract Address:       <REAL_ADDRESS_HERE>
-Contract Name:          IcoCrowdsale
-Compiler:               v0.4.18+commit.9cf6e910
+Contract Address:       <CONTRACT_ADDRESS>
+Contract Name:          <CONTRACT_NAME>
+Compiler:               v0.4.19+commit.c4cbbb05
 Optimization:           YES
 Solidity Contract Code: <Copy & Paste from ./build/bundle/IcoCrowdsale_all.sol>
-Constructor Arguments:  <ABI from abiEncode.js>
+Constructor Arguments:  <ABI from deployment output>
 ```
-- paste the result from __contract verification__ into `Constructor Arguments ABI-encoded`
+Visit [Solc version number](https://github.com/ethereum/solc-bin/tree/gh-pages/bin) page for determining the correct version number for your project.
+
 - Confirm you are not a robot
 - Hit `verify and publish` button
 

@@ -1,15 +1,9 @@
-/**
- * Asserts an exception just before
- *
- * @param {promise} promise Promise object
- * @returns {void}
- */
 export async function expectThrow(promise) {
     try {
         await promise;
     } catch (error) {
-        // TODO: Check jump destination to destinguish between a throw
-        //       and an actual invalid jump.
+    // TODO: Check jump destination to destinguish between a throw
+    //       and an actual invalid jump.
         const invalidOpcode = error.message.search('invalid opcode') >= 0;
         // TODO: When we contract A calls contract B, and B throws, instead
         //       of an 'invalid jump', we get an 'out of gas' error. How do
@@ -33,10 +27,10 @@ const BigNumber = web3.BigNumber;
 export {BigNumber};
 
 /**
- * @const cnf Static config from JSON file
+ * @const Network config from JSON file
  */
-const cnf = require('../../../ico.cnf.json');
-export {cnf};
+const networkConfig = require('../../../config/networks.json');
+export {networkConfig};
 
 /**
  * Increase N days in testrpc

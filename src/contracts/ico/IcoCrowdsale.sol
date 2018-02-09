@@ -8,6 +8,7 @@
 pragma solidity ^0.4.18;
 
 import "../../../node_modules/zeppelin-solidity/contracts/crowdsale/Crowdsale.sol";
+import "../../../node_modules/zeppelin-solidity/contracts/crowdsale/RefundVault.sol";
 import "../../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../../../node_modules/zeppelin-solidity/contracts/lifecycle/Pausable.sol";
 import "../../../node_modules/zeppelin-solidity/contracts/token/ERC20/TokenVesting.sol";
